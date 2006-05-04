@@ -46,16 +46,19 @@ class GSM {
 		const char *getSoftwareVer(void) { return fSoftwareVer.String(); };
 		const char *getSMSInfo(void){ return fSMSInfo.String(); };
 
-		void GSM::getSMSContent(SMS *sms = NULL);
+		void getSMSContent(SMS *sms = NULL);
 		void getSMSList(const char *slot);
+		int changeSMSMemSlot(const char *slot);
 		BList *listMemSlotSMS;
 		BList *SMSList;
+
+		enum { ENC_UTF8 = 1, ENC_UCS2, ENC_GSM };
+		enum { REC_READ=1, REC_UNREAD, STO_SENT, STO_UNSENT, MSG_UNK };
 
 	private:
 const char *getSMSMemSlotName(const char *slot);
 int getSMSType(const char *type);
 void getSMSMemSlots(void);
-int changeSMSMemSlot(const char *slot);
 const char *decodeText(const char *input);
 
 		bool initDevice(const char *device);
@@ -84,8 +87,6 @@ const char *decodeText(const char *input);
 		//
 		int fSMSRRead, fSMSRUnread, fSMSSSent, fSMSUSent;
 		//
-		enum { ENC_UTF8 = 1, ENC_UCS2, ENC_GSM };
-		enum { REC_READ=1, REC_UNREAD, STO_SENT, STO_UNSENT, MSG_UNK };
 };
 
 #endif

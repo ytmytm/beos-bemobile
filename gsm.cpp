@@ -372,8 +372,8 @@ void GSM::getSMSContent(SMS *sms = NULL) {
 	cmd << sms->id;
 	pat = isMotorola ? "^\\+M" : "^\\+C";
 	pat2 = pat;
-	pat += "MGR: \"([ \\w]+)\", \"([\\+\\d]+)\", \"([\\d\\/,:]+)\"\r\n(.*)$";
-	pat2 += "MGR: \"([ \\w]+)\", \"([\\+\\d]+)\".*\r\n(.*)$";
+	pat += "MGR: \"([ \\w]+)\", \"([^\"]+)\", \"([\\d\\/,:]+)\"\r\n(.*)$";
+	pat2 += "MGR: \"([ \\w]+)\", \"([^\"]+)\".*\r\n(.*)$";
 	Pattern *pMsg1 = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
 	Matcher *mMsg1 = pMsg1->createMatcher("");
 	Pattern *pMsg2 = Pattern::compile(pat2.String(), Pattern::MULTILINE_MATCHING);
@@ -404,7 +404,7 @@ void GSM::getSMSList(const char *slot) {
 	sendCommand(cmd.String(),&out);
 
 	pat = isMotorola ? "^\\+M" : "^\\+C";
-	pat += "MGL: (\\d+), \"([ \\w]+)\", \"([\\+\\d]+)\"\r\n(.*)$";
+	pat += "MGL: (\\d+), \"([ \\w]+)\", \"([^\"]+)\"\r\n(.*)$";
 
 	Pattern *pList = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
 	Matcher *mList = pList->createMatcher("");
@@ -442,11 +442,11 @@ void GSM::getSMSList(const char *slot) {
 printf("%i,%i,%s,%s\n",cursms->id,cursms->type,cursms->number.String(),cursms->date.String());
 	}
 
-	fSMSInfo = ""; fSMSInfo << fSMSRRead;
+	fSMSInfo = ""; fSMSInfo << fSMSRRead+fSMSRUnread;
 	fSMSInfo += _(" messages, ("); fSMSInfo << fSMSRUnread;
 	fSMSInfo += _(" unread)");
 
-	getSMSContent((struct SMS*)SMSList->ItemAt(2));
+//	getSMSContent((struct SMS*)SMSList->ItemAt(2));
 }
 
 const char *GSM::decodeText(const char *input) {
