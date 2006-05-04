@@ -118,7 +118,8 @@ void statusView::RefreshStatus(void) {
 
 	signalBar->Reset();
 	batteryBar->Reset();
-	if (!gsm) return;
+	if (!gsm)
+		return;
 
 	acPowerBut->SetValue(gsm->getACPower() ? B_CONTROL_ON : B_CONTROL_OFF);
 	batPowerBut->SetValue(gsm->getBatPower() ? B_CONTROL_ON : B_CONTROL_OFF);
@@ -132,7 +133,11 @@ void statusView::RefreshStatus(void) {
 
 void statusView::Pulse(void) {
 printf("ping!\n");
-	if (!gsm) return;
+	if ((this->Window() == NULL) || (this->IsHidden()))
+		return;
+
+	if (!gsm)
+		return;
 	gsm->getPhoneStatus();
 	RefreshStatus();
 }
