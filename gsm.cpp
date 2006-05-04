@@ -31,6 +31,7 @@ GSM::GSM(const char *device) {
 	if ((sem = create_sem(1, "gsm_sem")) < B_NO_ERROR)
 		return;
 	listMemSlotSMS = new BList(5);
+	SMSList = new BList;
 
 	// init status
 	isMotorola = false;
@@ -330,7 +331,7 @@ int GSM::changeSMSMemSlot(const char *slot) {
 	BString out, cmd = "AT+CPMS=\"";
 	cmd += slot; cmd +="\"";
 
-	sendCommand(cmd.String(),&out,true);
+	sendCommand(cmd.String(),&out);
 	mSlot->setString(out.String());
 	if (mSlot->findFirstMatch()) {
 		msgNum = toint(mSlot->getGroup(1).c_str());
@@ -347,38 +348,62 @@ int GSM::getSMSType(const char *type) {
 	return MSG_UNK;
 }
 
-BList SMSList;
+void GSM::getSMSContent(SMS *sms = NULL) {
+	BString cmd, pat, pat2, out;
+
+	if (sms == NULL)
+		return;
+
+	cmd = isMotorola ? "AT+MMGR=" : "AT+CMGR=";
+	cmd << sms->id;
+	pat = isMotorola ? "^\\+M" : "^\\+C";
+	pat2 = pat;
+	pat += "MGR: \"([ \\w]+)\", \"([\\+\\d]+)\", \"([\\d\\/,:]+)\"\r\n(.*)$";
+	pat2 += "MGR: \"([ \\w]+)\", \"([\\+\\d]+)\".*\r\n(.*)$";
+	Pattern *pMsg1 = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
+	Matcher *mMsg1 = pMsg1->createMatcher("");
+	Pattern *pMsg2 = Pattern::compile(pat2.String(), Pattern::MULTILINE_MATCHING);
+	Matcher *mMsg2 = pMsg2->createMatcher("");
+
+	sendCommand(cmd.String(),&out);
+	mMsg1->setString(out.String());
+	if (mMsg1->findFirstMatch()) {
+		sms->date = mMsg1->getGroup(3).c_str();
+		sms->msg = decodeText(mMsg1->getGroup(4).c_str());	
+	} else {
+		mMsg2->setString(out.String());
+		if (mMsg2->findFirstMatch()) {
+			sms->msg = decodeText(mMsg2->getGroup(3).c_str());
+		}
+	}
+printf("%i,%i,%s,%s\n[%s]\n",sms->id,sms->type,sms->number.String(),sms->date.String(),sms->msg.String());
+}
 
 void GSM::getSMSList(const char *slot) {
 	int msgNum = changeSMSMemSlot(slot);
+
 	if (msgNum == 0)
 		return;
 	BString cmd, out, pat;
-	BString cmd2, out2, pat2;
 
-	cmd = isMotorola ? "AT+MMGL" : "AT+CMGL";
-	cmd2 = isMotorola ? "AT+MMGR=" : "AT+CMGR";
+	cmd = isMotorola ? "AT+MMGL=\"HEADER ONLY\"" : "AT+CMGL";
 	sendCommand(cmd.String(),&out);
 
 	pat = isMotorola ? "^\\+M" : "^\\+C";
-	pat2 = pat;
 	pat += "MGL: (\\d+), \"([ \\w]+)\", \"([\\+\\d]+)\"\r\n(.*)$";
-	pat2 += "MGR: \"([ \\w]+)\", \"([\\+\\d]+)\", \"([\\d\\/,:]+)\"";
 
 	Pattern *pList = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
 	Matcher *mList = pList->createMatcher("");
-	Pattern *pMsg = Pattern::compile(pat2.String(), Pattern::MULTILINE_MATCHING);
-	Matcher *mMsg = pMsg->createMatcher("");
 
-	struct SMS *cursms;
+	struct SMS *cursms = NULL;
 
 	// clear list
-	if (SMSList.CountItems()>0) {
+	if (SMSList->CountItems()>0) {
 		struct SMS *anItem;
-		for (int i=0; (anItem=(struct SMS*)SMSList.ItemAt(i)); i++)
+		for (int i=0; (anItem=(struct SMS*)SMSList->ItemAt(i)); i++)
 			delete anItem;
-		if (!SMSList.IsEmpty())
-			SMSList.MakeEmpty();
+		if (!SMSList->IsEmpty())
+			SMSList->MakeEmpty();
 	}
 
 	fSMSRRead = fSMSRUnread = fSMSSSent = fSMSUSent = 0;
@@ -390,15 +415,9 @@ void GSM::getSMSList(const char *slot) {
 		cursms->id = toint(mList->getGroup(1).c_str());
 		cursms->type = getSMSType(mList->getGroup(2).c_str());
 		cursms->number = mList->getGroup(3).c_str();
+		// ignore because would need to be fetched for reading anyway
 		cursms->msg = decodeText(mList->getGroup(4).c_str());
-		SMSList.AddItem(cursms);
-		cmd = cmd2;
-		cmd << cursms->id;
-		sendCommand(cmd.String(),&out2,false);
-		mMsg->setString(out2.String());
-		if (mMsg->findFirstMatch()) {
-			cursms->date = mMsg->getGroup(3).c_str();
-		}
+		SMSList->AddItem(cursms);
 		switch(cursms->type) {
 			case REC_READ:		fSMSRRead++; break;
 			case REC_UNREAD:	fSMSRUnread++; break;
@@ -406,12 +425,14 @@ void GSM::getSMSList(const char *slot) {
 			case STO_UNSENT:	fSMSUSent++; break;
 			default:	break;
 		}
-//printf("%i,%i,%s,%s\n",cursms->id,cursms->type,cursms->number.String(),cursms->date.String());
+printf("%i,%i,%s,%s\n",cursms->id,cursms->type,cursms->number.String(),cursms->date.String());
 	}
 
 	fSMSInfo = ""; fSMSInfo << fSMSRRead;
 	fSMSInfo += _(" messages, ("); fSMSInfo << fSMSRUnread;
 	fSMSInfo += _(" unread)");
+
+	getSMSContent((struct SMS*)SMSList->ItemAt(2));
 }
 
 const char *GSM::decodeText(const char *input) {

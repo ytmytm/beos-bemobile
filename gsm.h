@@ -3,6 +3,23 @@
 
 #include <String.h>
 
+struct SMS {
+	BString slot;
+	int id;
+	int type;
+	BString number;
+	BString msg;
+	BString date;
+};
+//
+struct memSlotSMS {
+	BString sname;
+	BString name;
+	int items;
+	int allitems;
+	int unread;
+};
+
 class BList;
 class BSerialPort;
 
@@ -27,8 +44,10 @@ class GSM {
 		const char *getDateTime(void) { return fDateTime.String(); };
 		const char *getSMSInfo(void){ return fSMSInfo.String(); };
 
+		void GSM::getSMSContent(SMS *sms = NULL);
 		void getSMSList(const char *slot);
 		BList *listMemSlotSMS;
+		BList *SMSList;
 
 	private:
 const char *getSMSMemSlotName(const char *slot);
@@ -65,22 +84,6 @@ const char *decodeText(const char *input);
 		//
 		enum { ENC_UTF8 = 1, ENC_UCS2, ENC_GSM };
 		enum { REC_READ=1, REC_UNREAD, STO_SENT, STO_UNSENT, MSG_UNK };
-		struct SMS {
-			BString slot;
-			int id;
-			int type;
-			BString number;
-			BString msg;
-			BString date;
-		};
-		//
-		struct memSlotSMS {
-			BString sname;
-			BString name;
-			int items;
-			int allitems;
-			int unread;
-		};
 };
 
 #endif

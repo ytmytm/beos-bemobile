@@ -79,7 +79,7 @@ void workView::SetDevice(GSM *g) {
 	SetCurView(0);
 
 	// XXX dopiero na zadanie reload lub przy pierwszym otwarciu strony z smsami
-	gsm->getSMSList(((struct GSM::memSlotSMS*)gsm->listMemSlotSMS->ItemAt(0))->sname.String());
+	gsm->getSMSList(((struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(0))->sname.String());
 }
 
 void workView::SetCurView(int v) {
