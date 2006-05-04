@@ -4,8 +4,10 @@
 #include <View.h>
 #include "CLVEasyItem.h"
 
+class BStringView;
 class ColumnListView;
 class GSM;
+class mobileView;
 
 class workView : public BView {
 	public:
@@ -19,7 +21,10 @@ class workView : public BView {
 	private:
 		void SetCurView(int v = 0);
 		//
+		mobileView *pageView[8];
+		//
 		int curView;
+		BStringView *viewCaption;
 		GSM *gsm;
 		ColumnListView *list;
 };

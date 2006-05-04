@@ -172,6 +172,11 @@ void GSM::getPhoneData(void) {
 	static Matcher *mGSM = pGSM->createMatcher("");
 	static Pattern *pModel = Pattern::compile("\"(MODEL\\=)?(\\w*)\"$", Pattern::MULTILINE_MATCHING);
 	static Matcher *mModel = pModel->createMatcher("");
+	static Pattern *pSoft = Pattern::compile("^\\+CGMR: \"(.*)\"$", Pattern::MULTILINE_MATCHING);
+	static Matcher *mSoft = pSoft->createMatcher("");
+	static Pattern *pIMSI = Pattern::compile("^\\+CIMI: (\\d+)", Pattern::MULTILINE_MATCHING);
+	static Matcher *mIMSI = pIMSI->createMatcher("");
+
 	BString tmp;
 
 	// manufacturer
@@ -179,6 +184,11 @@ void GSM::getPhoneData(void) {
 	mManuf->setString(tmp.String());
 	if (mManuf->findFirstMatch())
 		fManuf = mManuf->getGroup(1).c_str();
+	// software revision
+	sendCommand("AT+CGMR",&tmp);
+	mSoft->setString(tmp.String());
+	if (mSoft->findFirstMatch())
+		fSoftwareVer = mSoft->getGroup(1).c_str();
 	// supported GSM versions
 	sendCommand("AT+CGMM",&tmp);
 	mGSM->setString(tmp.String());
@@ -199,9 +209,13 @@ void GSM::getPhoneData(void) {
 	mIMEI->setString(tmp.String());
 	if (mIMEI->findFirstMatch())
 		fIMEI = mIMEI->getGroup(1).c_str();
+	// IMSI
+	sendCommand("AT+CIMI",&tmp);
+	mIMSI->setString(tmp.String());
+	if (mIMSI->findFirstMatch())
+		fIMSI = mIMSI->getGroup(1).c_str();
 	// Motorola check for extended commands
 	isMotorola = (sendCommand("AT+MMGL=?") == 0);
-	// IMSI: +CIMI
 	// enable error reporting, try most verbose mode
 	sendCommand("AT+CMEE=1");
 	sendCommand("AT+CMEE=2");

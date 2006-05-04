@@ -42,6 +42,8 @@ class GSM {
 		const char *getGSMVer(void)	{ return fGSMVer.String(); };
 		const char *getIMEI(void)	{ return fIMEI.String(); };
 		const char *getDateTime(void) { return fDateTime.String(); };
+		const char *getIMSI(void)	{ return fIMSI.String(); };
+		const char *getSoftwareVer(void) { return fSoftwareVer.String(); };
 		const char *getSMSInfo(void){ return fSMSInfo.String(); };
 
 		void GSM::getSMSContent(SMS *sms = NULL);
@@ -75,7 +77,7 @@ const char *decodeText(const char *input);
 		bool fACPower, fBatPower;
 		int fCharge;
 		int fSignal;
-		BString fManuf, fModel, fGSMVer, fIMEI;
+		BString fManuf, fModel, fGSMVer, fIMEI, fSoftwareVer, fIMSI;
 		int fYear, fMonth, fDay, fHour, fMinute, fSecond, fTimezone;
 		BString fDateTime;	// XX unused in GUI
 		BString fSMSInfo;

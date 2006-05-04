@@ -5,6 +5,7 @@
 #include "ColumnListView.h"
 #include "globals.h"
 #include "gsm.h"
+#include "statusview.h"
 #include "workview.h"
 
 #include <stdio.h>
@@ -24,7 +25,7 @@ workView::workView(BRect r) : BView(r, "workView", B_FOLLOW_ALL_SIDES, B_WILL_DR
 	// add column list
 	CLVContainerView *containerView;
 	r.right = 150-15;
-	list = new ColumnListView(r, &containerView, NULL, B_FOLLOW_ALL_SIDES,
+	list = new ColumnListView(r, &containerView, NULL, B_FOLLOW_TOP_BOTTOM|B_FOLLOW_LEFT,
 		B_WILL_DRAW|B_FRAME_EVENTS|B_NAVIGABLE, B_SINGLE_SELECTION_LIST, true, true, true, true,
 		B_FANCY_BORDER);
 	list->AddColumn(new CLVColumn(NULL,20,CLV_EXPANDER|CLV_LOCK_AT_BEGINNING|CLV_NOT_MOVABLE));
@@ -75,6 +76,14 @@ void workView::SetDevice(GSM *g) {
 	list->AddItem(item);
 	//	- Calendar	XXX
 	//	icons		XXX
+	// create views
+	for (int i=0;i<8;i++) pageView[i] = NULL;
+
+	BRect r = this->Bounds();
+	r.left = 150;
+	pageView[0] = new statusView(r);
+	this->AddChild(pageView[0]);
+	pageView[0]->SetDevice(gsm);
 	// reset current right-hand view to curView
 	SetCurView(0);
 
@@ -85,9 +94,12 @@ void workView::SetDevice(GSM *g) {
 void workView::SetCurView(int v) {
 	if (v == curView)
 		return;
-	curView = v;
 	printf("selected: %i\n",v);
-	// XXX do something with right-hand view
+	if (pageView[curView])
+		pageView[curView]->Hide();
+	curView = v;
+	if (pageView[curView])
+		pageView[curView]->Show();
 }
 
 void workView::MessageReceived(BMessage *Message) {
@@ -97,14 +109,16 @@ void workView::MessageReceived(BMessage *Message) {
 			{	int i = list->CurrentSelection(0);
 				if (i>=0) {
 					i = ((infoItem*)list->ItemAt(list->CurrentSelection(0)))->Id();
-					if (i>=0) {
+					if (i>0) {
 						// changed selection
-						SetCurView(i);
+						SetCurView(i-1);
 					}
 				}
 				break;
 			}
 		default:
+			if (pageView[curView])
+				pageView[curView]->MessageReceived(Message);
 			break;
 	}
 }

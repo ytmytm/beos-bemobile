@@ -1,15 +1,14 @@
 #ifndef _STATUSVIEW_H
 #define _STATUSVIEW_H
 
-#include <View.h>
+#include "mobileview.h"
 
 class BBox;
 class BCheckBox;
 class BStatusBar;
 class BStringView;
-class GSM;
 
-class statusView : public BView {
+class statusView : public mobileView {
 	public:
 		statusView(BRect r);
 		~statusView() { };
@@ -20,11 +19,9 @@ class statusView : public BView {
 		void RefreshStatus(void);
 		//
 	private:
-		GSM *gsm;
-
 		BBox *box1, *box2, *box3;
-		BStringView *manufVal, *modelVal, *gsmVal, *imeiVal;
-		BStringView *smsStatus;
+		BStringView *manufVal, *modelVal, *gsmVal, *imeiVal, *softVal, *imsiVal;
+		BStringView *smsStatus, *dateTime;
 		BStatusBar *signalBar, *batteryBar;
 		BCheckBox *acPowerBut, *batPowerBut;
 };
