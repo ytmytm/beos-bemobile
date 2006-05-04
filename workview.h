@@ -21,7 +21,8 @@ class workView : public BView {
 	private:
 		void SetCurView(int v = 0);
 		//
-		mobileView *pageView[8];
+		enum { V_SUMMARY = 0, V_PHONEBOOK, V_CONTACTS, V_LASTCALLS, V_SMS, V_INBOX, V_OUTBOX, V_MAX };
+		mobileView *pageView[V_MAX];
 		//
 		int curView;
 		BStringView *viewCaption;

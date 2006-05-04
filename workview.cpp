@@ -5,6 +5,7 @@
 #include "ColumnListView.h"
 #include "globals.h"
 #include "gsm.h"
+#include "smsview.h"
 #include "statusview.h"
 #include "workview.h"
 
@@ -60,32 +61,36 @@ void workView::SetDevice(GSM *g) {
 	tmp = gsm->getManuf();
 	tmp = tmp.Truncate(tmp.FindFirst(" ")+1);
 	tmp += gsm->getModel();
-	item = new infoItem(1,tmp.String(),0,true,true);
+	item = new infoItem(V_SUMMARY,tmp.String(),0,true,true);
 	list->AddItem(item);
-	item = new infoItem(2,_("Phonebook"),1,true);
+	item = new infoItem(V_PHONEBOOK,_("Phonebook"),1,true);
 	list->AddItem(item);
-	item = new infoItem(3,_("Contacts"),2);
+	item = new infoItem(V_CONTACTS,_("Contacts"),2);
 	list->AddItem(item);
-	item = new infoItem(4,_("Last Calls"),2);
+	item = new infoItem(V_LASTCALLS,_("Last Calls"),2);
 	list->AddItem(item);
-	item = new infoItem(5,_("SMS"),1,true);
+	item = new infoItem(V_SMS,_("SMS"),1,true);
 	list->AddItem(item);
-	item = new infoItem(6,_("Inbox"),2);
+	item = new infoItem(V_INBOX,_("Inbox"),2);
 	list->AddItem(item);
-	item = new infoItem(7,_("Outbox"),2);
+	item = new infoItem(V_OUTBOX,_("Outbox"),2);
 	list->AddItem(item);
 	//	- Calendar	XXX
 	//	icons		XXX
 	// create views
-	for (int i=0;i<8;i++) pageView[i] = NULL;
+	for (int i=0;i<V_MAX;i++) pageView[i] = NULL;
 
 	BRect r = this->Bounds();
 	r.left = 150;
-	pageView[0] = new statusView(r);
-	this->AddChild(pageView[0]);
-	pageView[0]->SetDevice(gsm);
+	this->AddChild(pageView[V_SUMMARY] = new statusView(r));
+//	pageView[V_SUMMARY]->Hide();	// XXX if hidden -> will never show up, why??
+	pageView[V_SUMMARY]->SetDevice(gsm);
+	this->AddChild(pageView[V_SMS] = new smsView(r));
+	pageView[V_SMS]->Hide();
+	pageView[V_SMS]->SetDevice(gsm);
+
 	// reset current right-hand view to curView
-	SetCurView(0);
+	SetCurView(V_SUMMARY);
 
 	// XXX dopiero na zadanie reload lub przy pierwszym otwarciu strony z smsami
 	gsm->getSMSList(((struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(0))->sname.String());
@@ -109,9 +114,9 @@ void workView::MessageReceived(BMessage *Message) {
 			{	int i = list->CurrentSelection(0);
 				if (i>=0) {
 					i = ((infoItem*)list->ItemAt(list->CurrentSelection(0)))->Id();
-					if (i>0) {
+					if (i>=0) {
 						// changed selection
-						SetCurView(i-1);
+						SetCurView(i);
 					}
 				}
 				break;
