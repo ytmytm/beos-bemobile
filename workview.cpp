@@ -1,6 +1,7 @@
 
 #include <List.h>
 #include <Message.h>
+#include <Window.h>
 #include "CLVEasyItem.h"
 #include "ColumnListView.h"
 #include "globals.h"
@@ -101,11 +102,19 @@ void workView::SetCurView(int v) {
 	if (v == curView)
 		return;
 	printf("selected: %i\n",v);
-	if (pageView[curView])
+	if (pageView[curView]) {
 		pageView[curView]->Hide();
+		pageView[curView]->Sync();
+		this->Window()->Sync();
+	}
 	curView = v;
-	if (pageView[curView])
+	if (pageView[curView]) {
 		pageView[curView]->Show();
+		pageView[curView]->Sync();
+		this->Window()->Sync();
+	}
+	this->Sync();
+	this->Window()->Sync();
 }
 
 void workView::MessageReceived(BMessage *Message) {
