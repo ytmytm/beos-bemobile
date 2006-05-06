@@ -1,8 +1,5 @@
-//
-// - parse date into nice format (dd/mm/yyyy hh:mm)
-// - implement delete
-// - visual difference between read and unread messages (icon in col0? char?)
 
+#include <Alert.h>
 #include <Box.h>
 #include <Button.h>
 #include <Font.h>
@@ -200,11 +197,18 @@ void smsView::updatePreview(struct SMS *sms) {
 	prv->Insert(textlen,"\n",1);
 }
 
+#include <Window.h>
+
 void smsView::Show(void) {
 printf("show!\n");
-	BView::Show();
-	if (list->CountItems()==0)
+	if (list->CountItems()==0) {
+		BView::Show();
+		BView::Flush();
+		BView::Sync();
+		this->Window()->Flush();
+		this->Window()->Sync();
 		fillList();	// XXX what's the mode here?
+	}
 }
 
 void smsView::MessageReceived(BMessage *Message) {
@@ -213,9 +217,18 @@ void smsView::MessageReceived(BMessage *Message) {
 			fillList();
 			break;
 		case SMSDELETE:
-			// BAlert ask:
-			// XXX implement!
-			break;
+			{	int i = list->CurrentSelection(0);
+
+				if (i>=0) {
+					BAlert *ask = new BAlert(APP_NAME, _("Do you really want to delete this message?"), _("Yes"), _("No"), NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+					if (ask->Go() == 0) {
+						struct SMS *sms = ((smsListItem*)list->ItemAt(list->CurrentSelection(0)))->Msg();
+						if (gsm->removeSMS(sms) == 0)
+							list->RemoveItem(i);
+					}
+				}
+				break;
+			}
 		case SMSLIST_INV:
 		case SMSLIST_SEL:
 			{	int i = list->CurrentSelection(0);

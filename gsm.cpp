@@ -449,6 +449,17 @@ printf("%i,%i,%s,%s\n",cursms->id,cursms->type,cursms->number.String(),cursms->d
 //	getSMSContent((struct SMS*)SMSList->ItemAt(2));
 }
 
+int GSM::removeSMS(SMS *sms = NULL) {
+	if (!sms)
+		return -1;
+	//changeMemSlot(sms->slot.String());
+	BString cmd = "AT+CMGD="; cmd << sms->id;
+	int ret = sendCommand(cmd.String());
+	if (ret == 0)
+		SMSList->RemoveItem(sms);
+	return ret;
+}
+
 const char *GSM::parseDate(const char *input) {
 	static Pattern *pDate = Pattern::compile("(\\d+)\\/(\\d+)\\/(\\d+),(\\d+):(\\d+):(\\d+)", Pattern::MULTILINE_MATCHING);
 	static Matcher *mDate = pDate->createMatcher("");

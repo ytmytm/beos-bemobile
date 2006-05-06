@@ -48,6 +48,7 @@ class GSM {
 
 		void getSMSContent(SMS *sms = NULL);
 		void getSMSList(const char *slot);
+		int removeSMS(SMS *sms = NULL);
 		int changeSMSMemSlot(const char *slot);
 		BList *listMemSlotSMS;
 		BList *SMSList;
