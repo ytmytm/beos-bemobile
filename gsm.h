@@ -44,7 +44,7 @@ class GSM {
 		const char *getDateTime(void) { return fDateTime.String(); };
 		const char *getIMSI(void)	{ return fIMSI.String(); };
 		const char *getSoftwareVer(void) { return fSoftwareVer.String(); };
-		const char *getSMSInfo(void){ return fSMSInfo.String(); };
+		const char *getSMSInfo(void){ updateSMSInfo(); return fSMSInfo.String(); };
 
 		void getSMSContent(SMS *sms = NULL);
 		void getSMSList(const char *slot);
@@ -60,6 +60,7 @@ class GSM {
 const char *getSMSMemSlotName(const char *slot);
 int getSMSType(const char *type);
 void getSMSMemSlots(void);
+void updateSMSInfo(void);
 const char *decodeText(const char *input);
 const char *parseDate(const char *input);
 

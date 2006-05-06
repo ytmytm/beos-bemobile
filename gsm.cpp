@@ -90,7 +90,7 @@ void GSM::doneDevice(void) {
 // return 0 for OK, 1 for other, 2 for error, 3 for sem_error, 4 for tmout, 5 for unopened
 int GSM::sendCommand(const char *cmd, BString *out = NULL, bool debug = false) {
 	BString tmp;
-	static char buffer[60000];
+	static char buffer[10240];
 	int r;
 	int status = 0;
 	int tmout = 0;
@@ -296,6 +296,29 @@ printf("%s\n",tmbuf);
 	return sendCommand(tmbuf);
 }
 
+void GSM::updateSMSInfo(void) {
+	struct SMS *sms = NULL;
+	fSMSRRead = fSMSRUnread = fSMSSSent = fSMSUSent = 0;
+
+	int j = SMSList->CountItems();
+	for (int i=0;i<j;i++) {
+		sms = (struct SMS*)SMSList->ItemAt(i);
+		switch(sms->type) {
+			case REC_READ:		fSMSRRead++; break;
+			case REC_UNREAD:	fSMSRUnread++; break;
+			case STO_SENT:		fSMSSSent++; break;
+			case STO_UNSENT:	fSMSUSent++; break;
+			default:	break;
+		}
+	}
+	fSMSInfo = _("Inbox: "); fSMSInfo << fSMSRRead+fSMSRUnread;
+	fSMSInfo += _(" messages, ("); fSMSInfo << fSMSRUnread;
+	fSMSInfo += _(" unread). ");
+	fSMSInfo += _("Outbox: "); fSMSInfo << fSMSSSent+fSMSUSent;
+	fSMSInfo += _(" messages, ("); fSMSInfo << fSMSUSent;
+	fSMSInfo += _(" not sent yet).");
+}
+
 const char *GSM::getSMSMemSlotName(const char *slot) {
 	BString s = slot;
 	if (s == "MT") return "Combined memory";
@@ -420,7 +443,6 @@ void GSM::getSMSList(const char *slot) {
 			SMSList->MakeEmpty();
 	}
 
-	fSMSRRead = fSMSRUnread = fSMSSSent = fSMSUSent = 0;
 	// XXX show progress?
 	mList->setString(out.String());
 	while (mList->findNextMatch()) {
@@ -432,21 +454,8 @@ void GSM::getSMSList(const char *slot) {
 		// ignore because would need to be fetched for reading anyway
 		cursms->msg = decodeText(mList->getGroup(4).c_str());
 		SMSList->AddItem(cursms);
-		switch(cursms->type) {
-			case REC_READ:		fSMSRRead++; break;
-			case REC_UNREAD:	fSMSRUnread++; break;
-			case STO_SENT:		fSMSSSent++; break;
-			case STO_UNSENT:	fSMSUSent++; break;
-			default:	break;
-		}
 printf("%i,%i,%s,%s\n",cursms->id,cursms->type,cursms->number.String(),cursms->date.String());
 	}
-
-	fSMSInfo = ""; fSMSInfo << fSMSRRead+fSMSRUnread;
-	fSMSInfo += _(" messages, ("); fSMSInfo << fSMSRUnread;
-	fSMSInfo += _(" unread)");
-
-//	getSMSContent((struct SMS*)SMSList->ItemAt(2));
 }
 
 int GSM::removeSMS(SMS *sms = NULL) {
