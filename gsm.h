@@ -60,6 +60,7 @@ const char *getSMSMemSlotName(const char *slot);
 int getSMSType(const char *type);
 void getSMSMemSlots(void);
 const char *decodeText(const char *input);
+const char *parseDate(const char *input);
 
 		bool initDevice(const char *device);
 		void doneDevice(void);

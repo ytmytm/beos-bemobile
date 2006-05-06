@@ -382,7 +382,7 @@ void GSM::getSMSContent(SMS *sms = NULL) {
 	sendCommand(cmd.String(),&out);
 	mMsg1->setString(out.String());
 	if (mMsg1->findFirstMatch()) {
-		sms->date = mMsg1->getGroup(3).c_str();
+		sms->date = parseDate(mMsg1->getGroup(3).c_str());
 		sms->msg = decodeText(mMsg1->getGroup(4).c_str());	
 	} else {
 		mMsg2->setString(out.String());
@@ -448,6 +448,28 @@ printf("%i,%i,%s,%s\n",cursms->id,cursms->type,cursms->number.String(),cursms->d
 
 //	getSMSContent((struct SMS*)SMSList->ItemAt(2));
 }
+
+const char *GSM::parseDate(const char *input) {
+	static Pattern *pDate = Pattern::compile("(\\d+)\\/(\\d+)\\/(\\d+),(\\d+):(\\d+):(\\d+)", Pattern::MULTILINE_MATCHING);
+	static Matcher *mDate = pDate->createMatcher("");
+	static char datestring[21];
+	int y,m,d,h,i,s;
+
+	memset(datestring,sizeof(datestring),0);
+
+	mDate->setString(input);
+	if (mDate->findFirstMatch()) {
+		y = toint(mDate->getGroup(1).c_str());
+		m = toint(mDate->getGroup(2).c_str());
+		d = toint(mDate->getGroup(3).c_str());
+		h = toint(mDate->getGroup(4).c_str());
+		i = toint(mDate->getGroup(5).c_str());
+		s = toint(mDate->getGroup(6).c_str());
+		snprintf(datestring,sizeof(datestring),"%04i/%02i/%02i %02i:%02i:%02i",y,m,d,h,i,s);
+	}
+	return datestring;
+}
+
 
 const char *GSM::decodeText(const char *input) {
 	static BString out;
