@@ -16,3 +16,6 @@
 	- na samej gorze duzy tekst co jest wybrane (wielkosc ~header listy)
 - jesli mamy widget to na dole statusbar z:
 	- telefon; podswietlony numer;bateria;sygnal;dataczas
+- make sure that w/o device the app doesn't crash
+- upon start make as many gsm objects, as many ports there are, try to probe all at once, add to list (???)
+
