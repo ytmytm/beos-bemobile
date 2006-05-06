@@ -19,15 +19,17 @@ class workView : public BView {
 		void RefreshStatus(void);
 		//
 	private:
+bool hasSMSSlot(const char *slot);
 		void SetCurView(int v = 0);
 		//
-		enum { V_SUMMARY = 0, V_PHONEBOOK, V_CONTACTS, V_LASTCALLS, V_SMS, V_INBOX, V_OUTBOX, V_MAX };
-		mobileView *pageView[V_MAX];
+		BList *pageView;
 		//
 		int curView;
 		BStringView *viewCaption;
 		GSM *gsm;
 		ColumnListView *list;
+		// indices of list items
+		int VV_INBOX, VV_OUTBOX, VV_SENT, VV_DRAFT;
 };
 
 class infoItem : public CLVEasyItem {
@@ -36,11 +38,15 @@ class infoItem : public CLVEasyItem {
 			level, superitem, expanded, minwidth) {
 
 			fId = id;
+			fSlot = NULL;
 			SetColumnContent(2,text);
 		}
 		int Id(void) { return fId; };
+		const char *Slot(void) { return fSlot; };
+		void SetSlot(const char *slot) { fSlot = slot; };
 	private:
 		int fId;
+		const char *fSlot;
 };
 
 #endif
