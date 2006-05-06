@@ -1,4 +1,7 @@
 
+//
+// - put summary string somewhere, update leftworklist w/it? yes!
+
 #include <Alert.h>
 #include <Box.h>
 #include <Button.h>
@@ -121,7 +124,8 @@ void smsView::fillList(int mode = SMS_ALLBOXEN) {
 		right = ""; right << msgnum;
 		delta = 100/msgnum;
 		gsm->getSMSList(slot.String());
-		for (i=0;i<gsm->SMSList->CountItems();i++) {
+		int j = gsm->SMSList->CountItems();
+		for (i=0;i<j;i++) {
 			sms = (struct SMS*)gsm->SMSList->ItemAt(i);
 			gsm->getSMSContent(sms);
 			list->AddItem(new smsListItem(sms));
@@ -201,8 +205,8 @@ void smsView::updatePreview(struct SMS *sms) {
 
 void smsView::Show(void) {
 printf("show!\n");
+	BView::Show();
 	if (list->CountItems()==0) {
-		BView::Show();
 		BView::Flush();
 		BView::Sync();
 		this->Window()->Flush();
