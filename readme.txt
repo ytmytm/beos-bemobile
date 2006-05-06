@@ -39,3 +39,12 @@ lista SMS:
 	Pozostałe:
 	- tylko preview jak Inbox/Sent (numer jako 'numer')
 - nowy SMS w nowym oknie, możliwość zapisania do "writable SMS folders" - odczytywać z CPMS
+
+TODO:
+- gsm - wczytywanie listy sms do prywatnej listy (dla kazdego view)
+	- obecne w konstruktor (do wywalenia)
+	- obecne w update smsinfo (do wywalenia)
+	- getsmslist (do zmiany)
+- klasa bazowa dla smsviews (z inbox, zrobic outbox, bedzie wiadomo co jest inne)
+	smsboxview
+- przeprojektowanie view superitemsms
