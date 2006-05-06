@@ -321,44 +321,47 @@ void GSM::updateSMSInfo(void) {
 
 const char *GSM::getSMSMemSlotName(const char *slot) {
 	BString s = slot;
-	if (s == "MT") return "Combined memory";
-	if (s == "IM") return "Incoming messages";
-	if (s == "OM") return "Outgoing messages";
-	if (s == "BM") return "Information service messages";
-	if (s == "DM") return "Drafts";
-	return "Unknown memory type";
+	if (s == "MT") return _("All messages");
+	if (s == "IM") return _("Inbox");
+	if (s == "OM") return _("Outbox");
+	if (s == "BM") return _("Information service");
+	if (s == "DM") return _("Templates");
+	return _("Unknown");
 }
 
 void GSM::getSMSMemSlots(void) {
-// XXX rewrite for AT+CPMS=? and check first only (to read)
-// XXX use AT+CMPS=<slot> to quickly get stats?
-	static Pattern *pSlot = Pattern::compile("(\\w+),(\\d+),(\\d+)", Pattern::MULTILINE_MATCHING);
+	static Pattern *pSlots = Pattern::compile("^\\+CPMS: \\(([^)]+)\\)", Pattern::MULTILINE_MATCHING);
+	static Matcher *mSlots = pSlots->createMatcher("");
+	static Pattern *pSlot = Pattern::compile("(\\w\\w)");
 	static Matcher *mSlot = pSlot->createMatcher("");
-	BString tmp;
 
-	memSlotSMS *slot;
-	bool newlist;
-	int i;
+	BString out;
 
-	sendCommand("AT+CPMS?",&tmp);
-	mSlot->setString(tmp.String());
-	newlist = (listMemSlotSMS->CountItems() == 0);
+	// clear list
+	if (listMemSlotSMS->CountItems()>0) {
+		struct memSlotSMS *anItem;
+		for (int i=0; (anItem=(struct memSlotSMS*)listMemSlotSMS->ItemAt(i)); i++)
+			delete anItem;
+		if (!listMemSlotSMS->IsEmpty())
+			listMemSlotSMS->MakeEmpty();
+	}
 
-	i = 0;
-	while (mSlot->findNextMatch()) {
-		if (newlist) {
+	struct memSlotSMS *slot;
+
+	sendCommand("AT+CPMS=?",&out);
+	mSlots->setString(out.String());
+	if (mSlots->findFirstMatch()) {
+		mSlot->setString(mSlots->getGroup(1).c_str());
+		while (mSlot->findNextMatch()) {
 			slot = new memSlotSMS;
 			slot->sname = mSlot->getGroup(1).c_str();
 			slot->name = getSMSMemSlotName(slot->sname.String());
+			slot->items = changeSMSMemSlot(slot->sname.String());
 			listMemSlotSMS->AddItem(slot);
-		} else {
-			slot = (memSlotSMS*)listMemSlotSMS->ItemAt(i);
+			printf("got:%s,%i\n",slot->name.String(),slot->items);
 		}
-		slot->items = toint(mSlot->getGroup(2).c_str());
-		slot->allitems = toint(mSlot->getGroup(3).c_str());
-printf("got:%i,%s,%s,%s\n",i,mSlot->getGroup(1).c_str(),mSlot->getGroup(2).c_str(),mSlot->getGroup(3).c_str());
-		i++;
 	}
+	changeSMSMemSlot("MT");	// make it default
 }
 
 int GSM::changeSMSMemSlot(const char *slot) {
@@ -461,7 +464,7 @@ printf("%i,%i,%s,%s\n",cursms->id,cursms->type,cursms->number.String(),cursms->d
 int GSM::removeSMS(SMS *sms = NULL) {
 	if (!sms)
 		return -1;
-	//changeMemSlot(sms->slot.String());
+	//changeMemSlot(sms->slot.String());		// XXX possibly unneeded, IDs are unique?
 	BString cmd = "AT+CMGD="; cmd << sms->id;
 	int ret = sendCommand(cmd.String());
 	if (ret == 0)

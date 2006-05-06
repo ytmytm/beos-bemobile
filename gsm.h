@@ -16,8 +16,6 @@ struct memSlotSMS {
 	BString sname;
 	BString name;
 	int items;
-	int allitems;
-	int unread;
 };
 
 class BList;
