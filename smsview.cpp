@@ -1,13 +1,12 @@
 //
-// - btextview prv inside scrollview
 // - parse date into nice format (dd/mm/yyyy hh:mm)
 // - implement delete
-// - make workview derivative from mobileview (has setgsm)
 // - visual difference between read and unread messages (icon in col0? char?)
 
 #include <Box.h>
 #include <Button.h>
 #include <Font.h>
+#include <ScrollView.h>
 #include <StatusBar.h>
 #include <StringView.h>
 #include <TextView.h>
@@ -35,7 +34,7 @@ smsView::smsView(BRect r) : mobileView(r, "smsView") {
 	float maxw, totalw = 0;
 	BRect r = this->MyBounds();
 	r.InsetBy(10,15);
-	r.right -= 16;
+	r.right -= B_V_SCROLL_BAR_WIDTH;
 	r.bottom = r.top + r.Height()/2 - 50;
 
 	// add column list
@@ -43,13 +42,15 @@ smsView::smsView(BRect r) : mobileView(r, "smsView") {
 	list = new ColumnListView(r, &containerView, NULL, B_FOLLOW_TOP_BOTTOM|B_FOLLOW_LEFT_RIGHT,
 		B_WILL_DRAW|B_FRAME_EVENTS|B_NAVIGABLE, B_SINGLE_SELECTION_LIST, false, true, true, true,
 		B_FANCY_BORDER);
+	maxw = font.StringWidth("XX"); totalw += maxw;
+	list->AddColumn(new CLVColumn(NULL, maxw, CLV_TELL_ITEMS_WIDTH|CLV_SORT_KEYABLE));
 	maxw = font.StringWidth("+999999999") + 20; totalw += maxw;
 	list->AddColumn(new CLVColumn(_("Sender"), maxw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
 	totalw += maxw;
 	list->AddColumn(new CLVColumn(_("Receiver"), maxw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
 	maxw = font.StringWidth("8888/88/88, 88:88") + 20; totalw += maxw;
 	list->AddColumn(new CLVColumn(_("Date"), maxw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
-	list->AddColumn(new CLVColumn(_("Text"), r.right-16-totalw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
+	list->AddColumn(new CLVColumn(_("Text"), r.right-B_V_SCROLL_BAR_WIDTH-4-totalw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
 	list->SetSortFunction(CLVEasyItem::CompareItems);
 	this->AddChild(containerView);
 	list->SetInvocationMessage(new BMessage(SMSLIST_INV));
@@ -60,12 +61,12 @@ smsView::smsView(BRect r) : mobileView(r, "smsView") {
 	BBox *box;
 	this->AddChild(box = new BBox(r,"smsPrvBox"));
 	box->SetResizingMode(B_FOLLOW_LEFT_RIGHT|B_FOLLOW_BOTTOM);
-	BRect s = box->Bounds(); s.InsetBy(10,10);
+	BRect s = box->Bounds(); s.InsetBy(10,10); s.right -= B_V_SCROLL_BAR_WIDTH;
 	BRect t; t.top = t.left = 0; t.right = s.Width(); t.bottom = s.Height();
 	prv = new BTextView(s, "smsPrv", t, B_FOLLOW_LEFT_RIGHT|B_FOLLOW_BOTTOM);
-	box->AddChild(prv);
 	prv->MakeEditable(false);
 	prv->SetStylable(true);
+	box->AddChild(new BScrollView("smsPrvScroll",prv,B_FOLLOW_LEFT_RIGHT|B_FOLLOW_BOTTOM,0,false,true));
 
 	r.OffsetBy(0,r.Height()+5);
 	r.bottom = r.top + font.Size()*2;

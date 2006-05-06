@@ -40,18 +40,26 @@ class smsListItem : public CLVEasyItem {
 			switch (sms->type) {
 				case GSM::STO_SENT:
 				case GSM::STO_UNSENT:
-					SetColumnContent(1,sms->number.String());
+					SetColumnContent(2,sms->number.String());
 					break;
 				case GSM::REC_READ:
 				case GSM::REC_UNREAD:
 				default:
-					SetColumnContent(0,sms->number.String());
+					SetColumnContent(1,sms->number.String());
 					break;
 			}
-			SetColumnContent(2,sms->date.String());
+			switch (sms->type) {
+				case GSM::STO_UNSENT:
+				case GSM::REC_UNREAD:
+					SetColumnContent(0,"!");
+					break;
+				default:
+					break;
+			}
+			SetColumnContent(3,sms->date.String());
 			tmp = sms->msg.String();
 			tmp.ReplaceSet("\r\n\t"," ");
-			SetColumnContent(3,tmp.String());
+			SetColumnContent(4,tmp.String());
 		}
 		int Id(void) { return fId; };
 		struct SMS *Msg(void) { return fSMS; };
