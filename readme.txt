@@ -19,3 +19,23 @@
 - make sure that w/o device the app doesn't crash
 - upon start make as many gsm objects, as many ports there are, try to probe all at once, add to list (???)
 
+lista:
+- dodac kolumne z wartosciami
+lista SMS:
+- superitem SMS - view z listą folderów:
+	<icon_phone> <icon_folder> <nazwa> <unread> <total>
+	---
+	numery do centrum SMS?
+	---
+	opcja odswiezenia folderow?
+- subitemy - <nazwa folderu> <total>
+	- w kolejności: inbox, outbox (unsent), sent, draft, reszta
+	Inbox:
+	- to, co obecnie jest w glownym SMSview, ale uproszczona tabelka (tylko numer jako "Od")
+	Outbox:
+	- podobne do Inbox (numer jako "Do")  i jeszcze guzik <Send now> do zaznaczonego oraz "Nowy" (?)
+	Sent:
+	- podobne do Inbox (inny nagłówek listy, numer jako "do")
+	Pozostałe:
+	- tylko preview jak Inbox/Sent (numer jako 'numer')
+- nowy SMS w nowym oknie, możliwość zapisania do "writable SMS folders" - odczytywać z CPMS
