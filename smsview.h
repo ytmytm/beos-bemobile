@@ -22,6 +22,7 @@ class smsView : public mobileView {
 	private:
 		void clearList(void);
 		void fillList(void);
+		void fullListRefresh(void);
 
 		ColumnListView *list;
 		BStatusBar *progress;

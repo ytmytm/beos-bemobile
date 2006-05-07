@@ -317,18 +317,6 @@ void GSM::updateSMSInfo(void) {
 			}
 		}
 	}
-
-	sl = getSMSSlot("IM");
-	if (sl) {
-		sl->items = fSMSRRead+fSMSRUnread;
-		sl->unread = fSMSRUnread;
-	}
-	sl = getSMSSlot("OM");
-	if (sl) {
-		sl->items = fSMSSSent+fSMSUSent;
-		sl->unread = fSMSUSent;
-	}
-
 	fSMSInfo = _("Inbox: "); fSMSInfo << fSMSRRead+fSMSRUnread;
 	fSMSInfo += _(" messages, ("); fSMSInfo << fSMSRUnread;
 	fSMSInfo += _(" unread). ");
@@ -480,8 +468,12 @@ void GSM::getSMSList(const char *slot) {
 	int msgNum = changeSMSMemSlot(slot);
 	BList *SMSList;
 
+	sl->unread = 0;
+	sl->items = 0;
+
 	if (msgNum == 0)
 		return;
+
 	BString cmd, out, pat;
 
 	cmd = isMotorola ? "AT+MMGL=\"HEADER ONLY\"" : "AT+CMGL";
@@ -512,6 +504,15 @@ void GSM::getSMSList(const char *slot) {
 		cursms->slot = slot;
 		cursms->id = toint(mList->getGroup(1).c_str());
 		cursms->type = getSMSType(mList->getGroup(2).c_str());
+		sl->items++;
+		switch(cursms->type) {
+			case REC_UNREAD:
+			case STO_UNSENT:
+				sl->unread++;
+				break;
+			default:
+				break;
+		}
 		SMSList->AddItem(cursms);
 	}
 }

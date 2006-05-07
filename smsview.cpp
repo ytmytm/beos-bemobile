@@ -1,6 +1,3 @@
-//
-// after refresh - do get infos for all lists
-//
 
 #include <Button.h>
 #include <Font.h>
@@ -75,11 +72,8 @@ void smsView::clearList(void) {
 void smsView::fillList(void) {
 
 	clearList();
-//	progress->Reset();
-//	progress->Show();
-//
-//	progress->Update(0, _("Checking number of messagess..."));
-	gsm->updateSMSInfo();
+
+//	gsm->updateSMSInfo();
 	// add SMS folders in order: IM, OM-unsent, OM-sent, Drafts, rest
 	if (gsm->hasSMSSlot("IM")) {
 		list->AddItem(new smsListItem(gsm->getSMSSlot("IM")));
@@ -103,7 +97,42 @@ void smsView::fillList(void) {
 			list->AddItem(new smsListItem(sl));
 		}
 	}
-//	progress->Hide();
+}
+
+void smsView::fullListRefresh(void) {
+	struct memSlotSMS *sl, *mt;
+	struct SMS *sms;
+	BString right;
+	float delta;
+
+	progress->Reset();
+	progress->Show();
+	// get number of all messages
+	progress->Update(0, _("Checking number of messages..."));
+	int msgnum = gsm->changeSMSMemSlot("MT");
+	mt = gsm->getSMSSlot("MT");
+
+	right = ""; right << msgnum;
+	delta = 100/msgnum;
+
+	// read from slots
+	int i;
+	int j = gsm->listMemSlotSMS->CountItems();
+	for (i=0;i<j;i++) {
+		sl = (struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(i);
+		if (sl != mt) {
+			// change slot, read all messages
+			gsm->getSMSList(sl->sname.String());
+			int k = sl->msg->CountItems();
+			for (int l=0;l<k;l++) {
+				sms = (struct SMS*)sl->msg->ItemAt(l);
+				gsm->getSMSContent(sms);
+				progress->Update(delta, sl->name.String(), right.String());
+			}
+		}
+	}
+	progress->Hide();
+	gsm->changeSMSMemSlot("MT");	// XXX configurable?
 }
 
 #include <Window.h>
@@ -124,6 +153,7 @@ printf("show!\n");
 void smsView::MessageReceived(BMessage *Message) {
 	switch (Message->what) {
 		case SMSREFRESH:
+			fullListRefresh();
 			fillList();
 			break;
 		case SMSLIST_INV:
