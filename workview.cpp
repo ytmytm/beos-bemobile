@@ -95,9 +95,9 @@ void workView::SetDevice(GSM *g) {
 	cv->Hide();
 	cv->SetDevice(gsm);
 	// SMS folders, except MT, in order: IM, OM-unsent, sent, draft, pozostałe
-	VV_INBOX = VV_OUTBOX = VV_SENT = VV_DRAFT = -1;
+	VV_INBOX = VV_OUTBOX = VV_DRAFT = -1;
 
-	if (hasSMSSlot("IM")) {
+	if (gsm->hasSMSSlot("IM")) {
 		VV_INBOX = curitem++;
 		list->AddItem(item = new infoItem(VV_INBOX, _("Inbox"),2));
 		item->SetSlot("IM");
@@ -106,17 +106,13 @@ void workView::SetDevice(GSM *g) {
 		cv->Hide();
 		cv->SetDevice(gsm);
 	}
-	if (hasSMSSlot("OM")) {
+	if (gsm->hasSMSSlot("OM")) {
 		VV_OUTBOX = curitem++;
 		list->AddItem(item = new infoItem(VV_OUTBOX, _("Outbox"),2));
 		item->SetSlot("OM");
 		pageView->AddItem(NULL);
-		VV_SENT = curitem++;
-		list->AddItem(item = new infoItem(VV_SENT, _("Sent"),2));
-		item->SetSlot("OM");
-		pageView->AddItem(NULL);
 	}
-	if (hasSMSSlot("DM")) {
+	if (gsm->hasSMSSlot("DM")) {
 		VV_DRAFT = curitem++;
 		list->AddItem(item = new infoItem(VV_DRAFT, _("Drafts"),2));
 		item->SetSlot("DM");
@@ -142,20 +138,6 @@ void workView::SetDevice(GSM *g) {
 	// reset current right-hand view to curView
 	SetCurView(0);
 //	SetCurView(V_SMS);
-
-	// XXX dopiero na zadanie reload lub przy pierwszym otwarciu strony z smsami
-//	gsm->getSMSList(((struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(0))->sname.String());
-}
-
-bool workView::hasSMSSlot(const char *slot) {
-	int i;
-	int j = gsm->listMemSlotSMS->CountItems();
-
-	for (i=0;i<j;i++) {
-		if (strcmp(slot,((struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(i))->sname.String()) == 0)
-			return true;
-	}
-	return false;
 }
 
 void workView::SetCurView(int v) {

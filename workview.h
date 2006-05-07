@@ -29,7 +29,7 @@ bool hasSMSSlot(const char *slot);
 		GSM *gsm;
 		ColumnListView *list;
 		// indices of list items
-		int VV_INBOX, VV_OUTBOX, VV_SENT, VV_DRAFT;
+		int VV_INBOX, VV_OUTBOX, VV_DRAFT;
 };
 
 class infoItem : public CLVEasyItem {

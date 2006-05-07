@@ -311,6 +311,18 @@ void GSM::updateSMSInfo(void) {
 			default:	break;
 		}
 	}
+	struct memSlotSMS *sl;
+	sl = getSMSSlot("IM");
+	if (sl) {
+		sl->items = fSMSRRead+fSMSRUnread;
+		sl->unread = fSMSRUnread;
+	}
+	sl = getSMSSlot("OM");
+	if (sl) {
+		sl->items = fSMSSSent+fSMSUSent;
+		sl->unread = fSMSUSent;
+	}
+
 	fSMSInfo = _("Inbox: "); fSMSInfo << fSMSRRead+fSMSRUnread;
 	fSMSInfo += _(" messages, ("); fSMSInfo << fSMSRUnread;
 	fSMSInfo += _(" unread). ");
@@ -357,6 +369,7 @@ void GSM::getSMSMemSlots(void) {
 			slot->sname = mSlot->getGroup(1).c_str();
 			slot->name = getSMSMemSlotName(slot->sname.String());
 			slot->items = changeSMSMemSlot(slot->sname.String());
+			slot->unread = -1;
 			listMemSlotSMS->AddItem(slot);
 			printf("got:%s,%i\n",slot->name.String(),slot->items);
 		}
@@ -375,8 +388,33 @@ int GSM::changeSMSMemSlot(const char *slot) {
 	mSlot->setString(out.String());
 	if (mSlot->findFirstMatch()) {
 		msgNum = toint(mSlot->getGroup(1).c_str());
+		struct memSlotSMS *sl = getSMSSlot(slot);
+		if (sl)
+			sl->items = msgNum;
 	}
 	return msgNum;
+}
+
+struct memSlotSMS *GSM::getSMSSlot(const char *slot) {
+	int i;
+	int j = listMemSlotSMS->CountItems();
+
+	for (i=0;i<j;i++) {
+		if (strcmp(slot,((struct memSlotSMS*)listMemSlotSMS->ItemAt(i))->sname.String()) == 0)
+			return ((struct memSlotSMS*)listMemSlotSMS->ItemAt(i));
+	}
+	return NULL;
+}
+
+bool GSM::hasSMSSlot(const char *slot) {
+	int i;
+	int j = listMemSlotSMS->CountItems();
+
+	for (i=0;i<j;i++) {
+		if (strcmp(slot,((struct memSlotSMS*)listMemSlotSMS->ItemAt(i))->sname.String()) == 0)
+			return true;
+	}
+	return false;
 }
 
 int GSM::getSMSType(const char *type) {
@@ -469,6 +507,7 @@ int GSM::removeSMS(SMS *sms = NULL) {
 	int ret = sendCommand(cmd.String());
 	if (ret == 0)
 		SMSList->RemoveItem(sms);
+	//changeMemSlot("MT");						// XXX back to default
 	return ret;
 }
 

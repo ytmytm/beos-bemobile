@@ -20,52 +20,36 @@ class smsView : public mobileView {
 		void MessageReceived(BMessage *Message);
 
 	private:
-		void updatePreview(struct SMS *sms);
 		void clearList(void);
-		void fillList(int mode = SMS_ALLBOXEN);
+		void fillList(void);
 
 		ColumnListView *list;
-		BTextView *prv;
 		BStatusBar *progress;
 		BButton *refresh, *del, *newsms;
 };
 
 class smsListItem : public CLVEasyItem {
 	public:
-		smsListItem(struct SMS *sms) : CLVEasyItem(0, false, false, 20.0) {
+		smsListItem(struct memSlotSMS *slot) : CLVEasyItem(0, false, false, 20.0) {
+			fSName = slot->sname.String();
+			fSlot = slot;
+			RefreshData();
+		}
+		void RefreshData(void) {
 			BString tmp;
 
-			fSMS = sms;
-			fId = sms->id;
-			switch (sms->type) {
-				case GSM::STO_SENT:
-				case GSM::STO_UNSENT:
-					SetColumnContent(2,sms->number.String());
-					break;
-				case GSM::REC_READ:
-				case GSM::REC_UNREAD:
-				default:
-					SetColumnContent(1,sms->number.String());
-					break;
-			}
-			switch (sms->type) {
-				case GSM::STO_UNSENT:
-				case GSM::REC_UNREAD:
-					SetColumnContent(0,"!");
-					break;
-				default:
-					break;
-			}
-			SetColumnContent(3,sms->date.String());
-			tmp = sms->msg.String();
-			tmp.ReplaceSet("\r\n\t"," ");
-			SetColumnContent(4,tmp.String());
+			SetColumnContent(0,fSlot->name.String());
+			tmp = ""; tmp << fSlot->items;
+			SetColumnContent(2,tmp.String());
+			tmp = "";
+			if (fSlot->unread>=0) tmp << fSlot->unread; else tmp = "?";
+			SetColumnContent(1,tmp.String());
 		}
-		int Id(void) { return fId; };
-		struct SMS *Msg(void) { return fSMS; };
+		const char *SName(void) { return fSName.String(); };
+		struct memSlotSMS *Slot(void) { return fSlot; };
 	private:
-		int fId;
-		struct SMS *fSMS;
+		BString fSName;
+		struct memSlotSMS *fSlot;
 };
 
 #endif

@@ -16,6 +16,7 @@ struct memSlotSMS {
 	BString sname;
 	BString name;
 	int items;
+	int unread;
 };
 
 class BList;
@@ -46,6 +47,9 @@ class GSM {
 
 		const char *getSMSMemSlotName(const char *slot);
 		int changeSMSMemSlot(const char *slot);
+		bool hasSMSSlot(const char *slot);
+		struct memSlotSMS *getSMSSlot(const char *slot);
+		void updateSMSInfo(void);
 		BList *listMemSlotSMS;
 
 		void getSMSContent(SMS *sms = NULL);
@@ -59,7 +63,6 @@ class GSM {
 	private:
 int getSMSType(const char *type);
 void getSMSMemSlots(void);
-void updateSMSInfo(void);
 const char *decodeText(const char *input);
 const char *parseDate(const char *input);
 
@@ -84,7 +87,7 @@ const char *parseDate(const char *input);
 		int fSignal;
 		BString fManuf, fModel, fGSMVer, fIMEI, fSoftwareVer, fIMSI;
 		int fYear, fMonth, fDay, fHour, fMinute, fSecond, fTimezone;
-		BString fDateTime;	// XX unused in GUI
+		BString fDateTime;
 		BString fSMSInfo;
 		//
 		int fSMSRRead, fSMSRUnread, fSMSSSent, fSMSUSent;
