@@ -525,6 +525,9 @@ int GSM::removeSMS(SMS *sms = NULL) {
 	int ret = sendCommand(cmd.String());
 	if (ret == 0) {
 		struct memSlotSMS *sl = getSMSSlot(sms->slot.String());
+		if ((sms->type == GSM::REC_UNREAD) || (sms->type == GSM::STO_UNSENT))
+			sl->unread--;
+		sl->items--;
 		sl->msg->RemoveItem(sms);
 	}
 	//changeMemSlot("MT");						// XXX back to default
