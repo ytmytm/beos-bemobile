@@ -40,11 +40,13 @@ class smsListItem : public CLVEasyItem {
 			BString tmp;
 
 			SetColumnContent(0,fSlot->name.String());
-			tmp = ""; tmp << fSlot->items;
-			SetColumnContent(2,tmp.String());
+			tmp = fSlot->writable ? _("Yes") : _("No");
+			SetColumnContent(1,tmp.String());
 			tmp = "";
 			if (fSlot->unread>=0) tmp << fSlot->unread; else tmp = "?";
-			SetColumnContent(1,tmp.String());
+			SetColumnContent(2,tmp.String());
+			tmp = ""; tmp << fSlot->items;
+			SetColumnContent(3,tmp.String());
 		}
 		const char *SName(void) { return fSName.String(); };
 		struct memSlotSMS *Slot(void) { return fSlot; };

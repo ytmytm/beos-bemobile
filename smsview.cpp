@@ -31,6 +31,8 @@ smsView::smsView(BRect r) : mobileView(r, "smsView") {
 		B_FANCY_BORDER);
 	maxw = font.StringWidth(_("Folder"))*3+20; totalw += maxw;
 	list->AddColumn(new CLVColumn(_("Folder"), maxw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
+	maxw = font.StringWidth(_("Writable"))*2+20; totalw += maxw;
+	list->AddColumn(new CLVColumn(_("Writable"), maxw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
 	maxw = font.StringWidth(_("Unread"))*2+20; totalw += maxw;
 	list->AddColumn(new CLVColumn(_("Unread"), maxw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
 	maxw = font.StringWidth(_("Total"))+20;
