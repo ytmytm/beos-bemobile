@@ -38,8 +38,7 @@ lista SMS:
 	- podobne do Inbox (inny nagłówek listy, numer jako "do")
 	Pozostałe:
 	- tylko preview jak Inbox/Sent (numer jako 'numer')
-- nowy SMS w nowym oknie, możliwość zapisania do "writable SMS folders" - odczytywać z CPMS
+- nowy SMS w nowym oknie, możliwość zapisania do writable SMS slots, wybór popupmenu
 
 TODO:
-- odczytywanie które sloty sms sa writable
 - przepisac listy sms jako zamkniete klasy?
