@@ -73,7 +73,6 @@ void smsView::fillList(void) {
 
 	clearList();
 
-//	gsm->updateSMSInfo();
 	// add SMS folders in order: IM, OM-unsent, OM-sent, Drafts, rest
 	if (gsm->hasSMSSlot("IM")) {
 		list->AddItem(new smsListItem(gsm->getSMSSlot("IM")));
@@ -112,8 +111,8 @@ void smsView::fullListRefresh(void) {
 	int msgnum = gsm->changeSMSMemSlot("MT");
 	mt = gsm->getSMSSlot("MT");
 
+	delta = (msgnum > 0) ? 100/msgnum : 0;
 	right = ""; right << msgnum;
-	delta = 100/msgnum;
 
 	// read from slots
 	int i;
@@ -135,19 +134,11 @@ void smsView::fullListRefresh(void) {
 	gsm->changeSMSMemSlot("MT");	// XXX configurable?
 }
 
-#include <Window.h>
-
 void smsView::Show(void) {
-printf("show!\n");
 	BView::Show();
+	BView::Flush();
+	BView::Sync();
 	fillList();
-//	if (list->CountItems()==0) {
-//		BView::Flush();
-//		BView::Sync();
-//		this->Window()->Flush();
-//		this->Window()->Sync();
-//		fillList();	// XXX what's the mode here?
-//	}
 }
 
 void smsView::MessageReceived(BMessage *Message) {
