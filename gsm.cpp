@@ -49,7 +49,7 @@ GSM::GSM(const char *device) {
 		printf("dev:%s\n",devName);
 	}
 
-	if (!initDevice("/dev/ports/usb0")) {
+	if (!initDevice("/dev/ports/usb0")) {			// XXX constant!
 		printf("error opening device, notify!\n");
 		return;
 	}
@@ -336,7 +336,7 @@ const char *GSM::getSMSMemSlotName(const char *slot) {
 }
 
 void GSM::getSMSMemSlots(void) {
-	static Pattern *pSlots = Pattern::compile("^\\+CPMS: \\(([^)]+)\\)", Pattern::MULTILINE_MATCHING);
+	static Pattern *pSlots = Pattern::compile("^\\+CPMS: \\(([^)]+)\\),\\(([^)]+)\\)", Pattern::MULTILINE_MATCHING);
 	static Matcher *mSlots = pSlots->createMatcher("");
 	static Pattern *pSlot = Pattern::compile("(\\w\\w)");
 	static Matcher *mSlot = pSlot->createMatcher("");
@@ -365,8 +365,15 @@ void GSM::getSMSMemSlots(void) {
 			slot->items = changeSMSMemSlot(slot->sname.String());
 			slot->unread = -1;
 			slot->msg = new BList;
+			slot->writable = false;
 			listMemSlotSMS->AddItem(slot);
 			printf("got:%s,%i\n",slot->name.String(),slot->items);
+		}
+		mSlot->setString(mSlots->getGroup(2).c_str());
+		while (mSlot->findNextMatch()) {
+			printf("writable:%s\n",mSlot->getGroup(1).c_str());
+			slot = getSMSSlot(mSlot->getGroup(1).c_str());
+			slot->writable = true;
 		}
 	}
 	changeSMSMemSlot("MT");	// make it default

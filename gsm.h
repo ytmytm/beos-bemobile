@@ -17,6 +17,7 @@ struct memSlotSMS {
 	BString name;
 	int items;
 	int unread;
+	bool writable;
 	BList *msg;
 };
 
