@@ -99,7 +99,7 @@ void workView::SetDevice(GSM *g) {
 
 	if (gsm->hasSMSSlot("IM")) {
 		VV_INBOX = curitem++;
-		list->AddItem(item = new infoItem(VV_INBOX, _("Inbox"),2));
+		list->AddItem(item = new infoItem(VV_INBOX,gsm->getSMSMemSlotName("IM"),2));
 		item->SetSlot("IM");
 		this->AddChild(cv = new smsInboxView(r,"IM"));
 		pageView->AddItem(cv);
@@ -108,13 +108,13 @@ void workView::SetDevice(GSM *g) {
 	}
 	if (gsm->hasSMSSlot("OM")) {
 		VV_OUTBOX = curitem++;
-		list->AddItem(item = new infoItem(VV_OUTBOX, _("Outbox"),2));
+		list->AddItem(item = new infoItem(VV_OUTBOX,gsm->getSMSMemSlotName("OM"),2));
 		item->SetSlot("OM");
 		pageView->AddItem(NULL);
 	}
 	if (gsm->hasSMSSlot("DM")) {
 		VV_DRAFT = curitem++;
-		list->AddItem(item = new infoItem(VV_DRAFT, _("Drafts"),2));
+		list->AddItem(item = new infoItem(VV_DRAFT,gsm->getSMSMemSlotName("DM"),2));
 		item->SetSlot("DM");
 		pageView->AddItem(NULL);
 	}
