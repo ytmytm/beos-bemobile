@@ -89,6 +89,7 @@ void smsInboxView::clearList(void) {
 
 void smsInboxView::fillList(void) {
 	BString right;
+	struct memSlotSMS *sl;
 	struct SMS *sms;
 	int i, msgnum;
 	float delta;
@@ -99,14 +100,15 @@ void smsInboxView::fillList(void) {
 
 	progress->Update(0, _("Checking number of messagess..."));
 	msgnum = gsm->changeSMSMemSlot(memSlot.String());
+	sl = gsm->getSMSSlot(memSlot.String());
 
 	if (msgnum > 0) {
 		right = ""; right << msgnum;
 		delta = 100/msgnum;
 		gsm->getSMSList(memSlot.String());
-		int j = gsm->SMSList->CountItems();
+		int j = sl->msg->CountItems();
 		for (i=0;i<j;i++) {
-			sms = (struct SMS*)gsm->SMSList->ItemAt(i);
+			sms = (struct SMS*)sl->msg->ItemAt(i);
 			gsm->getSMSContent(sms);
 			list->AddItem(new smsInboxListItem(sms));
 			progress->Update(delta, "0", right.String());

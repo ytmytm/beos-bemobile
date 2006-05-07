@@ -31,7 +31,6 @@ GSM::GSM(const char *device) {
 	if ((sem = create_sem(1, "gsm_sem")) < B_NO_ERROR)
 		return;
 	listMemSlotSMS = new BList(5);
-	SMSList = new BList;
 
 	// init status
 	isMotorola = false;
@@ -298,20 +297,27 @@ printf("%s\n",tmbuf);
 
 void GSM::updateSMSInfo(void) {
 	struct SMS *sms = NULL;
-	fSMSRRead = fSMSRUnread = fSMSSSent = fSMSUSent = 0;
+	struct memSlotSMS *sl;
+	BList *SMSList;
 
-	int j = SMSList->CountItems();
-	for (int i=0;i<j;i++) {
-		sms = (struct SMS*)SMSList->ItemAt(i);
-		switch(sms->type) {
-			case REC_READ:		fSMSRRead++; break;
-			case REC_UNREAD:	fSMSRUnread++; break;
-			case STO_SENT:		fSMSSSent++; break;
-			case STO_UNSENT:	fSMSUSent++; break;
-			default:	break;
+	fSMSRRead = fSMSRUnread = fSMSSSent = fSMSUSent = 0;
+	int k = listMemSlotSMS->CountItems();
+	for (int l=0;l<k;l++) {
+		sl = (struct memSlotSMS*)listMemSlotSMS->ItemAt(l);
+		SMSList = sl->msg;
+		int j = SMSList->CountItems();
+		for (int i=0;i<j;i++) {
+			sms = (struct SMS*)SMSList->ItemAt(i);
+			switch(sms->type) {
+				case REC_READ:		fSMSRRead++; break;
+				case REC_UNREAD:	fSMSRUnread++; break;
+				case STO_SENT:		fSMSSSent++; break;
+				case STO_UNSENT:	fSMSUSent++; break;
+				default:	break;
+			}
 		}
 	}
-	struct memSlotSMS *sl;
+
 	sl = getSMSSlot("IM");
 	if (sl) {
 		sl->items = fSMSRRead+fSMSRUnread;
@@ -337,7 +343,7 @@ const char *GSM::getSMSMemSlotName(const char *slot) {
 	if (s == "IM") return _("Inbox");
 	if (s == "OM") return _("Outbox");
 	if (s == "BM") return _("Information service");
-	if (s == "DM") return _("Templates");
+	if (s == "DM") return _("Drafts");
 	return _("Unknown");
 }
 
@@ -370,6 +376,7 @@ void GSM::getSMSMemSlots(void) {
 			slot->name = getSMSMemSlotName(slot->sname.String());
 			slot->items = changeSMSMemSlot(slot->sname.String());
 			slot->unread = -1;
+			slot->msg = new BList;
 			listMemSlotSMS->AddItem(slot);
 			printf("got:%s,%i\n",slot->name.String(),slot->items);
 		}
@@ -427,7 +434,7 @@ int GSM::getSMSType(const char *type) {
 }
 
 void GSM::getSMSContent(SMS *sms = NULL) {
-	BString cmd, pat, pat2, out;
+	BString cmd, pat, pat2, pat3, out;
 
 	if (sms == NULL)
 		return;
@@ -436,29 +443,42 @@ void GSM::getSMSContent(SMS *sms = NULL) {
 	cmd << sms->id;
 	pat = isMotorola ? "^\\+M" : "^\\+C";
 	pat2 = pat;
+	pat3 = pat;
 	pat += "MGR: \"([ \\w]+)\", \"([^\"]+)\", \"([\\d\\/,:]+)\"\r\n(.*)$";
 	pat2 += "MGR: \"([ \\w]+)\", \"([^\"]+)\".*\r\n(.*)$";
+	pat3 += "MGR: \"([ \\w]+)\".*\r\n(.*)$";
 	Pattern *pMsg1 = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
 	Matcher *mMsg1 = pMsg1->createMatcher("");
 	Pattern *pMsg2 = Pattern::compile(pat2.String(), Pattern::MULTILINE_MATCHING);
 	Matcher *mMsg2 = pMsg2->createMatcher("");
+	Pattern *pMsg3 = Pattern::compile(pat3.String(), Pattern::MULTILINE_MATCHING);
+	Matcher *mMsg3 = pMsg3->createMatcher("");
 
 	sendCommand(cmd.String(),&out);
 	mMsg1->setString(out.String());
 	if (mMsg1->findFirstMatch()) {
+		sms->number = mMsg1->getGroup(2).c_str();
 		sms->date = parseDate(mMsg1->getGroup(3).c_str());
 		sms->msg = decodeText(mMsg1->getGroup(4).c_str());	
 	} else {
 		mMsg2->setString(out.String());
 		if (mMsg2->findFirstMatch()) {
+			sms->number = mMsg2->getGroup(2).c_str();
 			sms->msg = decodeText(mMsg2->getGroup(3).c_str());
+		} else {
+			mMsg3->setString(out.String());
+			if (mMsg3->findFirstMatch()) {
+				sms->msg = decodeText(mMsg3->getGroup(2).c_str());
+			}
 		}
 	}
 printf("%i,%i,%s,%s\n[%s]\n",sms->id,sms->type,sms->number.String(),sms->date.String(),sms->msg.String());
 }
 
 void GSM::getSMSList(const char *slot) {
+	struct memSlotSMS *sl = getSMSSlot(slot);
 	int msgNum = changeSMSMemSlot(slot);
+	BList *SMSList;
 
 	if (msgNum == 0)
 		return;
@@ -468,13 +488,14 @@ void GSM::getSMSList(const char *slot) {
 	sendCommand(cmd.String(),&out);
 
 	pat = isMotorola ? "^\\+M" : "^\\+C";
-	pat += "MGL: (\\d+), \"([ \\w]+)\", \"([^\"]+)\"\r\n(.*)$";
+	pat += "MGL: (\\d+), \"([ \\w]+)\"";
 
 	Pattern *pList = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
 	Matcher *mList = pList->createMatcher("");
 
 	struct SMS *cursms = NULL;
 
+	SMSList = sl->msg;
 	// clear list
 	if (SMSList->CountItems()>0) {
 		struct SMS *anItem;
@@ -491,11 +512,7 @@ void GSM::getSMSList(const char *slot) {
 		cursms->slot = slot;
 		cursms->id = toint(mList->getGroup(1).c_str());
 		cursms->type = getSMSType(mList->getGroup(2).c_str());
-		cursms->number = mList->getGroup(3).c_str();
-		// ignore because would need to be fetched for reading anyway
-		cursms->msg = decodeText(mList->getGroup(4).c_str());
 		SMSList->AddItem(cursms);
-printf("%i,%i,%s,%s\n",cursms->id,cursms->type,cursms->number.String(),cursms->date.String());
 	}
 }
 
@@ -505,8 +522,10 @@ int GSM::removeSMS(SMS *sms = NULL) {
 	//changeMemSlot(sms->slot.String());		// XXX possibly unneeded, IDs are unique?
 	BString cmd = "AT+CMGD="; cmd << sms->id;
 	int ret = sendCommand(cmd.String());
-	if (ret == 0)
-		SMSList->RemoveItem(sms);
+	if (ret == 0) {
+		struct memSlotSMS *sl = getSMSSlot(sms->slot.String());
+		sl->msg->RemoveItem(sms);
+	}
 	//changeMemSlot("MT");						// XXX back to default
 	return ret;
 }
