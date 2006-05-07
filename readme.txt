@@ -42,7 +42,4 @@ lista SMS:
 
 TODO:
 - odczytywanie które sloty sms sa writable
-- klasa bazowa dla smsviews (z inbox, zrobic outbox, bedzie wiadomo co jest inne)
-	smsboxview
 - przepisac listy sms jako zamkniete klasy?
-- niepotrzebnie nie uaktualniac list w podklasach superitemu sms
