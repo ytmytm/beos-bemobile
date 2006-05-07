@@ -98,7 +98,7 @@ void smsInboxView::fillList(void) {
 	progress->Reset();
 	progress->Show();
 
-	progress->Update(0, _("Checking number of messagess..."));
+	progress->Update(0, _("Checking number of messages..."));
 	msgnum = gsm->changeSMSMemSlot(memSlot.String());
 	sl = gsm->getSMSSlot(memSlot.String());
 
