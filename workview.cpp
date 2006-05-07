@@ -110,13 +110,19 @@ void workView::SetDevice(GSM *g) {
 		VV_OUTBOX = curitem++;
 		list->AddItem(item = new infoItem(VV_OUTBOX,gsm->getSMSMemSlotName("OM"),2));
 		item->SetSlot("OM");
-		pageView->AddItem(NULL);
+		this->AddChild(cv = new smsOutboxView(r,"OM"));
+		pageView->AddItem(cv);
+		cv->Hide();
+		cv->SetDevice(gsm);
 	}
 	if (gsm->hasSMSSlot("DM")) {
 		VV_DRAFT = curitem++;
 		list->AddItem(item = new infoItem(VV_DRAFT,gsm->getSMSMemSlotName("DM"),2));
 		item->SetSlot("DM");
-		pageView->AddItem(NULL);
+		this->AddChild(cv = new smsDraftboxView(r,"DM"));
+		pageView->AddItem(cv);
+		cv->Hide();
+		cv->SetDevice(gsm);
 	}
 
 	// add the rest of slots: except MT, IM, OM, DM
@@ -131,7 +137,10 @@ void workView::SetDevice(GSM *g) {
 			 (strcmp(sl->sname.String(),"DM")!=0) ) {
 			list->AddItem(item = new infoItem(curitem++, gsm->getSMSMemSlotName(sl->sname.String()),2));
 			item->SetSlot(sl->sname.String());
-			pageView->AddItem(NULL);
+			this->AddChild(cv = new smsBoxView(r,sl->sname.String()));
+			pageView->AddItem(cv);
+			cv->Hide();
+			cv->SetDevice(gsm);
 		}
 	}
 
