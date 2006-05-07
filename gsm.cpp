@@ -31,6 +31,7 @@ GSM::GSM(const char *device) {
 	if ((sem = create_sem(1, "gsm_sem")) < B_NO_ERROR)
 		return;
 	listMemSlotSMS = new BList(5);
+	listMemSlotPB = new BList(10);
 
 	// init status
 	isMotorola = false;
@@ -235,6 +236,7 @@ void GSM::getPhoneData(void) {
 	// if failed: AT+MODE=0 is sent
 	// PDU mode test goes from: AT+CMGF=0
 	getSMSMemSlots();
+	getPBMemSlots();
 }
 
 void GSM::getPhoneStatus(void) {
@@ -539,6 +541,110 @@ int GSM::removeSMS(SMS *sms = NULL) {
 	}
 	//changeMemSlot("MT");						// XXX back to default
 	return ret;
+}
+
+const char *GSM::getPBMemSlotName(const char *slot) {
+	BString s = slot;
+	if ((s == "MT") || (s == "AD")) return _("Composite phonebook");
+	if (s == "EN") return _("Emergency numbers");
+	if (s == "FD") return _("SIM fixed dialing numbers");
+	if (s == "ME") return _("Phone number list");
+	if ((s == "ON") || (s == "OW")) return _("Own numbers");
+	if (s == "SM") return _("SIM number list");
+	if (s == "TA") return _("Data card number list");
+	if (s == "MD") return _("Last number redial");
+	if (s == "MV") return _("Voice activated phonebook");
+	if (s == "HP") return _("Hierarchical phonebook");
+	if (s == "BC") return _("Own business card");
+	if ((s == "QD") || (s == "DD")) return _("Quick dial number list");
+
+	if (s == "LD") return _("SIM last dialed numbers");
+	if (s == "MC") return _("Missed calls");
+	if (s == "DC") return _("Dialed calls");
+	if (s == "RC") return _("Received calls");
+	return _("Unknown phonebook type");
+}
+
+void GSM::getPBMemSlots(void) {
+	static Pattern *pSlots = Pattern::compile("^\\+CPBS: \\(([^)]+)\\)", Pattern::MULTILINE_MATCHING);
+	static Matcher *mSlots = pSlots->createMatcher("");
+	static Pattern *pSlot = Pattern::compile("(\\w\\w)");
+	static Matcher *mSlot = pSlot->createMatcher("");
+
+	BString out;
+
+	// clear list
+	if (listMemSlotPB->CountItems()>0) {
+		struct pbSlot *anItem;
+		for (int i=0; (anItem=(struct pbSlot*)listMemSlotPB->ItemAt(i)); i++)
+			delete anItem;
+		if (!listMemSlotPB->IsEmpty())
+			listMemSlotPB->MakeEmpty();
+	}
+
+	struct pbSlot *slot;
+
+	sendCommand("AT+CPBS=?",&out);
+	mSlots->setString(out.String());
+	if (mSlots->findFirstMatch()) {
+		mSlot->setString(mSlots->getGroup(1).c_str());
+		while (mSlot->findNextMatch()) {
+			slot = new pbSlot;
+			slot->sname = mSlot->getGroup(1).c_str();
+			slot->name = getPBMemSlotName(slot->sname.String());
+			slot->writable = false;
+			slot->items = -1;
+			slot->pb = new BList;
+			listMemSlotPB->AddItem(slot);
+			changePBMemSlot(slot->sname.String());	// fetch ranges (must be on the list)
+			printf("got:%s\n",slot->name.String());
+		}
+	}
+}
+
+void GSM::changePBMemSlot(const char *slot) {
+	static Pattern *pSlot = Pattern::compile("^\\+CPBR: \\((\\d+)-(\\d+)\\),(\\d+),(\\d+)", Pattern::MULTILINE_MATCHING);
+	static Matcher *mSlot = pSlot->createMatcher("");
+
+	BString out, cmd = "AT+CPBS=\"";
+	cmd += slot; cmd +="\"";
+
+	sendCommand(cmd.String());
+	cmd = "AT+CPBR=?";
+	sendCommand(cmd.String(),&out);
+	mSlot->setString(out.String());
+	if (mSlot->findFirstMatch()) {
+		struct pbSlot *sl = getPBSlot(slot);
+		if (sl) {
+			sl->min = toint(mSlot->getGroup(1).c_str());
+			sl->max = toint(mSlot->getGroup(2).c_str());
+			sl->numlen = toint(mSlot->getGroup(3).c_str());
+			sl->namelen = toint(mSlot->getGroup(4).c_str());
+			printf("got:%s - (%i-%i),%i,%i\n",slot,sl->min,sl->max,sl->numlen,sl->namelen);
+		}
+	}
+}
+
+bool GSM::hasPBSlot(const char *slot) {
+	int i;
+	int j = listMemSlotPB->CountItems();
+
+	for (i=0;i<j;i++) {
+		if (strcmp(slot,((struct pbSlot*)listMemSlotPB->ItemAt(i))->sname.String()) == 0)
+			return true;
+	}
+	return false;
+}
+
+struct pbSlot *GSM::getPBSlot(const char *slot) {
+	int i;
+	int j = listMemSlotPB->CountItems();
+
+	for (i=0;i<j;i++) {
+		if (strcmp(slot,((struct pbSlot*)listMemSlotPB->ItemAt(i))->sname.String()) == 0)
+			return ((struct pbSlot*)listMemSlotPB->ItemAt(i));
+	}
+	return NULL;
 }
 
 const char *GSM::parseDate(const char *input) {

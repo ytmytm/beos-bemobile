@@ -20,6 +20,27 @@ struct memSlotSMS {
 	bool writable;
 	BList *msg;
 };
+//
+struct pbNum {
+	BString slot;
+	int id;
+	BString number;
+	BString name;
+	int type;	// number/email/other
+	int kind;	// home/work/etc.
+};
+//
+struct pbSlot {
+	BString sname;
+	BString name;
+	int min;
+	int max;
+	int items;
+	int numlen;
+	int namelen;
+	bool writable;
+	BList *pb;
+};
 
 class BList;
 class BSerialPort;
@@ -58,12 +79,19 @@ class GSM {
 		void getSMSList(const char *slot);
 		int removeSMS(SMS *sms = NULL);
 
+		const char *getPBMemSlotName(const char *slot);
+		void changePBMemSlot(const char *slot);
+		bool hasPBSlot(const char *slot);
+		struct pbSlot *getPBSlot(const char *slot);
+		BList *listMemSlotPB;
+
 		enum { ENC_UTF8 = 1, ENC_UCS2, ENC_GSM };
 		enum { REC_READ=1, REC_UNREAD, STO_SENT, STO_UNSENT, MSG_UNK };
 
 	private:
 int getSMSType(const char *type);
 void getSMSMemSlots(void);
+void getPBMemSlots(void);
 const char *decodeText(const char *input);
 const char *parseDate(const char *input);
 
