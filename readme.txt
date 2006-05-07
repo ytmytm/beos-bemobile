@@ -40,5 +40,31 @@ lista SMS:
 	- tylko preview jak Inbox/Sent (numer jako 'numer')
 - nowy SMS w nowym oknie, możliwość zapisania do writable SMS slots, wybór popupmenu
 
+- PB:
+	- getPBSlots
+		- oznaczyć zapisywalne sloty
+		- oznaczyc sloty PB i call register
+	- przy dzialaniu pomijac sloty MD i AT
++	+CPBS=?
++		- odczytac nazwy slotów
++	+CPBR=?
++		+CPBR: (1-100),40,24	(min,max),numlen,namelen
+	+CPBR=min,max (te z ?)
+		+CPBR: id,"numer",type,nazwa-encoded
++	+MPBR=?
++		+MPBR: 1-100,xxxxxx
+	+MPBR=min,max
+		+MPBR: id,"numer",type,nazwa-encoded,???
+
 TODO:
 - przepisac listy sms jako zamkniete klasy?
+- opcje zapisywania smsów, eksportu/importu phonebooka
+- phonebook:
+	- osobno phonebooks (phone, sim, fixed, etc.)
+		- lista nazw pionowa:
+			- po wyborze: po prawej wypisanie wszystkich dostępnych numerów i ich rodzajów
+			  (gdy dostępne)
+		- guziki [REFRESH], [DIAL], [NEW], [DELETE]
+	- osobno call register (dialed, missed, received)
+		- tylko lista podglądu <ikonarodzaj> <numertel> <nazwa>
+		- guzik [DIAL]
