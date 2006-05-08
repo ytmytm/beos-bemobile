@@ -670,7 +670,7 @@ void GSM::getPBList(const char *slot) {
 
 	if (sendCommand(cmd.String(),&out) == 0) {
 		pat = isMotorola ? "^\\+MP" : "^\\+CP";
-		pat += "BR: (\\d+),\"([^\"]+)\",(\\d+),([^,]+)";
+		pat += "BR: (\\d+),\"([^\"]+)\",(\\d+),([^,\r\n]+)";
 		if (isMotorola) {
 			// 5phtype,6voicetag,7alerttone,8backlight,9primary,10categorynum
 			pat += ",(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)";
