@@ -28,6 +28,7 @@ struct pbNum {
 	BString name;
 	int type;	// number/email/other
 	int kind;	// home/work/etc.
+	bool primary;
 };
 //
 struct pbSlot {
@@ -85,8 +86,14 @@ class GSM {
 		struct pbSlot *getPBSlot(const char *slot);
 		BList *listMemSlotPB;
 
+		void getPBList(const char *slot);
+
 		enum { ENC_UTF8 = 1, ENC_UCS2, ENC_GSM };
 		enum { REC_READ=1, REC_UNREAD, STO_SENT, STO_UNSENT, MSG_UNK };
+		// indirect pNum.type mapping
+		enum { PB_PHONE = 1, PB_INTLPHONE, PB_EMAIL, PB_OTHER };
+		// direct pNum.kind mapping (for motorola)
+		enum { PK_WORK = 0, PK_HOME, PK_MAIN, PK_MOBILE, PK_FAX, PK_PAGER, PK_EMAIL, PK_MAILLIST };
 
 	private:
 int getSMSType(const char *type);

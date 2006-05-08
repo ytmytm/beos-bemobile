@@ -237,6 +237,8 @@ void GSM::getPhoneData(void) {
 	// PDU mode test goes from: AT+CMGF=0
 	getSMSMemSlots();
 	getPBMemSlots();
+
+	getPBList("MT");
 }
 
 void GSM::getPhoneStatus(void) {
@@ -645,6 +647,74 @@ struct pbSlot *GSM::getPBSlot(const char *slot) {
 			return ((struct pbSlot*)listMemSlotPB->ItemAt(i));
 	}
 	return NULL;
+}
+
+void GSM::getPBList(const char *slot) {
+	struct pbSlot *sl = getPBSlot(slot);
+	changePBMemSlot(slot);
+
+	BList *pbList = sl->pb;
+	BString cmd, out, pat;
+
+	cmd = isMotorola ? "AT+MPBR=" : "AT+CPBR=";
+	cmd << sl->min; cmd += ","; cmd << sl->max;
+
+	// clear list
+	if (pbList->CountItems()>0) {
+		struct pbNum *anItem;
+		for (int i=0; (anItem=(struct pbNum*)pbList->ItemAt(i)); i++)
+			delete anItem;
+		if (!pbList->IsEmpty())
+			pbList->MakeEmpty();
+	}
+
+	if (sendCommand(cmd.String(),&out) == 0) {
+		pat = isMotorola ? "^\\+MP" : "^\\+CP";
+		pat += "BR: (\\d+),\"([^\"]+)\",(\\d+),([^,]+)";
+		if (isMotorola) {
+			// 5phtype,6voicetag,7alerttone,8backlight,9primary,10categorynum
+			pat += ",(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)";
+		}
+		Pattern *pNum = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
+		Matcher *mNum = pNum->createMatcher("");
+		struct pbNum *num;
+
+		mNum->setString(out.String());
+		while (mNum->findNextMatch()) {
+			num = new pbNum;
+			num->slot = slot;
+			num->id = toint(mNum->getGroup(1).c_str());
+			num->number = mNum->getGroup(2).c_str();
+			switch (toint(mNum->getGroup(3).c_str())) {
+				case 129:
+					num->type = PB_PHONE;
+					break;
+				case 145:
+					num->type = PB_INTLPHONE;
+					break;
+				case 128:
+					num->type = PB_EMAIL;
+					break;
+				default:
+					num->type = PB_OTHER;
+			}
+			num->name = decodeText(mNum->getGroup(4).c_str());
+			num->primary = true;
+			num->kind = PK_MAIN;
+			if (isMotorola) {
+				// extended params
+				num->kind = toint(mNum->getGroup(5).c_str());
+				if (toint(mNum->getGroup(9).c_str()) == 0)
+					num->primary = false;
+			}
+			printf("%i:%s:%s:%i:%i,%i\n",num->id,num->number.String(),num->name.String(),num->kind,num->type,num->primary?0:1);
+			pbList->AddItem(num);
+		}
+
+	}
+	sl->items = pbList->CountItems();
+
+	//changePBMemSlot("MT");		// XXX change to default?
 }
 
 const char *GSM::parseDate(const char *input) {
