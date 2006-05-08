@@ -45,21 +45,13 @@ lista SMS:
 		- oznaczyć zapisywalne sloty
 		- oznaczyc sloty PB i call register
 	- przy dzialaniu pomijac sloty MD i AT
-+	+CPBS=?
-+		- odczytac nazwy slotów
-+	+CPBR=?
-+		+CPBR: (1-100),40,24	(min,max),numlen,namelen
-	+CPBR=min,max (te z ?)
-		+CPBR: id,"numer",type,nazwa-encoded
-+	+MPBR=?
-+		+MPBR: 1-100,xxxxxx
-	+MPBR=min,max
-		+MPBR: id,"numer",type,nazwa-encoded,???
 
 TODO:
 - przepisac listy sms jako zamkniete klasy?
 - opcje zapisywania smsów, eksportu/importu phonebooka
 - phonebook:
+	- na superitems (phonebook/call register)
+		- lista wszystkich numerow z oznaczeniem slotu? moze tylko informacje o slotach? (raczej 1sze)
 	- osobno phonebooks (phone, sim, fixed, etc.)
 		- lista nazw pionowa:
 			- po wyborze: po prawej wypisanie wszystkich dostępnych numerów i ich rodzajów
