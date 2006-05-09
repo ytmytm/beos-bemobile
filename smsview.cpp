@@ -3,7 +3,6 @@
 #include <Font.h>
 #include <StatusBar.h>
 #include <StringView.h>
-#include "CLVEasyItem.h"
 #include "ColumnListView.h"
 #include "globals.h"
 #include "smsview.h"

@@ -2,6 +2,7 @@
 #ifndef _SMSVIEW_H
 #define _SMSVIEW_H
 
+#include "CLVEasyItem.h"
 #include "gsm.h"
 #include "mobileview.h"
 

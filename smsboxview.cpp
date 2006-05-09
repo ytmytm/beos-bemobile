@@ -7,7 +7,6 @@
 #include <StatusBar.h>
 #include <StringView.h>
 #include <TextView.h>
-#include "CLVEasyItem.h"
 #include "ColumnListView.h"
 #include "globals.h"
 #include "smsboxview.h"
