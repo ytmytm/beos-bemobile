@@ -237,8 +237,6 @@ void GSM::getPhoneData(void) {
 	// PDU mode test goes from: AT+CMGF=0
 	getSMSMemSlots();
 	getPBMemSlots();
-
-	getPBList("MT");
 }
 
 void GSM::getPhoneStatus(void) {
@@ -547,6 +545,7 @@ int GSM::removeSMS(SMS *sms = NULL) {
 
 const char *GSM::getPBMemSlotName(const char *slot) {
 	BString s = slot;
+	// phonebooks
 	if ((s == "MT") || (s == "AD")) return _("Composite phonebook");
 	if (s == "EN") return _("Emergency numbers");
 	if (s == "FD") return _("SIM fixed dialing numbers");
@@ -554,17 +553,25 @@ const char *GSM::getPBMemSlotName(const char *slot) {
 	if ((s == "ON") || (s == "OW")) return _("Own numbers");
 	if (s == "SM") return _("SIM number list");
 	if (s == "TA") return _("Data card number list");
-	if (s == "MD") return _("Last number redial");
 	if (s == "MV") return _("Voice activated phonebook");
 	if (s == "HP") return _("Hierarchical phonebook");
 	if (s == "BC") return _("Own business card");
 	if ((s == "QD") || (s == "DD")) return _("Quick dial number list");
-
+	// call register
+	if (s == "MD") return _("Last number redial");	// XXX does it belong here?
 	if (s == "LD") return _("SIM last dialed numbers");
 	if (s == "MC") return _("Missed calls");
 	if (s == "DC") return _("Dialed calls");
 	if (s == "RC") return _("Received calls");
 	return _("Unknown phonebook type");
+}
+
+bool GSM::isPBSlotWritable(const char *slot) {
+	BString s = slot;
+	if ((s == "EN") || (s == "DC") || (s == "LD") || (s == "MC") || (s == "RC") || (s == "MD"))
+		return false;
+	else
+		return true;
 }
 
 void GSM::getPBMemSlots(void) {
@@ -594,7 +601,7 @@ void GSM::getPBMemSlots(void) {
 			slot = new pbSlot;
 			slot->sname = mSlot->getGroup(1).c_str();
 			slot->name = getPBMemSlotName(slot->sname.String());
-			slot->writable = false;
+			slot->writable = isPBSlotWritable(slot->sname.String());
 			slot->items = -1;
 			slot->pb = new BList;
 			listMemSlotPB->AddItem(slot);

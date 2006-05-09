@@ -99,6 +99,7 @@ class GSM {
 int getSMSType(const char *type);
 void getSMSMemSlots(void);
 void getPBMemSlots(void);
+bool isPBSlotWritable(const char *slot);
 const char *decodeText(const char *input);
 const char *parseDate(const char *input);
 
