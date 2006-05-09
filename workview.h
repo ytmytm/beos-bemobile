@@ -29,6 +29,7 @@ bool hasSMSSlot(const char *slot);
 		GSM *gsm;
 		ColumnListView *list;
 		// indices of list items
+		int VV_DIALED, VV_DIALEDSIM, VV_MISSED, VV_RECEIVED;
 		int VV_INBOX, VV_OUTBOX, VV_DRAFT;
 };
 

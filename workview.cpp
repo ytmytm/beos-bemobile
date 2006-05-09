@@ -6,6 +6,7 @@
 #include "ColumnListView.h"
 #include "globals.h"
 #include "gsm.h"
+#include "callregslotview.h"
 #include "smsview.h"
 #include "smsinboxview.h"
 #include "statusview.h"
@@ -81,10 +82,57 @@ void workView::SetDevice(GSM *g) {
 	// phonebook items
 	list->AddItem(item = new infoItem(curitem++,_("Phonebook"),1,true));
 	pageView->AddItem(NULL);
+	// pb items, except call register
 	list->AddItem(item = new infoItem(curitem++,_("Contacts"),2));
 	pageView->AddItem(NULL);
-	list->AddItem(item = new infoItem(curitem++,_("Last Calls"),2));
+	// XXX just a test
+	list->AddItem(item = new infoItem(curitem++,gsm->getPBMemSlotName("ME"),2));
+	item->SetSlot("ME");
+	this->AddChild(cv = new callRegSlotView(r,"ME"));
+	pageView->AddItem(cv);
+	cv->Hide();
+	cv->SetDevice(gsm);
+	// XXX end of test
+	// superitem for Call register
+	list->AddItem(item = new infoItem(curitem++,_("Call register"),1,true));
 	pageView->AddItem(NULL);
+	VV_DIALED = VV_DIALEDSIM = VV_MISSED = VV_RECEIVED = -1;
+	if (gsm->hasPBSlot("DC")) {
+		VV_DIALED = curitem++;
+		list->AddItem(item = new infoItem(VV_DIALED,gsm->getPBMemSlotName("DC"),2));
+		item->SetSlot("DC");
+		this->AddChild(cv = new callRegSlotView(r,"DC"));
+		pageView->AddItem(cv);
+		cv->Hide();
+		cv->SetDevice(gsm);
+	}
+	if (gsm->hasPBSlot("LD")) {
+		VV_DIALEDSIM = curitem++;
+		list->AddItem(item = new infoItem(VV_DIALEDSIM,gsm->getPBMemSlotName("LD"),2));
+		item->SetSlot("LD");
+		this->AddChild(cv = new callRegSlotView(r,"LD"));
+		pageView->AddItem(cv);
+		cv->Hide();
+		cv->SetDevice(gsm);
+	}
+	if (gsm->hasPBSlot("MC")) {
+		VV_MISSED = curitem++;
+		list->AddItem(item = new infoItem(VV_MISSED,gsm->getPBMemSlotName("MC"),2));
+		item->SetSlot("MC");
+		this->AddChild(cv = new callRegSlotView(r,"MC"));
+		pageView->AddItem(cv);
+		cv->Hide();
+		cv->SetDevice(gsm);
+	}
+	if (gsm->hasPBSlot("RC")) {
+		VV_RECEIVED = curitem++;
+		list->AddItem(item = new infoItem(VV_RECEIVED,gsm->getPBMemSlotName("RC"),2));
+		item->SetSlot("RC");
+		this->AddChild(cv = new callRegSlotView(r,"RC"));
+		pageView->AddItem(cv);
+		cv->Hide();
+		cv->SetDevice(gsm);
+	}
 	//	- Calendar	XXX
 	//	icons		XXX
 
