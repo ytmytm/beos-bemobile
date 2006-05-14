@@ -86,12 +86,26 @@ void workView::SetDevice(GSM *g) {
 	list->AddItem(item = new infoItem(curitem++,_("Contacts"),2));
 	pageView->AddItem(NULL);
 	// XXX just a test
-	list->AddItem(item = new infoItem(curitem++,gsm->getPBMemSlotName("ME"),2));
-	item->SetSlot("ME");
-	this->AddChild(cv = new callRegSlotView(r,"ME"));
-	pageView->AddItem(cv);
-	cv->Hide();
-	cv->SetDevice(gsm);
+	// add default slots
+	// add the rest of slots: except ??,??,??
+	{
+	int i, j = gsm->listMemSlotPB->CountItems();
+	struct pbSlot *sl;
+	for (i=0;i<j;i++) {
+		sl = (struct pbSlot*)gsm->listMemSlotPB->ItemAt(i);
+		if ( (strcmp(sl->sname.String(),"??")!=0) &&
+			 (strcmp(sl->sname.String(),"??")!=0) &&
+			 (strcmp(sl->sname.String(),"??")!=0) &&
+			 (strcmp(sl->sname.String(),"??")!=0) ) {
+			list->AddItem(item = new infoItem(curitem++, gsm->getPBMemSlotName(sl->sname.String()),2));
+			item->SetSlot(sl->sname.String());
+			this->AddChild(cv = new callRegSlotView(r,sl->sname.String()));
+			pageView->AddItem(cv);
+			cv->Hide();
+			cv->SetDevice(gsm);
+		}
+	}
+	}
 	// XXX end of test
 	// superitem for Call register
 	list->AddItem(item = new infoItem(curitem++,_("Call register"),1,true));
@@ -174,8 +188,8 @@ void workView::SetDevice(GSM *g) {
 	}
 
 	// add the rest of slots: except MT, IM, OM, DM
-	int i;
-	int j = gsm->listMemSlotSMS->CountItems();
+	{
+	int i, j = gsm->listMemSlotSMS->CountItems();
 	struct memSlotSMS *sl;
 	for (i=0;i<j;i++) {
 		sl = (struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(i);
@@ -190,6 +204,7 @@ void workView::SetDevice(GSM *g) {
 			cv->Hide();
 			cv->SetDevice(gsm);
 		}
+	}
 	}
 
 	// reset current right-hand view to curView
