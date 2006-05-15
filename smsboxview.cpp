@@ -208,8 +208,10 @@ void smsBoxView::updatePreview(struct SMS *sms) {
 	textlen += 2;
 	font.SetSize(12.0);
 	prv->SetFontAndColor(&font,B_FONT_ALL,black);
-	prv->Insert(textlen,sms->msg.String(),sms->msg.Length());
-	textlen += sms->msg.Length();
+	BString msg = sms->msg.String();
+	msg.RemoveAll("\r");
+	prv->Insert(textlen,msg.String(),msg.Length());
+	textlen += msg.Length();
 	prv->Insert(textlen,"\n",1);
 }
 
