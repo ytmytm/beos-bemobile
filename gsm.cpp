@@ -112,8 +112,8 @@ if (debug) printf("sending:[%s]\n",cmd);
 	// reset output
 	tmp = "";
 	// read answer
-	while (tmout < 5) {
-		r = port->WaitForInput();
+	r = port->WaitForInput();
+	while (tmout < 8) {
 if (debug) printf("wfi:%i\n",r);
 		if (r>0) {
 			r = port->Read(buffer,r);
@@ -141,6 +141,7 @@ if (debug) printf("error!\n");
 		}
 		// multiple runs will overwrite buffer, but we keep data in tmp
 		snooze(100000);
+		r = port->WaitForInput();
 		if (r==0)
 			tmout++;
 	}
@@ -148,7 +149,8 @@ if (debug) printf("error!\n");
 	if (out!=NULL)
 		out->SetTo(tmp);
 	release_sem(sem);
-	printf("tmout=%i\n",tmout);
+	if (tmout>0)
+		printf("tmout=%i, cmd=[%s]\n",tmout,cmd);
 	if (tmout == 5)
 		status = 4;
 	return status;
@@ -552,6 +554,7 @@ const char *GSM::getPBMemSlotName(const char *slot) {
 	if (s == "ME") return _("Phone number list");
 	if ((s == "ON") || (s == "OW")) return _("Own numbers");
 	if (s == "SM") return _("SIM number list");
+	if (s == "SD") return _("SIM number list");	// XXX guessing and can't read properties
 	if (s == "TA") return _("Data card number list");
 	if (s == "MV") return _("Voice activated phonebook");
 	if (s == "HP") return _("Hierarchical phonebook");
@@ -568,6 +571,7 @@ const char *GSM::getPBMemSlotName(const char *slot) {
 
 bool GSM::isPBSlotWritable(const char *slot) {
 	BString s = slot;
+	// add "SD" here (no params available)
 	if ((s == "EN") || (s == "DC") || (s == "LD") || (s == "MC") || (s == "RC") || (s == "MD"))
 		return false;
 	else
@@ -605,13 +609,17 @@ void GSM::getPBMemSlots(void) {
 			slot->items = -1;
 			slot->pb = new BList;
 			listMemSlotPB->AddItem(slot);
-			changePBMemSlot(slot->sname.String());	// fetch ranges (must be on the list)
-			printf("got:%s\n",slot->name.String());
+			slot->min = slot->max = slot->numlen = slot->namelen = 0;
+			if (changePBMemSlot(slot->sname.String()) == false) {
+				listMemSlotPB->RemoveItem(slot);
+				delete slot;
+			}
+			else printf("got:%s\n",slot->name.String());
 		}
 	}
 }
 
-void GSM::changePBMemSlot(const char *slot) {
+bool GSM::changePBMemSlot(const char *slot) {
 	static Pattern *pSlot = Pattern::compile("^\\+CPBR: \\((\\d+)-(\\d+)\\),(\\d+),(\\d+)", Pattern::MULTILINE_MATCHING);
 	static Matcher *mSlot = pSlot->createMatcher("");
 
@@ -620,7 +628,10 @@ void GSM::changePBMemSlot(const char *slot) {
 
 	sendCommand(cmd.String());
 	cmd = "AT+CPBR=?";
-	sendCommand(cmd.String(),&out);
+	// return false on error -> don't add such slot
+	if (sendCommand(cmd.String(),&out) == 2)
+		return false;
+
 	mSlot->setString(out.String());
 	if (mSlot->findFirstMatch()) {
 		struct pbSlot *sl = getPBSlot(slot);
@@ -632,6 +643,7 @@ void GSM::changePBMemSlot(const char *slot) {
 			printf("got:%s - (%i-%i),%i,%i\n",slot,sl->min,sl->max,sl->numlen,sl->namelen);
 		}
 	}
+	return true;
 }
 
 bool GSM::hasPBSlot(const char *slot) {
@@ -674,8 +686,9 @@ void GSM::getPBList(const char *slot) {
 		if (!pbList->IsEmpty())
 			pbList->MakeEmpty();
 	}
-
-	if (sendCommand(cmd.String(),&out) == 0) {
+	int rs = sendCommand(cmd.String(),&out,true);
+	// accept timeout (SIM reading may be slow)
+	if ((rs == 0)||(rs == 4)) {
 		pat = isMotorola ? "^\\+MP" : "^\\+CP";
 		pat += "BR: (\\d+),\"([^\"]+)\",(\\d+),([^,\r\n]+)";
 		if (isMotorola) {
@@ -714,7 +727,7 @@ void GSM::getPBList(const char *slot) {
 				if (toint(mNum->getGroup(9).c_str()) == 0)
 					num->primary = false;
 			}
-			printf("%i:%s:%s:%i:%i,%i\n",num->id,num->number.String(),num->name.String(),num->kind,num->type,num->primary?0:1);
+//			printf("%i:%s:%s:%i:%i,%i\n",num->id,num->number.String(),num->name.String(),num->kind,num->type,num->primary?0:1);
 			pbList->AddItem(num);
 		}
 

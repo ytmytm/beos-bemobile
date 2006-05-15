@@ -81,7 +81,7 @@ class GSM {
 		int removeSMS(SMS *sms = NULL);
 
 		const char *getPBMemSlotName(const char *slot);
-		void changePBMemSlot(const char *slot);
+		bool changePBMemSlot(const char *slot);
 		bool hasPBSlot(const char *slot);
 		struct pbSlot *getPBSlot(const char *slot);
 		BList *listMemSlotPB;
