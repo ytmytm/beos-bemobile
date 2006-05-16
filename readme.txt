@@ -35,6 +35,7 @@ lista SMS:
 	- przy dzialaniu pomijac sloty MD i AT
 
 TODO:
+- coś pochodnego CLVEasyItem, ale żeby na żądanie pisało się bold (mark new)
 - przepisac listy pb/sms jako zamkniete klasy?
 - opcje zapisywania smsów, eksportu/importu phonebooka
 - phonebook:
