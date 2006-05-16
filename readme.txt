@@ -1,45 +1,33 @@
+- zaraz po uruchomieniu okno tymczasowe z informacją który port jest otwierany
+	- jesli nieznany, to w oknie combo z wyborem portu i OK, QUIT - koniec programu
+	- jeśli znany to nazwa portu i info 'please wait', może z informacją o komórce
+	- jeśli się nie uda to -- to samo, co nieznany
 - na poczatek wizard:
 	- enumeracja portow
 	- wykrycie czy i co odpowiada po drugiej stronie
 	- zapisanie konfiguracji
-- lista rozwijana
-	- zostawic tak, jak jest i wszystkie informacje po stronie view
-	- usunac 3 level, przeniesc na strone view:
-		- nowa lista:
-			folder inbox: phone(new,count); sim(new,count)
-			outbox: j/w
-		- nowe listy, info o wszystkich mozliwych zrodlach
-			- wazne dla kontaktow: phone/sim/lastout/lastin etc.
-		- w/w - male listy po lewej u gory
-		- duza lista u gory: podsumowanie wybranego
-		- duze okno w dolnej polowie: duzy widok wybranego
-	- na samej gorze duzy tekst co jest wybrane (wielkosc ~header listy)
 - jesli mamy widget to na dole statusbar z:
 	- telefon; podswietlony numer;bateria;sygnal;dataczas
-- make sure that w/o device the app doesn't crash
-- upon start make as many gsm objects, as many ports there are, try to probe all at once, add to list (???)
 
 lista:
+- dodać kolumnę z ikonami
 - dodac kolumne z wartosciami
 lista SMS:
 - superitem SMS - view z listą folderów:
-	<icon_phone> <icon_folder> <nazwa> <unread> <total>
-	---
 	numery do centrum SMS?
-	---
-	opcja odswiezenia folderow?
 - subitemy - <nazwa folderu> <total>
 	- w kolejności: inbox, outbox (unsent), sent, draft, reszta
 	Inbox:
 	- to, co obecnie jest w glownym SMSview, ale uproszczona tabelka (tylko numer jako "Od")
 	Outbox:
-	- podobne do Inbox (numer jako "Do")  i jeszcze guzik <Send now> do zaznaczonego oraz "Nowy" (?)
-	Sent:
-	- podobne do Inbox (inny nagłówek listy, numer jako "do")
+	- informacja wysłany/niewysłany w osobnej kolumnie?
+	- [NEW] - nowe okno do pisania
+	- [SEND NOW] - wyślij zaznaczony sms
 	Pozostałe:
 	- tylko preview jak Inbox/Sent (numer jako 'numer')
-- nowy SMS w nowym oknie, możliwość zapisania do writable SMS slots, wybór popupmenu
-
+- nowy SMS w nowym oknie
+	- możliwość zapisania do writable SMS slots, wybór popupmenu
+	- wybór adresata z popup (1 - slot pb, 2 - adresat)
 - PB:
 	- getPBSlots
 		- oznaczyć zapisywalne sloty
@@ -47,7 +35,7 @@ lista SMS:
 	- przy dzialaniu pomijac sloty MD i AT
 
 TODO:
-- przepisac listy sms jako zamkniete klasy?
+- przepisac listy pb/sms jako zamkniete klasy?
 - opcje zapisywania smsów, eksportu/importu phonebooka
 - phonebook:
 	- na superitems (phonebook/call register)
@@ -56,7 +44,13 @@ TODO:
 		- lista nazw pionowa:
 			- po wyborze: po prawej wypisanie wszystkich dostępnych numerów i ich rodzajów
 			  (gdy dostępne)
-		- guziki [REFRESH], [DIAL], [NEW], [DELETE]
+		- guziki [REFRESH], [DIAL], [NEW], [DELETE], [EDIT]
 	- osobno call register (dialed, missed, received)
 		- tylko lista podglądu <ikonarodzaj> <numertel> <nazwa>
-		- guzik [DIAL]
+		- guzik [DIAL], [DELETE] (o ile to możliwe)
+
+IKONY
+- ikona programu 1
+- ikony elementów listy wybieralnej ??
+- ikony typu numeru (telefon/email) - 8-9
+- ikony typu smsa (nowy,przeczytany,nowyniewysłany,wysłany) - 4 koperty
