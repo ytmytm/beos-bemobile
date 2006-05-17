@@ -51,6 +51,12 @@ GSM::~GSM() {
 	delete_sem(sem);
 	// close log file
 	logFile->Unset();
+	delete logFile;
+	delete port;
+	// close window
+	if (term) {
+	// XXX
+	}
 }
 
 bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
@@ -60,7 +66,7 @@ bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
 	if (log) {
 		logFile->SetTo("/boot/home/bemobile.log",B_ERASE_FILE|B_CREATE_FILE|B_WRITE_ONLY);
 		tmp = "opening device:["; tmp += device; tmp += "]\n";
-		logFile->Write(tmp.String(),tmp.Length());
+		logWrite(tmp.String());
 	}
 	doneDevice();
 	if (strlen(device)==0)
@@ -69,7 +75,7 @@ bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
 	if (port->Open(device) <= 0) {
 		if (log) {
 			tmp = "can't open bserialport\n";
-			logFile->Write(tmp.String(),tmp.Length());
+			logWrite(tmp.String());
 		}
 		return false;
 	} else {
@@ -95,11 +101,20 @@ void GSM::doneDevice(void) {
 	active = false;
 }
 
-// timeout threshold
-#define THRSTMOUT 8
-#define WLOG { logFile->Write(lll.String(),lll.Length()); }
+void GSM::logWrite(const char *t) {
+	if (log) {
+		logFile->Write(t,strlen(t));
+	}
+	if (term) {
+	// XXX update
+	}
+}
+
 // return 0 for OK, 1 for other, 2 for error, 3 for sem_error, 4 for tmout, 5 for unopened
 int GSM::sendCommand(const char *cmd, BString *out = NULL, bool debug = false) {
+// timeout threshold
+#define THRSTMOUT 8
+#define WLOG logWrite(lll.String());
 	BString tmp;
 	BString lll;
 	static char buffer[10240];
@@ -141,7 +156,7 @@ if (debug) printf("sending:[%s]\n",cmd);
 if (debug) printf("wfi:%i\n",r);
 		if (r>0) {
 			r = port->Read(buffer,r);
-			if (out != NULL)		// preserve output only if needed
+			if (log || (out != NULL))		// preserve output only if needed
 				tmp.Append(buffer,r);
 if (debug) printf("got:[%s]\n",buffer);
 			if (strstr(buffer,"RING")) {

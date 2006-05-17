@@ -1,5 +1,4 @@
 - zaraz po uruchomieniu okno tymczasowe z informacją który port jest otwierany
-	- logowanie uzywa zawartosci ze zmiennej tmp, a ta nie zawsze jest inicjalizowana!!!
 	- w gsm/sendcommand - uaktualnienie okna terminala
 	- w gsm/constr/initdevice - okno z logiem terminala
 

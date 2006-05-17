@@ -101,6 +101,7 @@ class GSM {
 		enum { PK_WORK = 0, PK_HOME, PK_MAIN, PK_MOBILE, PK_FAX, PK_PAGER, PK_EMAIL, PK_MAILLIST };
 
 	private:
+void logWrite(const char *log);
 int getSMSType(const char *type);
 void getSMSMemSlots(void);
 void getPBMemSlots(void);
