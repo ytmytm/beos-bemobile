@@ -4,6 +4,7 @@
 // 		- regexy w sendcommand do wykrycia statusu
 //
 
+#include <File.h>
 #include <List.h>
 #include <SerialPort.h>
 #include <String.h>
@@ -26,7 +27,7 @@ int toint(const char *input) {
 		return 0;
 }
 
-GSM::GSM(const char *device) {
+GSM::GSM(void) {
 
 	if ((sem = create_sem(1, "gsm_sem")) < B_NO_ERROR)
 		return;
@@ -34,6 +35,7 @@ GSM::GSM(const char *device) {
 	listMemSlotPB = new BList(10);
 
 	// init status
+	active = false;
 	isMotorola = false;
 	// init phone status
 	fCharge = fSignal = 0;
@@ -41,35 +43,36 @@ GSM::GSM(const char *device) {
 	fManuf = fModel = fGSMVer = fIMEI = "";
 
 	port = new BSerialPort;
-	// enumerate ports...
-	int n;
-	char devName[B_OS_NAME_LENGTH];
-
-	for (n = port->CountDevices()-1; n >=0; n--) {
-		port->GetDeviceName(n, devName);
-		printf("dev:%s\n",devName);
-	}
-
-	if (!initDevice("/dev/ports/usb0")) {			// XXX constant!
-		printf("error opening device, notify!\n");
-		return;
-	}
+	logFile = new BFile;
 }
 
 GSM::~GSM() {
 	doneDevice();
 	delete_sem(sem);
+	// close log file
+	logFile->Unset();
 }
 
-bool GSM::initDevice(const char *device) {
+bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
+	BString tmp;
 
-	printf("initDevice(%s)\n", device);
+	log = l;
+	if (log) {
+		logFile->SetTo("/boot/home/bemobile.log",B_ERASE_FILE|B_CREATE_FILE|B_WRITE_ONLY);
+		tmp = "opening device:["; tmp += device; tmp += "]\n";
+		logFile->Write(tmp.String(),tmp.Length());
+	}
 	doneDevice();
+	if (strlen(device)==0)
+		return false;
 	port->SetFlowControl(B_HARDWARE_CONTROL);
-	if (port->Open("usb0") <= 0) {
-		printf("can't open bserial\n");
+	if (port->Open(device) <= 0) {
+		if (log) {
+			tmp = "can't open bserialport\n";
+			logFile->Write(tmp.String(),tmp.Length());
+		}
+		return false;
 	} else {
-		active = true;
 		port->SetDataRate(B_19200_BPS);
 		port->SetDataBits(B_DATA_BITS_8);
 		port->SetStopBits(B_STOP_BITS_1);
@@ -77,25 +80,42 @@ bool GSM::initDevice(const char *device) {
 		port->SetTimeout(100000);
 		snooze(100000);
 		// success?
-		phoneReset();
+		active = phoneReset();
+	}
+	term = t;
+	if (term) {
+// XXX create a window with terminal log
 	}
 	return active;
 }
 
 void GSM::doneDevice(void) {
-	port->Close();
+	if (active)
+		port->Close();
 	active = false;
 }
 
+// timeout threshold
+#define THRSTMOUT 8
+#define WLOG { logFile->Write(lll.String(),lll.Length()); }
 // return 0 for OK, 1 for other, 2 for error, 3 for sem_error, 4 for tmout, 5 for unopened
 int GSM::sendCommand(const char *cmd, BString *out = NULL, bool debug = false) {
 	BString tmp;
+	BString lll;
 	static char buffer[10240];
 	int r;
 	int status = 0;
 	int tmout = 0;
+
+	if (log) {
+		lll = "<--["; lll += cmd; lll += "]\n"; WLOG;
+	}
+
 	if (!active) {
 if (debug) printf("port not open\n");
+		if (log) {
+			lll = "ERR: port not open\n"; WLOG;
+		}
 		buffer[0] = '\0';
 		return 5;
 	}
@@ -104,8 +124,12 @@ if (debug) printf("sending:[%s]\n",cmd);
 	tmp = cmd; tmp += "\n\r";
 	memset(buffer,0,sizeof(buffer));
 
-	if (acquire_sem(sem) != B_NO_ERROR)
+	if (acquire_sem(sem) != B_NO_ERROR) {
+		if (log) {
+			lll = "ERR: can't acquire semaphore to serial port\n"; WLOG;
+		}
 		return 3;
+	}
 
 	r = port->Write(tmp.String(), tmp.Length());
 
@@ -113,7 +137,7 @@ if (debug) printf("sending:[%s]\n",cmd);
 	tmp = "";
 	// read answer
 	r = port->WaitForInput();
-	while (tmout < 8) {
+	while (tmout < THRSTMOUT) {
 if (debug) printf("wfi:%i\n",r);
 		if (r>0) {
 			r = port->Read(buffer,r);
@@ -146,23 +170,35 @@ if (debug) printf("error!\n");
 			tmout++;
 	}
 	// copy out data while locked
+	if (log) {
+		lll = "-->["; lll += tmp; lll += "]\n"; WLOG;
+	}
 	if (out!=NULL)
 		out->SetTo(tmp);
 	release_sem(sem);
 	if (tmout>0)
 		printf("tmout=%i, cmd=[%s]\n",tmout,cmd);
-	if (tmout == 5)
+	if (tmout == THRSTMOUT) {
+		if (log) {
+			lll = "ERR: timeout\n"; WLOG;
+		}
 		status = 4;
+	}
 	return status;
 }
 
-void GSM::phoneReset(void) {
+bool GSM::phoneReset(void) {
 	// reset
-	sendCommand("ATZ");
+	active = true;	// lie for a moment
+	if (sendCommand("ATZ") != 0) {
+		active = false;
+		return false;
+	}
 	sendCommand("ATE0");
 	// fetch character sets, default to utf8 or fallback to whatever is there
 //	sendCommand("AT+CSCS=?");
 	ringIncoming = false;
+	return true;
 }
 
 void GSM::getPhoneData(void) {
@@ -686,7 +722,7 @@ void GSM::getPBList(const char *slot) {
 		if (!pbList->IsEmpty())
 			pbList->MakeEmpty();
 	}
-	int rs = sendCommand(cmd.String(),&out,true);
+	int rs = sendCommand(cmd.String(),&out);
 	// accept timeout (SIM reading may be slow)
 	if ((rs == 0)||(rs == 4)) {
 		pat = isMotorola ? "^\\+MP" : "^\\+CP";

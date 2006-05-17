@@ -5,7 +5,9 @@
 #include <Application.h>
 
 class dialAbout;
+class initWindow;
 class BeMobileMainWindow;
+class GSM;
 
 class BeMobileApp : public BApplication {
 	public:
@@ -16,6 +18,8 @@ class BeMobileApp : public BApplication {
 		virtual void AboutRequested(void);
 
 	private:
+		GSM *gsm;
+		initWindow *startWindow;
 		BeMobileMainWindow *mainWindow;
 		dialAbout *aboutDialog;
 

@@ -43,13 +43,18 @@ struct pbSlot {
 	BList *pb;
 };
 
+class BFile;
 class BList;
 class BSerialPort;
 
 class GSM {
 	public:
-		GSM (const char *device);
+		GSM (void);
 		~GSM();
+		//
+		bool initDevice(const char *device, bool l = false, bool t = false);
+		void doneDevice(void);
+		bool phoneReset(void);
 		//
 		void getPhoneData(void);
 		void getPhoneStatus(void);
@@ -102,11 +107,6 @@ void getPBMemSlots(void);
 bool isPBSlotWritable(const char *slot);
 const char *decodeText(const char *input);
 const char *parseDate(const char *input);
-
-		bool initDevice(const char *device);
-		void doneDevice(void);
-		//
-		void phoneReset(void);
 		//
 		int sendCommand(const char *cmd, BString *out = NULL, bool debug = false);
 		//
@@ -114,6 +114,7 @@ const char *parseDate(const char *input);
 		//
 		sem_id sem;
 		bool active;
+		bool log, term;
 		// data
 		bool isMotorola;
 		int	fEncoding;
@@ -126,6 +127,8 @@ const char *parseDate(const char *input);
 		int fYear, fMonth, fDay, fHour, fMinute, fSecond, fTimezone;
 		BString fDateTime;
 		BString fSMSInfo;
+		//
+		BFile *logFile;
 		//
 		int fSMSRRead, fSMSRUnread, fSMSSSent, fSMSUSent;
 		//

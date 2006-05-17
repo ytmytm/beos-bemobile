@@ -14,7 +14,7 @@
 
 	class BeMobileMainWindow : public BWindow {
 		public:
-			BeMobileMainWindow(const char *windowTitle);
+			BeMobileMainWindow(const char *windowTitle, GSM *g);
 			~BeMobileMainWindow();
 //			virtual void FrameResized(float width, float height);
 			void MessageReceived(BMessage *Message);

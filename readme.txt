@@ -1,13 +1,6 @@
 - zaraz po uruchomieniu okno tymczasowe z informacją który port jest otwierany
-	- jesli nieznany, to w oknie combo z wyborem portu i OK, QUIT - koniec programu
-	- jeśli znany to nazwa portu i info 'please wait', może z informacją o komórce
-	- jeśli się nie uda to -- to samo, co nieznany
-- na poczatek wizard:
-	- enumeracja portow
-	- wykrycie czy i co odpowiada po drugiej stronie
-	- zapisanie konfiguracji
-- jesli mamy widget to na dole statusbar z:
-	- telefon; podswietlony numer;bateria;sygnal;dataczas
+	- w gsm/sendcommand - uaktualnienie okna terminala
+	- w gsm/constr/initdevice - okno z logiem terminala
 
 lista:
 - dodać kolumnę z ikonami

@@ -14,7 +14,7 @@ const uint32 MENU_ABOUT	= 'BM01';
 const uint32 MENU_SETDATETIME = 'BM02';
 const uint32 MENU_SHOWSTATUS = 'BM03';
 
-BeMobileMainWindow::BeMobileMainWindow(const char *windowTitle) : BWindow(
+BeMobileMainWindow::BeMobileMainWindow(const char *windowTitle, GSM *g) : BWindow(
 	BRect(200, 150, 840, 630), windowTitle, B_DOCUMENT_WINDOW, B_OUTLINE_RESIZE, B_CURRENT_WORKSPACE ) {
 
 	BRect r;
@@ -48,13 +48,13 @@ BeMobileMainWindow::BeMobileMainWindow(const char *windowTitle) : BWindow(
 
 	this->SetPulseRate(1000000);
 
-	gsm = new GSM("/dev/ports/serial0");	// XXX get dev from config
+	gsm = g;
 
 	mainView->SetDevice(gsm);
 }
 
 BeMobileMainWindow::~BeMobileMainWindow() {
-	delete gsm;
+
 }
 
 void BeMobileMainWindow::MessageReceived(BMessage *Message) {
