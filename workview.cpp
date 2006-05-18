@@ -83,26 +83,30 @@ void workView::SetDevice(GSM *g) {
 	list->AddItem(item = new infoItem(curitem++,_("Phonebook"),1,true));
 	pageView->AddItem(NULL);
 	// pb items, except call register
-	list->AddItem(item = new infoItem(curitem++,_("Contacts"),2));
-	pageView->AddItem(NULL);
 	// XXX just a test
 	// add default slots
 	// add the rest of slots: except ??,??,??
 	{
 	int i, j = gsm->listMemSlotPB->CountItems();
 	struct pbSlot *sl;
+	bool hadcompositepb = false;
+	BString pb;
 	for (i=0;i<j;i++) {
 		sl = (struct pbSlot*)gsm->listMemSlotPB->ItemAt(i);
-		if ( (strcmp(sl->sname.String(),"??")!=0) &&
-			 (strcmp(sl->sname.String(),"??")!=0) &&
-			 (strcmp(sl->sname.String(),"??")!=0) &&
-			 (strcmp(sl->sname.String(),"??")!=0) ) {
-			list->AddItem(item = new infoItem(curitem++, gsm->getPBMemSlotName(sl->sname.String()),2));
-			item->SetSlot(sl->sname.String());
-			this->AddChild(cv = new callRegSlotView(r,sl->sname.String()));
-			pageView->AddItem(cv);
-			cv->Hide();
-			cv->SetDevice(gsm);
+		if (!sl->callreg) {
+			pb = sl->sname;
+			if ( (pb != "??") && (pb != "??") && (pb != "??") && (pb != "??") ) {
+				if (hadcompositepb && ((pb == "MT")||(pb == "AD"))) {
+				} else {
+				hadcompositepb = true;
+				list->AddItem(item = new infoItem(curitem++, gsm->getPBMemSlotName(sl->sname.String()),2));
+				item->SetSlot(sl->sname.String());
+				this->AddChild(cv = new callRegSlotView(r,sl->sname.String()));
+				pageView->AddItem(cv);
+				cv->Hide();
+				cv->SetDevice(gsm);
+				}
+			}
 		}
 	}
 	}
@@ -191,12 +195,11 @@ void workView::SetDevice(GSM *g) {
 	{
 	int i, j = gsm->listMemSlotSMS->CountItems();
 	struct memSlotSMS *sl;
+	BString sn;
 	for (i=0;i<j;i++) {
 		sl = (struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(i);
-		if ( (strcmp(sl->sname.String(),"MT")!=0) &&
-			 (strcmp(sl->sname.String(),"IM")!=0) &&
-			 (strcmp(sl->sname.String(),"OM")!=0) &&
-			 (strcmp(sl->sname.String(),"DM")!=0) ) {
+		sn = sl->sname;
+		if ( (sn != "MT") && (sn != "IM") && (sn != "OM") && (sn != "DM") ) {
 			list->AddItem(item = new infoItem(curitem++, gsm->getSMSMemSlotName(sl->sname.String()),2));
 			item->SetSlot(sl->sname.String());
 			this->AddChild(cv = new smsBoxView(r,sl->sname.String()));
@@ -209,7 +212,6 @@ void workView::SetDevice(GSM *g) {
 
 	// reset current right-hand view to curView
 	SetCurView(0);
-//	SetCurView(V_SMS);
 }
 
 void workView::SetCurView(int v) {
