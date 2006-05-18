@@ -3,6 +3,7 @@
 	- ze testowane na C550, powinno dzialac z innymi moto, siemens, etc (sprawdzic liste z kmobiletools)
 	- ze nokie tylko niektore, a jak komu zalezy niech sportuje gnokii, bo ja musialbym nokie kupic
 	- ze na razie tylko browser
+	- ze w razie problemow prosze o kontakt z wyslanym logiem
 
 - zaraz po uruchomieniu okno tymczasowe z informacją który port jest otwierany
   (wlasciwie na razie widac to ladnie w logu)
