@@ -21,9 +21,6 @@ lista SMS:
 	- możliwość zapisania do writable SMS slots, wybór popupmenu
 	- wybór adresata z popup (1 - slot pb, 2 - adresat)
 - PB:
-	- getPBSlots
-		- oznaczyć zapisywalne sloty
-		- oznaczyc sloty PB i call register
 	- przy dzialaniu pomijac sloty MD i AT
 
 TODO:
