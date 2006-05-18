@@ -1,6 +1,5 @@
 - zaraz po uruchomieniu okno tymczasowe z informacją który port jest otwierany
-	- w gsm/sendcommand - uaktualnienie okna terminala
-	- w gsm/constr/initdevice - okno z logiem terminala
+  (wlasciwie na razie widac to ladnie w logu)
 
 lista:
 - dodać kolumnę z ikonami

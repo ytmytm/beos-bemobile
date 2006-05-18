@@ -4,10 +4,14 @@
 // 		- regexy w sendcommand do wykrycia statusu
 //
 
+#include <Application.h>
 #include <File.h>
 #include <List.h>
+#include <ScrollView.h>
 #include <SerialPort.h>
 #include <String.h>
+#include <TextView.h>
+#include <Window.h>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +31,8 @@ int toint(const char *input) {
 		return 0;
 }
 
+#define TERMLOG_WINDOWNAME "Terminal log"
+
 GSM::GSM(void) {
 
 	if ((sem = create_sem(1, "gsm_sem")) < B_NO_ERROR)
@@ -44,6 +50,15 @@ GSM::GSM(void) {
 
 	port = new BSerialPort;
 	logFile = new BFile;
+	logWindow = new BWindow(BRect(500,170,880,550),TERMLOG_WINDOWNAME,B_FLOATING_WINDOW_LOOK,B_NORMAL_WINDOW_FEEL,B_NOT_ZOOMABLE);
+	BView *v = new BView(logWindow->Bounds(),"terminalView",B_FOLLOW_ALL_SIDES,B_WILL_DRAW);
+	logWindow->AddChild(v);
+	BRect s = v->Bounds(); s.InsetBy(10,10); s.right -= B_V_SCROLL_BAR_WIDTH;
+	BRect t; t.top = t.left = 0; t.right = s.Width(); t.bottom = s.Height();
+	logView = new BTextView(s, "terminalTextView",t,B_FOLLOW_ALL_SIDES);
+	logView->MakeEditable(false);
+	logView->SetStylable(false);
+	v->AddChild(new BScrollView("terminalPrvScroll",logView,B_FOLLOW_ALL_SIDES,0,false,true));
 }
 
 GSM::~GSM() {
@@ -52,19 +67,27 @@ GSM::~GSM() {
 	// close log file
 	logFile->Unset();
 	delete logFile;
-	delete port;
 	// close window
-	if (term) {
-	// XXX
-	}
+	if (!logWindow)
+		delete logWindow;
+	delete port;
 }
 
 bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
 	BString tmp;
 
 	log = l;
+	term = t;
 	if (log) {
 		logFile->SetTo("/boot/home/bemobile.log",B_ERASE_FILE|B_CREATE_FILE|B_WRITE_ONLY);
+	}
+	if (term) {
+		logWindow->Lock();
+		logView->SetText("");
+		logWindow->Unlock();
+		logWindow->Show();
+	}
+	if (log || term) {
 		tmp = "opening device:["; tmp += device; tmp += "]\n";
 		logWrite(tmp.String());
 	}
@@ -73,7 +96,7 @@ bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
 		return false;
 	port->SetFlowControl(B_HARDWARE_CONTROL);
 	if (port->Open(device) <= 0) {
-		if (log) {
+		if (log || term) {
 			tmp = "can't open bserialport\n";
 			logWrite(tmp.String());
 		}
@@ -87,10 +110,6 @@ bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
 		snooze(100000);
 		// success?
 		active = phoneReset();
-	}
-	term = t;
-	if (term) {
-// XXX create a window with terminal log
 	}
 	return active;
 }
@@ -106,7 +125,16 @@ void GSM::logWrite(const char *t) {
 		logFile->Write(t,strlen(t));
 	}
 	if (term) {
-	// XXX update
+		static BString tmp;
+		for (int i=0;i<be_app->CountWindows();i++) {
+			tmp = be_app->WindowAt(i)->Name();
+			if (tmp == TERMLOG_WINDOWNAME) {
+				logWindow->Lock();
+				logView->Insert(strlen(logView->Text()),t,strlen(t));
+				logWindow->Unlock();
+				break;
+			}
+		}
 	}
 }
 
@@ -122,13 +150,13 @@ int GSM::sendCommand(const char *cmd, BString *out = NULL, bool debug = false) {
 	int status = 0;
 	int tmout = 0;
 
-	if (log) {
+	if (log || term) {
 		lll = "<--["; lll += cmd; lll += "]\n"; WLOG;
 	}
 
 	if (!active) {
 if (debug) printf("port not open\n");
-		if (log) {
+		if (log || term) {
 			lll = "ERR: port not open\n"; WLOG;
 		}
 		buffer[0] = '\0';
@@ -140,7 +168,7 @@ if (debug) printf("sending:[%s]\n",cmd);
 	memset(buffer,0,sizeof(buffer));
 
 	if (acquire_sem(sem) != B_NO_ERROR) {
-		if (log) {
+		if (log || term) {
 			lll = "ERR: can't acquire semaphore to serial port\n"; WLOG;
 		}
 		return 3;
@@ -156,7 +184,7 @@ if (debug) printf("sending:[%s]\n",cmd);
 if (debug) printf("wfi:%i\n",r);
 		if (r>0) {
 			r = port->Read(buffer,r);
-			if (log || (out != NULL))		// preserve output only if needed
+			if (log || term || (out != NULL))		// preserve output only if needed
 				tmp.Append(buffer,r);
 if (debug) printf("got:[%s]\n",buffer);
 			if (strstr(buffer,"RING")) {
@@ -185,7 +213,7 @@ if (debug) printf("error!\n");
 			tmout++;
 	}
 	// copy out data while locked
-	if (log) {
+	if (log || term) {
 		lll = "-->["; lll += tmp; lll += "]\n"; WLOG;
 	}
 	if (out!=NULL)
@@ -194,7 +222,7 @@ if (debug) printf("error!\n");
 	if (tmout>0)
 		printf("tmout=%i, cmd=[%s]\n",tmout,cmd);
 	if (tmout == THRSTMOUT) {
-		if (log) {
+		if (log || term) {
 			lll = "ERR: timeout\n"; WLOG;
 		}
 		status = 4;

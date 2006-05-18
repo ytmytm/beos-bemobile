@@ -46,6 +46,8 @@ struct pbSlot {
 class BFile;
 class BList;
 class BSerialPort;
+class BTextView;
+class BWindow;
 
 class GSM {
 	public:
@@ -130,6 +132,8 @@ const char *parseDate(const char *input);
 		BString fSMSInfo;
 		//
 		BFile *logFile;
+		BWindow *logWindow;
+		BTextView *logView;
 		//
 		int fSMSRRead, fSMSRUnread, fSMSSSent, fSMSUSent;
 		//
