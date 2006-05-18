@@ -39,6 +39,7 @@ struct pbSlot {
 	int items;
 	int numlen;
 	int namelen;
+	bool callreg;
 	bool writable;
 	BList *pb;
 };
@@ -60,6 +61,8 @@ class GSM {
 		//
 		void getPhoneData(void);
 		void getPhoneStatus(void);
+		bool statusUpdateEnabled(void)	{ return fStatusUpdateEn; };
+		void setStatusUpdate(bool s = false) { fStatusUpdateEn = s; };
 		//
 		int setDateTime(void);
 		//
@@ -108,6 +111,7 @@ int getSMSType(const char *type);
 void getSMSMemSlots(void);
 void getPBMemSlots(void);
 bool isPBSlotWritable(const char *slot);
+bool isPBSlotCallRegister(const char *slot);
 const char *decodeText(const char *input);
 const char *parseDate(const char *input);
 		//
@@ -122,6 +126,7 @@ const char *parseDate(const char *input);
 		bool isMotorola;
 		int	fEncoding;
 		// status variables
+		bool fStatusUpdateEn;
 		bool ringIncoming;
 		bool fACPower, fBatPower;
 		int fCharge;

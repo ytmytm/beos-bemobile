@@ -47,6 +47,7 @@ GSM::GSM(void) {
 	fCharge = fSignal = 0;
 	fACPower = fBatPower = false;
 	fManuf = fModel = fGSMVer = fIMEI = "";
+	fStatusUpdateEn = false;
 
 	port = new BSerialPort;
 	logFile = new BFile;
@@ -657,6 +658,15 @@ bool GSM::isPBSlotWritable(const char *slot) {
 		return true;
 }
 
+bool GSM::isPBSlotCallRegister(const char *slot) {
+	BString s = slot;
+	// XXX add "MD" here ???
+	if ((s == "LD") || (s == "MC") || (s == "DC") || (s == "RC"))
+		return true;
+	else
+		return false;
+}
+
 void GSM::getPBMemSlots(void) {
 	static Pattern *pSlots = Pattern::compile("^\\+CPBS: \\(([^)]+)\\)", Pattern::MULTILINE_MATCHING);
 	static Matcher *mSlots = pSlots->createMatcher("");
@@ -685,6 +695,7 @@ void GSM::getPBMemSlots(void) {
 			slot->sname = mSlot->getGroup(1).c_str();
 			slot->name = getPBMemSlotName(slot->sname.String());
 			slot->writable = isPBSlotWritable(slot->sname.String());
+			slot->callreg = isPBSlotCallRegister(slot->sname.String());
 			slot->items = -1;
 			slot->pb = new BList;
 			listMemSlotPB->AddItem(slot);
