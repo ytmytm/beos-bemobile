@@ -62,7 +62,7 @@ callRegSlotView::callRegSlotView(BRect r, const char *slot) : mobileView(r, "cal
 	s = r; s.top = s.bottom - font.Size()*2; s.right = s.left + font.StringWidth("MMMMMMMMMM")+40;
 	this->AddChild(refresh = new BButton(s, "crRefresh", _("Refresh"), new BMessage(CRREFRESH), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 	t = r; t.top = s.top; t.bottom = s.bottom; t.right = r.right; t.left = t.right - (font.StringWidth("MMMMMMMMMM")+40);
-	this->AddChild(call = new BButton(t, "crCall", _("Call"), new BMessage(CRCALL), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
+	this->AddChild(call = new BButton(t, "crCall", _("Dial"), new BMessage(CRCALL), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
 	call->SetEnabled(false);
 }
 
