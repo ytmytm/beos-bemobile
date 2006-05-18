@@ -30,6 +30,7 @@
 			// main view widgets
 			BMenuBar *menuBar;
 			BMenu *menu;
+			BMenuItem *updStatusItem;
 	};
 
 #endif

@@ -132,14 +132,16 @@ void statusView::RefreshStatus(void) {
 }
 
 void statusView::Pulse(void) {
-printf("ping!\n");
 	if ((this->Window() == NULL) || (this->IsHidden()))
 		return;
 
 	if (!gsm)
 		return;
-	gsm->getPhoneStatus();
-	RefreshStatus();
+
+	if (gsm->statusUpdateEnabled()) {
+		gsm->getPhoneStatus();
+		RefreshStatus();
+	}
 }
 
 void statusView::SetDevice(GSM *g) {
