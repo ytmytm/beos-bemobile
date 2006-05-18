@@ -28,6 +28,8 @@ initWindow::initWindow(const char *name) : BWindow(
 	log = false;
 	term = false;
 	device = "";
+	// my stuff
+	log = term = true; device = "usb0";
 
 	// center onscreen
 	BScreen	*screen = new BScreen();
