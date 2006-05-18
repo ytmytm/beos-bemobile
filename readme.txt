@@ -1,3 +1,9 @@
+- napisac normalne readme po angielsku
+	- ze tylko serialport (whatever is there in /dev/ports - serial/usb/ircomm maybe)
+	- ze testowane na C550, powinno dzialac z innymi moto, siemens, etc (sprawdzic liste z kmobiletools)
+	- ze nokie tylko niektore, a jak komu zalezy niech sportuje gnokii, bo ja musialbym nokie kupic
+	- ze na razie tylko browser
+
 - zaraz po uruchomieniu okno tymczasowe z informacją który port jest otwierany
   (wlasciwie na razie widac to ladnie w logu)
 
