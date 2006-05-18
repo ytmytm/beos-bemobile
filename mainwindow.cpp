@@ -46,11 +46,11 @@ BeMobileMainWindow::BeMobileMainWindow(const char *windowTitle, GSM *g) : BWindo
 	menu->AddItem(new BMenuItem(_("Show status"), new BMessage(MENU_SHOWSTATUS)));
 	menuBar->AddItem(menu);
 
-	this->SetPulseRate(1000000);
-
 	gsm = g;
 
 	mainView->SetDevice(gsm);
+
+	this->SetPulseRate(1000000);
 }
 
 BeMobileMainWindow::~BeMobileMainWindow() {
