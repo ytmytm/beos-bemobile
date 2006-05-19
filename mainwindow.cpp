@@ -8,12 +8,10 @@
 #include "mainwindow.h"
 #include "workview.h"
 #include "statusview.h"
-#include "statuswindow.h"
 
 const uint32 MENU_ABOUT			= 'BM01';
 const uint32 MENU_SETDATETIME	= 'BM02';
-const uint32 MENU_SHOWSTATUS	= 'BM03';
-const uint32 MENU_UPDSTATUS		= 'BM04';
+const uint32 MENU_UPDSTATUS		= 'BM03';
 
 BeMobileMainWindow::BeMobileMainWindow(const char *windowTitle, GSM *g) : BWindow(
 	BRect(200, 150, 840, 630), windowTitle, B_DOCUMENT_WINDOW, B_OUTLINE_RESIZE, B_CURRENT_WORKSPACE ) {
@@ -45,7 +43,6 @@ BeMobileMainWindow::BeMobileMainWindow(const char *windowTitle, GSM *g) : BWindo
 	menu = new BMenu(_("Settings"), B_ITEMS_IN_COLUMN);
 	menu->AddItem(new BMenuItem(_("Set date and time"), new BMessage(MENU_SETDATETIME)));
 	menu->AddItem(updStatusItem = new BMenuItem(_("Monitor status"), new BMessage(MENU_UPDSTATUS)));
-	menu->AddItem(new BMenuItem(_("Show status"), new BMessage(MENU_SHOWSTATUS)));
 	menuBar->AddItem(menu);
 
 	gsm = g;
@@ -78,12 +75,6 @@ void BeMobileMainWindow::MessageReceived(BMessage *Message) {
 			// really should go with B_ABOUT_REQUESTED, but it doesn't work...
 			be_app->AboutRequested();
 			break;
-		case MENU_SHOWSTATUS:
-			{
-				StatusWindow *st = new StatusWindow(APP_NAME, gsm);
-				st->Show();
-				break;
-			}
 		default:
 			break;
 	}

@@ -1,0 +1,61 @@
+
+BeMobile 0.1
+(c) Maciej Witkowiak <ytm@elysium.pl>, <mwitkowiak@gmail.com>
+http://members.elysium.pl/ytm/html/beos.html
+http://ytm.bossstation.dnsalias.org/html/beos.html
+
+BeMobile is a simple program to manage contacts and messages stored on your mobile phone.
+Currently it is possible only to browse phonebook and SMS storage. Editing options will
+come in the future, as well as data import and export. It has been developed for Motorola
+C550 but should work with any phone that supports AT command set.
+
+
+
+COMPATIBILITY
+
+BeMobile works only with phones that can be driven with AT commands. It has been developed
+and tested ONLY on a Motorola C550. It should work on some other models too, like Siemens,
+Ericsson and some Nokia phones.
+To make a long story short - if SerialConnect can talk with your phone via infra-red link,
+RS232 or USB cable, then BeMobile should work too.
+
+
+
+OPTIONS
+
+There are really only two interesting menu items:
+- Set date and time - set date and time on the phone according to computer clock
+- Monitor status - disable this when troubleshooting, it won't fill the log with uninteresting
+  data about phone battery status, network signal strength etc.
+
+
+
+NOKIA
+
+I expect that this will come often - NO, MOST LIKELY IT WILL NOT RUN WITH YOUR NOKIA.
+As far as I know, most Nokia phones use something different than plain old modem AT commands.
+If you're really interested, you should port gnokii (XXX:URL) to BeOS, or convince someone
+to do it. Myself, I don't have a Nokia phone, so buy me one before asking about compatibility
+with Nokias :)
+
+
+
+TROUBLESHOOTING
+
+If the program doesn't work or interprets some data wrong or can't gather data at all, please
+send me full information about your phone, link type and (most important) communication log.
+The log is by default enabled and saved in your home directory as 'bemobile.log'. Please
+try all options that don't work as they should 
+
+
+
+HELP
+
+Do you want to help? I'll be more than happy to receive any donations and reports (both success
+and failure).
+
+
+
+LICENSE
+
+You are free to use and distribute this software provided that the archive is not altered in any way.
