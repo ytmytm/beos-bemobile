@@ -1,10 +1,3 @@
-- napisac normalne readme po angielsku
-	- ze tylko serialport (whatever is there in /dev/ports - serial/usb/ircomm maybe)
-	- ze testowane na C550, powinno dzialac z innymi moto, siemens, etc (sprawdzic liste z kmobiletools)
-	- ze nokie tylko niektore, a jak komu zalezy niech sportuje gnokii, bo ja musialbym nokie kupic
-	- ze na razie tylko browser
-	- ze w razie problemow prosze o kontakt z wyslanym logiem
-
 - zaraz po uruchomieniu okno tymczasowe z informacją który port jest otwierany
   (wlasciwie na razie widac to ladnie w logu)
 
@@ -45,9 +38,14 @@ TODO:
 	- osobno call register (dialed, missed, received)
 		- tylko lista podglądu <ikonarodzaj> <numertel> <nazwa>
 		- guzik [DIAL], [DELETE] (o ile to możliwe)
+- callreg:
+	- wyszukiwac danych o numerach w slotach PB, jesli nie ma to uzyc tego, co jest teraz
+	- jesli dane sa, to wyswietlic zgodnie z informacjami
 
 IKONY
 - ikona programu 1
 - ikony elementów listy wybieralnej ??
 - ikony typu numeru (telefon/email) - 8-9
 - ikony typu smsa (nowy,przeczytany,nowyniewysłany,wysłany) - 4 koperty
+- ikona baterii/baterii krytycznej
+(ladowanie .rsrc -> Bapplication->AppResources)
