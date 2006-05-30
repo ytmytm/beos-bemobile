@@ -1,9 +1,5 @@
-- zaraz po uruchomieniu okno tymczasowe z informacją który port jest otwierany
-  (wlasciwie na razie widac to ladnie w logu)
-
 lista:
-- dodać kolumnę z ikonami
-- dodac kolumne z wartosciami
+- dodac kolumne z wartosciami (ile numerow, ile smsow, warto???)
 lista SMS:
 - superitem SMS - view z listą folderów:
 	numery do centrum SMS?
@@ -25,6 +21,9 @@ lista SMS:
 
 TODO:
 - coś pochodnego CLVEasyItem, ale żeby na żądanie pisało się bold (mark new)
+- preview SMS - uzyc wyszukiwarki numerów
+- callreg: użyć wyszukiwarki numerów w oknie podglądu smsa - dodać informację od kogo to
+	(przenieść wyszukiwarkę we wspólne miejsce, gdzie???)
 - przepisac listy pb/sms jako zamkniete klasy?
 - opcje zapisywania smsów, eksportu/importu phonebooka
 - phonebook:
@@ -38,9 +37,9 @@ TODO:
 	- osobno call register (dialed, missed, received)
 		- tylko lista podglądu <ikonarodzaj> <numertel> <nazwa>
 		- guzik [DIAL], [DELETE] (o ile to możliwe)
-- callreg:
-	- wyszukiwac danych o numerach w slotach PB, jesli nie ma to uzyc tego, co jest teraz
-	- jesli dane sa, to wyswietlic zgodnie z informacjami
+- zaraz po uruchomieniu okno tymczasowe z informacją który port jest otwierany
+  (wlasciwie na razie widac to ladnie w logu)
+
 
 IKONY
 - ikona programu 1

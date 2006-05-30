@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "gsm.h"
 #include "callregslotview.h"
+#include "phonelistslotview.h"
 #include "smsview.h"
 #include "smsinboxview.h"
 #include "statusview.h"
@@ -101,7 +102,7 @@ void workView::SetDevice(GSM *g) {
 				hadcompositepb = true;
 				list->AddItem(item = new infoItem(curitem++, gsm->getPBMemSlotName(sl->sname.String()),2));
 				item->SetSlot(sl->sname.String());
-				this->AddChild(cv = new callRegSlotView(r,sl->sname.String()));
+				this->AddChild(cv = new phoneListSlotView(r,sl->sname.String()));
 				pageView->AddItem(cv);
 				cv->Hide();
 				cv->SetDevice(gsm);
