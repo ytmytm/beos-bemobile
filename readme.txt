@@ -20,6 +20,8 @@ lista SMS:
 	- przy dzialaniu pomijac sloty MD i AT
 
 TODO:
+- PB - dodatkowe pola z motoroli (adres, urodziny itd.)
+- sms PDU mode (odczytywanie wszystkich informacji)
 - coś pochodnego CLVEasyItem, ale żeby na żądanie pisało się bold (mark new)
 - preview SMS - uzyc wyszukiwarki numerów
 - callreg: użyć wyszukiwarki numerów w oknie podglądu smsa - dodać informację od kogo to
