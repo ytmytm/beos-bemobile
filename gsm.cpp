@@ -258,6 +258,8 @@ void GSM::getPhoneData(void) {
 	static Matcher *mSoft = pSoft->createMatcher("");
 	static Pattern *pIMSI = Pattern::compile("^\\+CIMI: (\\d+)", Pattern::MULTILINE_MATCHING);
 	static Matcher *mIMSI = pIMSI->createMatcher("");
+	static Pattern *pIMSI2 = Pattern::compile("^\(\\d+)", Pattern::MULTILINE_MATCHING);
+	static Matcher *mIMSI2 = pIMSI2->createMatcher("");
 
 	BString tmp;
 
@@ -296,6 +298,11 @@ void GSM::getPhoneData(void) {
 	mIMSI->setString(tmp.String());
 	if (mIMSI->findFirstMatch())
 		fIMSI = mIMSI->getGroup(1).c_str();
+	else {
+		mIMSI2->setString(tmp.String());
+		if (mIMSI2->findFirstMatch())
+			fIMSI = mIMSI2->getGroup(1).c_str();
+	}
 	// Motorola check for extended commands
 	isMotorola = (sendCommand("AT+MMGL=?") == 0);
 	// enable error reporting, try most verbose mode
@@ -784,6 +791,7 @@ void GSM::getPBList(const char *slot) {
 		if (isMotorola) {
 			// 5phtype,6voicetag,7alerttone,8backlight,9primary,10categorynum
 			pat += ",(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)";
+			// 11,12,13-??,14iconpath,15-16??,17adres2,18adres1,19miasto,20stan,21kod,22kraj,23pseudo,24bday(mm-dd-yyyy),25??
 		}
 		Pattern *pNum = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
 		Matcher *mNum = pNum->createMatcher("");
@@ -808,7 +816,12 @@ void GSM::getPBList(const char *slot) {
 				default:
 					num->type = PB_OTHER;
 			}
-			num->name = decodeText(mNum->getGroup(4).c_str());
+			if (mNum->getGroup(4).c_str()[0] != '"')
+				num->name = decodeText(mNum->getGroup(4).c_str());
+			else {
+				BString tmp(mNum->getGroup(4).c_str());
+				tmp.CopyInto(num->name,1,tmp.Length()-2);
+			}
 			num->primary = true;
 			num->kind = PK_MAIN;
 			if (isMotorola) {
