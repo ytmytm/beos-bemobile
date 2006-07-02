@@ -112,6 +112,7 @@ void getSMSMemSlots(void);
 void getPBMemSlots(void);
 bool isPBSlotWritable(const char *slot);
 bool isPBSlotCallRegister(const char *slot);
+const char *decodeSMSText(const char *input);
 const char *decodeText(const char *input);
 const char *parseDate(const char *input);
 		//

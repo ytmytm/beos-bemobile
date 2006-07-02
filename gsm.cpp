@@ -323,7 +323,9 @@ void GSM::getPhoneData(void) {
 	// +CSCS: ("8859-1","ASCII","GSM","UCS2","UTF8")
 	// kmt sends also: AT+MODE=2 if 'smsMode2' is enabled in config
 	// if failed: AT+MODE=0 is sent
-	// PDU mode test goes from: AT+CMGF=0
+
+	// switch to TEXT mode, test/enable PDU by passing 0 here
+	sendCommand("AT+CMGF=1");
 	getSMSMemSlots();
 	getPBMemSlots();
 }
@@ -417,13 +419,17 @@ void GSM::updateSMSInfo(void) {
 }
 
 const char *GSM::getSMSMemSlotName(const char *slot) {
-	BString s = slot;
+	static BString s;
+	s = slot;
 	if (s == "MT") return _("All messages");
 	if (s == "IM") return _("Inbox");
 	if (s == "OM") return _("Outbox");
 	if (s == "BM") return _("Information service");
 	if (s == "DM") return _("Drafts");
-	return _("Unknown");
+	if (s == "ME") return _("Phone SMS memory");
+	if (s == "SM") return _("SIM SMS memory");
+	s = _("Unknown SMS slot"); s += " ("; s += slot; s += ")";
+	return s.String();
 }
 
 void GSM::getSMSMemSlots(void) {
@@ -545,16 +551,16 @@ void GSM::getSMSContent(SMS *sms = NULL) {
 	if (mMsg1->findFirstMatch()) {
 		sms->number = mMsg1->getGroup(2).c_str();
 		sms->date = parseDate(mMsg1->getGroup(3).c_str());
-		sms->msg = decodeText(mMsg1->getGroup(4).c_str());	
+		sms->msg = decodeSMSText(mMsg1->getGroup(4).c_str());	
 	} else {
 		mMsg2->setString(out.String());
 		if (mMsg2->findFirstMatch()) {
 			sms->number = mMsg2->getGroup(2).c_str();
-			sms->msg = decodeText(mMsg2->getGroup(3).c_str());
+			sms->msg = decodeSMSText(mMsg2->getGroup(3).c_str());
 		} else {
 			mMsg3->setString(out.String());
 			if (mMsg3->findFirstMatch()) {
-				sms->msg = decodeText(mMsg3->getGroup(2).c_str());
+				sms->msg = decodeSMSText(mMsg3->getGroup(2).c_str());
 			}
 		}
 	}
@@ -633,7 +639,8 @@ int GSM::removeSMS(SMS *sms = NULL) {
 }
 
 const char *GSM::getPBMemSlotName(const char *slot) {
-	BString s = slot;
+	static BString s;
+	s = slot;
 	// phonebooks
 	if ((s == "MT") || (s == "AD")) return _("Composite phonebook");
 	if (s == "EN") return _("Emergency numbers");
@@ -653,7 +660,9 @@ const char *GSM::getPBMemSlotName(const char *slot) {
 	if (s == "MC") return _("Missed calls");
 	if (s == "DC") return _("Dialed calls");
 	if (s == "RC") return _("Received calls");
-	return _("Unknown phonebook type");
+	s = _("Unknown phonebook type");
+	s += " ("; s += slot; s += ")";
+	return s.String();
 }
 
 bool GSM::isPBSlotWritable(const char *slot) {
@@ -857,10 +866,27 @@ const char *GSM::parseDate(const char *input) {
 		i = toint(mDate->getGroup(5).c_str());
 		s = toint(mDate->getGroup(6).c_str());
 		snprintf(datestring,sizeof(datestring),"%04i/%02i/%02i %02i:%02i:%02i",y,m,d,h,i,s);
+	} else {
+		snprintf(datestring,sizeof(datestring),_("<none>"));
 	}
 	return datestring;
 }
 
+const char *GSM::decodeSMSText(const char *input) {
+	if (fEncoding != ENC_UTF8)
+		return decodeText(input);
+	// guess if input is UTF8 hex encoded or raw
+	int nothex = 0;
+	int i, j;
+	j = strlen(input);
+	for (i=0;i<j;i++)
+		if (input[i]>'F')
+			nothex++;
+	if (nothex > 0)
+		return input;
+	else
+		return decodeText(input);
+}
 
 const char *GSM::decodeText(const char *input) {
 	static BString out;
