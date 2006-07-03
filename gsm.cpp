@@ -238,7 +238,9 @@ bool GSM::phoneReset(void) {
 		active = false;
 		return false;
 	}
+	// disable local echo
 	sendCommand("ATE0");
+
 	// fetch character sets, default to utf8 or fallback to whatever is there
 //	sendCommand("AT+CSCS=?");
 	ringIncoming = false;
