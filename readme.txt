@@ -5,8 +5,6 @@ lista SMS:
 	numery do centrum SMS?
 - subitemy - <nazwa folderu> <total>
 	- w kolejności: inbox, outbox (unsent), sent, draft, reszta
-	Inbox:
-	- to, co obecnie jest w glownym SMSview, ale uproszczona tabelka (tylko numer jako "Od")
 	Outbox:
 	- informacja wysłany/niewysłany w osobnej kolumnie?
 	- [NEW] - nowe okno do pisania
@@ -20,14 +18,15 @@ lista SMS:
 	- przy dzialaniu pomijac sloty MD i AT
 
 TODO:
+- statystyki użycia slotów (total?)
 - PB - dodatkowe pola z motoroli (adres, urodziny itd.)
 - sms PDU mode (odczytywanie wszystkich informacji)
 - coś pochodnego CLVEasyItem, ale żeby na żądanie pisało się bold (mark new)
-- preview SMS - uzyc wyszukiwarki numerów
+- preview SMS - uzyc wyszukiwarki numerów (jak w callreg)
 - callreg: użyć wyszukiwarki numerów w oknie podglądu smsa - dodać informację od kogo to
 	(przenieść wyszukiwarkę we wspólne miejsce, gdzie???)
 - przepisac listy pb/sms jako zamkniete klasy?
-- opcje zapisywania smsów, eksportu/importu phonebooka
+- opcje eksportu smsów, eksportu/importu phonebooka
 - phonebook:
 	- na superitems (phonebook/call register)
 		- lista wszystkich numerow z oznaczeniem slotu? moze tylko informacje o slotach? (raczej 1sze)
@@ -36,6 +35,7 @@ TODO:
 			- po wyborze: po prawej wypisanie wszystkich dostępnych numerów i ich rodzajów
 			  (gdy dostępne)
 		- guziki [REFRESH], [DIAL], [NEW], [DELETE], [EDIT]
+			(NEW/EDIT - brać pod uwagę ograniczenia długości!)
 	- osobno call register (dialed, missed, received)
 		- tylko lista podglądu <ikonarodzaj> <numertel> <nazwa>
 		- guzik [DIAL], [DELETE] (o ile to możliwe)
@@ -44,9 +44,6 @@ TODO:
 
 
 IKONY
-- ikona programu 1
-- ikony elementów listy wybieralnej ??
-- ikony typu numeru (telefon/email) - 8-9
+- ikony typu numeru (telefon/email/dom/praca itd.) - 8-9
 - ikony typu smsa (nowy,przeczytany,nowyniewysłany,wysłany) - 4 koperty
 - ikona baterii/baterii krytycznej
-(ladowanie .rsrc -> Bapplication->AppResources)

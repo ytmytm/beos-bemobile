@@ -1,6 +1,10 @@
 #ifndef _WORKVIEW_H
 #define _WORKVIEW_H
 
+#include <Application.h>
+#include <Resources.h>
+#include <Bitmap.h>
+#include <stdio.h>
 #include <View.h>
 #include "CLVEasyItem.h"
 
@@ -19,8 +23,8 @@ class workView : public BView {
 		void RefreshStatus(void);
 		//
 	private:
-bool hasSMSSlot(const char *slot);
 		void SetCurView(int v = 0);
+		const char *iconNameForSlot(const char *slot);
 		//
 		BList *pageView;
 		//
@@ -35,11 +39,31 @@ bool hasSMSSlot(const char *slot);
 
 class infoItem : public CLVEasyItem {
 	public:
-		infoItem(int id, const char *text, int level = 0, bool superitem = false, bool expanded = false, float minwidth = 20.0) : CLVEasyItem(
+		infoItem(int id, const char *text, int level = 0, const char *icon_resname = NULL, bool superitem = false, bool expanded = false, float minwidth = 20.0) : CLVEasyItem(
 			level, superitem, expanded, minwidth) {
 
 			fId = id;
 			fSlot = NULL;
+			if (icon_resname) {
+				BResources *res = be_app->AppResources();
+				printf("search for res:%s\n",icon_resname);
+				if (res->HasResource('BBMP',icon_resname)) {
+					printf("has it\n");
+					BBitmap *bmp;
+					BMessage msg;
+					size_t len;
+					char *buf;
+					buf = (char *)res->LoadResource('BBMP', icon_resname, &len);
+//					printf("loaded,len=%i\n",len);
+					msg.Unflatten(buf);
+//					printf("unflatten\n");
+					bmp = new BBitmap(&msg);
+//					printf("new bmp\n");
+					SetColumnContent(1,bmp);
+//					printf("col set\n");
+					delete [] buf;
+				}
+			}
 			SetColumnContent(2,text);
 		}
 		int Id(void) { return fId; };

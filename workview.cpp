@@ -74,14 +74,14 @@ void workView::SetDevice(GSM *g) {
 	tmp = gsm->getManuf();
 	tmp = tmp.Truncate(tmp.FindFirst(" ")+1);
 	tmp += gsm->getModel();
-	list->AddItem(item = new infoItem(curitem++,tmp.String(),0,true,true));
+	list->AddItem(item = new infoItem(curitem++,tmp.String(),0,"Img:Phone",true,true));
 	this->AddChild(cv = new statusView(r));
 	pageView->AddItem(cv);
 //	cv->Hide();			// XXX if hidden -> will never show up, why??
 	cv->SetDevice(gsm);
 
 	// phonebook items
-	list->AddItem(item = new infoItem(curitem++,_("Phonebook"),1,true));
+	list->AddItem(item = new infoItem(curitem++,_("Phonebook"),1,"Img:Contacts",true));
 	pageView->AddItem(NULL);
 	// pb items, except call register
 	// XXX just a test
@@ -100,7 +100,7 @@ void workView::SetDevice(GSM *g) {
 				if (hadcompositepb && ((pb == "MT")||(pb == "AD"))) {
 				} else {
 				hadcompositepb = true;
-				list->AddItem(item = new infoItem(curitem++, gsm->getPBMemSlotName(sl->sname.String()),2));
+				list->AddItem(item = new infoItem(curitem++, gsm->getPBMemSlotName(sl->sname.String()),2,iconNameForSlot(pb.String())));
 				item->SetSlot(sl->sname.String());
 				this->AddChild(cv = new phoneListSlotView(r,sl->sname.String()));
 				pageView->AddItem(cv);
@@ -113,12 +113,12 @@ void workView::SetDevice(GSM *g) {
 	}
 	// XXX end of test
 	// superitem for Call register
-	list->AddItem(item = new infoItem(curitem++,_("Call register"),1,true));
+	list->AddItem(item = new infoItem(curitem++,_("Call register"),1,"Img:MobilePhone",true));
 	pageView->AddItem(NULL);
 	VV_DIALED = VV_DIALEDSIM = VV_MISSED = VV_RECEIVED = -1;
 	if (gsm->hasPBSlot("DC")) {
 		VV_DIALED = curitem++;
-		list->AddItem(item = new infoItem(VV_DIALED,gsm->getPBMemSlotName("DC"),2));
+		list->AddItem(item = new infoItem(VV_DIALED,gsm->getPBMemSlotName("DC"),2,iconNameForSlot("DC")));
 		item->SetSlot("DC");
 		this->AddChild(cv = new callRegSlotView(r,"DC"));
 		pageView->AddItem(cv);
@@ -127,7 +127,7 @@ void workView::SetDevice(GSM *g) {
 	}
 	if (gsm->hasPBSlot("LD")) {
 		VV_DIALEDSIM = curitem++;
-		list->AddItem(item = new infoItem(VV_DIALEDSIM,gsm->getPBMemSlotName("LD"),2));
+		list->AddItem(item = new infoItem(VV_DIALEDSIM,gsm->getPBMemSlotName("LD"),2,iconNameForSlot("LD")));
 		item->SetSlot("LD");
 		this->AddChild(cv = new callRegSlotView(r,"LD"));
 		pageView->AddItem(cv);
@@ -136,7 +136,7 @@ void workView::SetDevice(GSM *g) {
 	}
 	if (gsm->hasPBSlot("MC")) {
 		VV_MISSED = curitem++;
-		list->AddItem(item = new infoItem(VV_MISSED,gsm->getPBMemSlotName("MC"),2));
+		list->AddItem(item = new infoItem(VV_MISSED,gsm->getPBMemSlotName("MC"),2,iconNameForSlot("MC")));
 		item->SetSlot("MC");
 		this->AddChild(cv = new callRegSlotView(r,"MC"));
 		pageView->AddItem(cv);
@@ -145,7 +145,7 @@ void workView::SetDevice(GSM *g) {
 	}
 	if (gsm->hasPBSlot("RC")) {
 		VV_RECEIVED = curitem++;
-		list->AddItem(item = new infoItem(VV_RECEIVED,gsm->getPBMemSlotName("RC"),2));
+		list->AddItem(item = new infoItem(VV_RECEIVED,gsm->getPBMemSlotName("RC"),2,iconNameForSlot("RC")));
 		item->SetSlot("RC");
 		this->AddChild(cv = new callRegSlotView(r,"RC"));
 		pageView->AddItem(cv);
@@ -156,7 +156,7 @@ void workView::SetDevice(GSM *g) {
 	//	icons		XXX
 
 	// superitem for SMS
-	list->AddItem(item = new infoItem(curitem++,_("SMS"),1,true));
+	list->AddItem(item = new infoItem(curitem++,_("SMS"),1,"Img:MailGeneric",true));
 	this->AddChild(cv = new smsView(r));
 	pageView->AddItem(cv);
 	cv->Hide();
@@ -166,7 +166,7 @@ void workView::SetDevice(GSM *g) {
 
 	if (gsm->hasSMSSlot("IM")) {
 		VV_INBOX = curitem++;
-		list->AddItem(item = new infoItem(VV_INBOX,gsm->getSMSMemSlotName("IM"),2));
+		list->AddItem(item = new infoItem(VV_INBOX,gsm->getSMSMemSlotName("IM"),2,iconNameForSlot("IM")));
 		item->SetSlot("IM");
 		this->AddChild(cv = new smsInboxView(r,"IM"));
 		pageView->AddItem(cv);
@@ -175,7 +175,7 @@ void workView::SetDevice(GSM *g) {
 	}
 	if (gsm->hasSMSSlot("OM")) {
 		VV_OUTBOX = curitem++;
-		list->AddItem(item = new infoItem(VV_OUTBOX,gsm->getSMSMemSlotName("OM"),2));
+		list->AddItem(item = new infoItem(VV_OUTBOX,gsm->getSMSMemSlotName("OM"),2,iconNameForSlot("OM")));
 		item->SetSlot("OM");
 		this->AddChild(cv = new smsOutboxView(r,"OM"));
 		pageView->AddItem(cv);
@@ -184,7 +184,7 @@ void workView::SetDevice(GSM *g) {
 	}
 	if (gsm->hasSMSSlot("DM")) {
 		VV_DRAFT = curitem++;
-		list->AddItem(item = new infoItem(VV_DRAFT,gsm->getSMSMemSlotName("DM"),2));
+		list->AddItem(item = new infoItem(VV_DRAFT,gsm->getSMSMemSlotName("DM"),2,iconNameForSlot("DM")));
 		item->SetSlot("DM");
 		this->AddChild(cv = new smsDraftboxView(r,"DM"));
 		pageView->AddItem(cv);
@@ -201,7 +201,7 @@ void workView::SetDevice(GSM *g) {
 		sl = (struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(i);
 		sn = sl->sname;
 		if ( (sn != "MT") && (sn != "IM") && (sn != "OM") && (sn != "DM") ) {
-			list->AddItem(item = new infoItem(curitem++, gsm->getSMSMemSlotName(sl->sname.String()),2));
+			list->AddItem(item = new infoItem(curitem++, gsm->getSMSMemSlotName(sl->sname.String()),2,iconNameForSlot(sn.String())));
 			item->SetSlot(sl->sname.String());
 			this->AddChild(cv = new smsBoxView(r,sl->sname.String()));
 			pageView->AddItem(cv);
@@ -256,4 +256,13 @@ void workView::MessageReceived(BMessage *Message) {
 				((mobileView *)pageView->ItemAt(curView))->MessageReceived(Message);
 			break;
 	}
+}
+
+const char *workView::iconNameForSlot(const char *slot) {
+	BString sl = slot;
+	if (sl == "IM") return "Img:Inbox";
+	if (sl == "OM") return "Img:Outbox";
+	if (sl == "BM") return "Img:Info";
+	if (sl == "DM") return "Img:Notes";
+	return NULL;
 }
