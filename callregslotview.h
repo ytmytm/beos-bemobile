@@ -13,9 +13,6 @@ class callRegSlotView : public phoneListView {
 
 	protected:
 		void fillList(void);
-
-	private:
-		const char *stripLeadNum(const char *num);
 };
 
 #endif

@@ -97,14 +97,18 @@ class GSM {
 		BList *listMemSlotPB;
 
 		void getPBList(const char *slot);
+		const char *stripLeadNum(const char *num);
+		struct pbNum *matchNumFromPB(struct pbNum *num);
 
+		// encodings
 		enum { ENC_UTF8 = 1, ENC_UCS2, ENC_GSM };
+		// sms TEXT mode states
 		enum { REC_READ=1, REC_UNREAD, STO_SENT, STO_UNSENT, MSG_UNK };
 		// indirect pNum.type mapping
 		enum { PB_PHONE = 1, PB_INTLPHONE, PB_EMAIL, PB_OTHER };
 		// direct pNum.kind mapping (for motorola)
 		enum { PK_WORK = 0, PK_HOME, PK_MAIN, PK_MOBILE, PK_FAX, PK_PAGER, PK_EMAIL, PK_MAILLIST };
-
+	
 	private:
 void logWrite(const char *log);
 int getSMSType(const char *type);
@@ -117,6 +121,8 @@ const char *decodeText(const char *input);
 const char *parseDate(const char *input);
 		//
 		int sendCommand(const char *cmd, BString *out = NULL, bool debug = false);
+		// return codes from sendcommand
+		enum { COM_OK = 0, COM_OTHER, COM_ERROR, COM_SEMERROR, COM_TIMEOUT, COM_NOTOPEN };
 		//
 		BSerialPort *port;
 		//

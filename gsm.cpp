@@ -161,7 +161,7 @@ if (debug) printf("port not open\n");
 			lll = "ERR: port not open\n"; WLOG;
 		}
 		buffer[0] = '\0';
-		return 5;
+		return COM_NOTOPEN;
 	}
 
 if (debug) printf("sending:[%s]\n",cmd);
@@ -172,7 +172,7 @@ if (debug) printf("sending:[%s]\n",cmd);
 		if (log || term) {
 			lll = "ERR: can't acquire semaphore to serial port\n"; WLOG;
 		}
-		return 3;
+		return COM_SEMERROR;
 	}
 
 	r = port->Write(tmp.String(), tmp.Length());
@@ -193,17 +193,17 @@ printf("RRRIIIIIIIIIIIINGGGGGGG!\b\n");
 				ringIncoming = true;
 			}
 			if (strstr(buffer,"\nOK\r\n")) {
-				status = 0;
+				status = COM_OK;
 if (debug) printf("ok!\n");
 				break;
 			}
 			if (strstr(buffer,"ERROR")) {
-				status = 2;
+				status = COM_ERROR;
 if (debug) printf("error!\n");
 				break;
 			}
 			if (strstr(buffer,"\nCONNECT") || strstr(buffer,"\nNO CARRIER\r\n") || strstr(buffer,"\nBUSY\r\n")) {
-				status = 1;
+				status = COM_OTHER;
 				break;
 			}
 		}
@@ -226,7 +226,7 @@ if (debug) printf("error!\n");
 		if (log || term) {
 			lll = "ERR: timeout\n"; WLOG;
 		}
-		status = 4;
+		status = COM_TIMEOUT;
 	}
 	return status;
 }
@@ -306,16 +306,16 @@ void GSM::getPhoneData(void) {
 			fIMSI = mIMSI2->getGroup(1).c_str();
 	}
 	// Motorola check for extended commands
-	isMotorola = (sendCommand("AT+MMGL=?") == 0);
+	isMotorola = (sendCommand("AT+MMGL=?") == COM_OK);
 	// enable error reporting, try most verbose mode
 	sendCommand("AT+CMEE=1");
 	sendCommand("AT+CMEE=2");
 
 	// enable native UTF8 message format, fallback to Unicode and GSM
 	fEncoding = ENC_UTF8;
-	if (sendCommand("AT+CSCS=\"UTF8\"") > 0) {
+	if (sendCommand("AT+CSCS=\"UTF8\"") != COM_OK) {
 		fEncoding = ENC_UCS2;
-		if (sendCommand("AT+CSCS=\"UCS2\"") > 0) {
+		if (sendCommand("AT+CSCS=\"UCS2\"") != COM_OK) {
 			fEncoding = ENC_GSM;
 			sendCommand("AT+CSCS=\"GSM\"");
 		}
@@ -629,7 +629,7 @@ int GSM::removeSMS(SMS *sms = NULL) {
 	//changeMemSlot(sms->slot.String());		// XXX possibly unneeded, IDs are unique?
 	BString cmd = "AT+CMGD="; cmd << sms->id;
 	int ret = sendCommand(cmd.String());
-	if (ret == 0) {
+	if (ret == COM_OK) {
 		struct memSlotSMS *sl = getSMSSlot(sms->slot.String());
 		if ((sms->type == GSM::REC_UNREAD) || (sms->type == GSM::STO_UNSENT))
 			sl->unread--;
@@ -737,7 +737,7 @@ bool GSM::changePBMemSlot(const char *slot) {
 	sendCommand(cmd.String());
 	cmd = "AT+CPBR=?";
 	// return false on error -> don't add such slot
-	if (sendCommand(cmd.String(),&out) == 2)
+	if (sendCommand(cmd.String(),&out) == COM_ERROR)
 		return false;
 
 	mSlot->setString(out.String());
@@ -796,9 +796,9 @@ void GSM::getPBList(const char *slot) {
 	}
 	int rs = sendCommand(cmd.String(),&out);
 	// accept timeout (SIM reading may be slow)
-	if ((rs == 0)||(rs == 4)) {
+	if ((rs == COM_OK)||(rs == COM_TIMEOUT)) {
 		pat = isMotorola ? "^\\+MP" : "^\\+CP";
-		pat += "BR: (\\d+),\"([^\"]+)\",(\\d+),([^,\r\n]+)";
+		pat += "BR: (\\d+),\"([^\"]+)\",(\\d+),([^,\r\n]*)";
 		if (isMotorola) {
 			// 5phtype,6voicetag,7alerttone,8backlight,9primary,10categorynum
 			pat += ",(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)";
@@ -849,6 +849,41 @@ void GSM::getPBList(const char *slot) {
 	sl->items = pbList->CountItems();
 
 	//changePBMemSlot("MT");		// XXX change to default?
+}
+
+const char *GSM::stripLeadNum(const char *num) {
+	static BString tmp;
+	tmp = num;
+	tmp.RemoveSet("+");
+	while (tmp[0] == '0')
+		tmp.Remove(0,1);
+	return tmp.String();
+}
+
+struct pbNum *GSM::matchNumFromPB(struct pbNum *num) {
+	BString crnum = stripLeadNum(num->number.String());
+
+	// search in all Phonebook slots
+	int k, l = listMemSlotPB->CountItems();
+	struct pbSlot *pb;
+	for (k=0;k<l;k++) {
+		pb = (struct pbSlot*)listMemSlotPB->ItemAt(k);
+		// don't search in callreg, just phonebooks
+		if (!pb->callreg) {
+		// search in all items
+			int m, n = pb->pb->CountItems();
+			struct pbNum *pn;
+			for (m=0;m<n;m++) {
+				pn = (struct pbNum*)pb->pb->ItemAt(m);
+				if (crnum.Compare(stripLeadNum(pn->number.String())) == 0) {
+//					printf("%i:[%s]:[%s]\n",pn->id,pn->number.String(),crnum.String());
+					return pn;
+				}
+			}
+		}
+	}
+	// no match, return what got on input
+	return num;
 }
 
 const char *GSM::parseDate(const char *input) {
