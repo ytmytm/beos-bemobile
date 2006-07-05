@@ -554,11 +554,13 @@ void GSM::getSMSContent(SMS *sms = NULL) {
 		sms->number = mMsg1->getGroup(2).c_str();
 		sms->date = parseDate(mMsg1->getGroup(3).c_str());
 		sms->msg = decodeSMSText(mMsg1->getGroup(4).c_str());	
+		matchNumFromSMS(sms);
 	} else {
 		mMsg2->setString(out.String());
 		if (mMsg2->findFirstMatch()) {
 			sms->number = mMsg2->getGroup(2).c_str();
 			sms->msg = decodeSMSText(mMsg2->getGroup(3).c_str());
+			matchNumFromSMS(sms);
 		} else {
 			mMsg3->setString(out.String());
 			if (mMsg3->findFirstMatch()) {
@@ -566,7 +568,7 @@ void GSM::getSMSContent(SMS *sms = NULL) {
 			}
 		}
 	}
-printf("%i,%i,%s,%s\n[%s]\n",sms->id,sms->type,sms->number.String(),sms->date.String(),sms->msg.String());
+printf("%i,%i,%s,:%s\n[%s]\n",sms->id,sms->type,sms->number.String(),sms->date.String(),sms->msg.String());
 }
 
 void GSM::getSMSList(const char *slot) {
@@ -597,8 +599,10 @@ void GSM::getSMSList(const char *slot) {
 	// clear list
 	if (SMSList->CountItems()>0) {
 		struct SMS *anItem;
-		for (int i=0; (anItem=(struct SMS*)SMSList->ItemAt(i)); i++)
+		for (int i=0; (anItem=(struct SMS*)SMSList->ItemAt(i)); i++) {
+			SMSClearNumList(anItem);
 			delete anItem;
+		}
 		if (!SMSList->IsEmpty())
 			SMSList->MakeEmpty();
 	}
@@ -857,11 +861,16 @@ const char *GSM::stripLeadNum(const char *num) {
 	tmp.RemoveSet("+");
 	while (tmp[0] == '0')
 		tmp.Remove(0,1);
+	// assume 9 digit numbers
+	if (tmp.Length()>9) {
+		BString tmp2 = tmp;
+		tmp2.CopyInto(tmp,tmp.Length()-9,9);
+	}
 	return tmp.String();
 }
 
-struct pbNum *GSM::matchNumFromPB(struct pbNum *num) {
-	BString crnum = stripLeadNum(num->number.String());
+struct pbNum *GSM::matchNumFromNum(const char *num) {
+	BString crnum = stripLeadNum(num);
 
 	// search in all Phonebook slots
 	int k, l = listMemSlotPB->CountItems();
@@ -876,14 +885,56 @@ struct pbNum *GSM::matchNumFromPB(struct pbNum *num) {
 			for (m=0;m<n;m++) {
 				pn = (struct pbNum*)pb->pb->ItemAt(m);
 				if (crnum.Compare(stripLeadNum(pn->number.String())) == 0) {
-//					printf("%i:[%s]:[%s]\n",pn->id,pn->number.String(),crnum.String());
+					printf("%i:[%s]:[%s]\n",pn->id,pn->number.String(),crnum.String());
 					return pn;
 				}
 			}
 		}
 	}
-	// no match, return what got on input
+	// no match
+	return NULL;
+}
+
+struct pbNum *GSM::matchNumFromPB(struct pbNum *num) {
+	struct pbNum *pb = matchNumFromNum(num->number.String());
+	if (pb)
+		return pb;
+	// no match, return input
 	return num;
+}
+
+void GSM::matchNumFromSMS(struct SMS *sms) {
+	Pattern *pNum = Pattern::compile("([^ ]+)", Pattern::MULTILINE_MATCHING);
+	Matcher *mNum = pNum->createMatcher("");
+	struct pbNum *pb;
+	// break down by spaces
+	mNum->setString(sms->number.String());
+	while (mNum->findNextMatch()) {
+//		printf("got:[%s]\n",mNum->getGroup(0).c_str());
+		pb = matchNumFromNum(mNum->getGroup(0).c_str());
+		if (!pb) {
+			pb = new pbNum;
+			pb->slot = "??";
+			pb->id = -1;
+			pb->number = mNum->getGroup(0).c_str();
+			pb->name = "";
+		}
+		sms->pbnumbers.AddItem(pb);
+	}
+}
+
+void GSM::SMSClearNumList(struct SMS *sms) {
+	if (sms->pbnumbers.CountItems()>0) {
+		struct pbNum *anItem;
+		for (int i=0; (anItem=(struct pbNum*)sms->pbnumbers.ItemAt(i)); i++) {
+			// free only allocated
+			if (anItem->id == -1) {
+				delete anItem;
+			}
+		}
+		if (!sms->pbnumbers.IsEmpty())
+			sms->pbnumbers.MakeEmpty();
+	}
 }
 
 const char *GSM::parseDate(const char *input) {
@@ -912,7 +963,7 @@ const char *GSM::parseDate(const char *input) {
 const char *GSM::decodeSMSText(const char *input) {
 	if (fEncoding != ENC_UTF8)
 		return decodeText(input);
-	// guess if input is UTF8 hex encoded or raw
+	// guess if input is hex encoded or raw UTF8/ASCII
 	int nothex = 0;
 	int i, j;
 	j = strlen(input);

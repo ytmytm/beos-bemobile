@@ -22,9 +22,7 @@ TODO:
 - PB - dodatkowe pola z motoroli (adres, urodziny itd.)
 - sms PDU mode (odczytywanie wszystkich informacji)
 - coś pochodnego CLVEasyItem, ale żeby na żądanie pisało się bold (mark new)
-- preview SMS - uzyc wyszukiwarki numerów (jak w callreg)
-- callreg: użyć wyszukiwarki numerów w oknie podglądu smsa - dodać informację od kogo to
-	(przenieść wyszukiwarkę we wspólne miejsce, gdzie???)
+- lista sms - wyświetlać nazwy? (smslistitem nie zna smsnumbertext(...)content z smsboxview)
 - przepisac listy pb/sms jako zamkniete klasy?
 - opcje eksportu smsów, eksportu/importu phonebooka
 - phonebook:
@@ -46,4 +44,4 @@ TODO:
 IKONY
 - ikony typu numeru (telefon/email/dom/praca itd.) - 8-9
 - ikony typu smsa (nowy,przeczytany,nowyniewysłany,wysłany) - 4 koperty
-- ikona baterii/baterii krytycznej
+- ikona baterii/baterii krytycznej (użyć z resources, gdzie?)

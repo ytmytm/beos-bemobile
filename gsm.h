@@ -2,25 +2,8 @@
 #define _GSM_H
 
 #include <String.h>
+#include <List.h>
 
-struct SMS {
-	BString slot;
-	int id;
-	int type;
-	BString number;
-	BString msg;
-	BString date;
-};
-//
-struct memSlotSMS {
-	BString sname;
-	BString name;
-	int items;
-	int unread;
-	bool writable;
-	BList *msg;
-};
-//
 struct pbNum {
 	BString slot;
 	int id;
@@ -42,6 +25,25 @@ struct pbSlot {
 	bool callreg;
 	bool writable;
 	BList *pb;
+};
+//
+struct SMS {
+	BString slot;
+	int id;
+	int type;
+	BString number;
+	BList pbnumbers;
+	BString msg;
+	BString date;
+};
+//
+struct memSlotSMS {
+	BString sname;
+	BString name;
+	int items;
+	int unread;
+	bool writable;
+	BList *msg;
 };
 
 class BFile;
@@ -98,7 +100,11 @@ class GSM {
 
 		void getPBList(const char *slot);
 		const char *stripLeadNum(const char *num);
+		// may return value from pb or input
 		struct pbNum *matchNumFromPB(struct pbNum *num);
+		// may return value from pb or NULL
+		struct pbNum *matchNumFromNum(const char *num);
+		void matchNumFromSMS(struct SMS *sms);
 
 		// encodings
 		enum { ENC_UTF8 = 1, ENC_UCS2, ENC_GSM };
@@ -119,6 +125,7 @@ bool isPBSlotCallRegister(const char *slot);
 const char *decodeSMSText(const char *input);
 const char *decodeText(const char *input);
 const char *parseDate(const char *input);
+void SMSClearNumList(SMS *sms);	// struct sms destructor
 		//
 		int sendCommand(const char *cmd, BString *out = NULL, bool debug = false);
 		// return codes from sendcommand

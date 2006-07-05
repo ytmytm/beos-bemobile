@@ -25,6 +25,8 @@ class smsBoxView : public mobileView {
 		void fillList(void);
 		void fullListRefresh(void);
 
+		const char *smsNumberTextContent(struct SMS *sms);
+
 		BString memSlot;
 
 		ColumnListView *list;

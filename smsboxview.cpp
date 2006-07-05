@@ -142,7 +142,7 @@ void smsBoxView::fullListRefresh(void) {
 }
 
 void smsBoxView::updatePreview(struct SMS *sms) {
-	BString tmp, tmp2;
+	BString tmp, tmp2, num;
 	int textlen;
 	static BFont font(be_plain_font);
 	static BFont bfont(be_bold_font);
@@ -190,8 +190,9 @@ void smsBoxView::updatePreview(struct SMS *sms) {
 		prv->Insert(textlen,tmp2.String(),tmp2.Length());
 		textlen += tmp2.Length();
 		prv->SetFontAndColor(&bfont,B_FONT_ALL,red);
-		prv->Insert(textlen,sms->number.String(),sms->number.Length());
-		textlen += sms->number.Length();
+		num = smsNumberTextContent(sms);
+		prv->Insert(textlen, num.String(), num.Length());
+		textlen += num.Length();
 	}
 	prv->Insert(textlen,"\n",1);
 	textlen++;
@@ -213,6 +214,30 @@ void smsBoxView::updatePreview(struct SMS *sms) {
 	prv->Insert(textlen,msg.String(),msg.Length());
 	textlen += msg.Length();
 	prv->Insert(textlen,"\n",1);
+}
+
+const char *smsBoxView::smsNumberTextContent(struct SMS *sms) {
+	static BString tmp;
+	bool first;
+	first = true;
+//printf("[%s]->[%i]\n",sms->number.String(),sms->pbnumbers.CountItems());
+	if (sms->pbnumbers.CountItems()>0) {
+		struct pbNum *anItem;
+		for (int i=0; (anItem=(struct pbNum*)sms->pbnumbers.ItemAt(i)); i++) {
+			if (first)
+				tmp = "";
+			else
+				tmp += ", ";
+			if (anItem->name.Length()>0) {
+				tmp += anItem->name.String();
+				tmp += " ("; tmp += anItem->number.String(); tmp += ")";
+			} else {
+				tmp += anItem->number.String();
+			}
+			first = false;
+		}
+	}
+	return tmp.String();
 }
 
 void smsBoxView::Show(void) {
