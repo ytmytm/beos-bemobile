@@ -18,6 +18,19 @@ and tested ONLY on Motorola C550 and L6. It should work on some other models too
 Ericsson and some Nokia phones.
 To make a long story short - if SerialConnect can talk with your phone via infra-red link,
 RS232 or USB cable, then BeMobile should work too.
+Phone numbers from SMS and Call Register lists are matched against Phone Books, but you have to
+read (open the list) them first. Just 9 last digits are matched, without international prefixes madness
+(I send SMS without prefixes and receive them both with and without +48 so it is best to strip them
+all).
+
+
+
+CHANGES
+
+version 0.2
+- support for L6
+- icons for device list (can't get transparent background to work though)
+- match phone numbers in SMS preview and Call Register with Phone Book and show names+numbers
 
 
 
