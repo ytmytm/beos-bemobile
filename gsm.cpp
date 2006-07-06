@@ -906,32 +906,33 @@ struct pbNum *GSM::matchNumFromPB(struct pbNum *num) {
 void GSM::matchNumFromSMS(struct SMS *sms) {
 	Pattern *pNum = Pattern::compile("([^ ]+)", Pattern::MULTILINE_MATCHING);
 	Matcher *mNum = pNum->createMatcher("");
-	struct pbNum *pb;
+	struct pbNum *pb, *newpb;
 	// break down by spaces
 	mNum->setString(sms->number.String());
 	while (mNum->findNextMatch()) {
 //		printf("got:[%s]\n",mNum->getGroup(0).c_str());
 		pb = matchNumFromNum(mNum->getGroup(0).c_str());
-		if (!pb) {
-			pb = new pbNum;
-			pb->slot = "??";
-			pb->id = -1;
-			pb->number = mNum->getGroup(0).c_str();
-			pb->name = "";
+		newpb = new pbNum;
+		if (pb) {
+			newpb->slot = pb->slot;
+			newpb->id = pb->id;
+			newpb->number = pb->number;
+			newpb->name = pb->name;
+		} else {
+			newpb->slot = "??";
+			newpb->id = -1;
+			newpb->number = mNum->getGroup(0).c_str();
+			newpb->name = "";
 		}
-		sms->pbnumbers.AddItem(pb);
+		sms->pbnumbers.AddItem(newpb);
 	}
 }
 
 void GSM::SMSClearNumList(struct SMS *sms) {
 	if (sms->pbnumbers.CountItems()>0) {
 		struct pbNum *anItem;
-		for (int i=0; (anItem=(struct pbNum*)sms->pbnumbers.ItemAt(i)); i++) {
-			// free only allocated
-			if (anItem->id == -1) {
-				delete anItem;
-			}
-		}
+		for (int i=0; (anItem=(struct pbNum*)sms->pbnumbers.ItemAt(i)); i++)
+			delete anItem;
 		if (!sms->pbnumbers.IsEmpty())
 			sms->pbnumbers.MakeEmpty();
 	}
