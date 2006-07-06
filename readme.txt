@@ -1,47 +1,55 @@
-lista:
-- dodac kolumne z wartosciami (ile numerow, ile smsow, warto???)
-lista SMS:
-- superitem SMS - view z listą folderów:
-	numery do centrum SMS?
-- subitemy - <nazwa folderu> <total>
-	- w kolejności: inbox, outbox (unsent), sent, draft, reszta
-	Outbox:
-	- informacja wysłany/niewysłany w osobnej kolumnie?
-	- [NEW] - nowe okno do pisania
-	- [SEND NOW] - wyślij zaznaczony sms
-	Pozostałe:
-	- tylko preview jak Inbox/Sent (numer jako 'numer')
-- nowy SMS w nowym oknie
-	- możliwość zapisania do writable SMS slots, wybór popupmenu
-	- wybór adresata z popup (1 - slot pb, 2 - adresat)
+OPCJE:
+	SMS INBOX
+		- guzik [NEW], [DIAL]
+	SMS OUTBOX
+		- guzik [NEW], [DIAL], [SEND CURRENT]
+	SMS DRAFT i pozostałe
+		- guzik [NEW], [DIAL]
+
+	OKNO [NOWY SMS]
+	- combo z listą slotów writable
+	- lista numerów z wybranego slotu do wyboru i wpisania w textedit
+	- treść SMSa
+	- [OK], [CANCEL], [SEND NOW], [SAVE TO SLOT]
+
+	CALLREG
+	- guzik [DIAL], [DELETE]-o ile działa
+
+	PB
+	- guzik [DIAL], [DELETE], [EDIT]-na zaznaczone/dwuklik, [NEW]
+
+	OKNO [NOWY NUMER]
+	- combo z listą slotów (domyślnie ustawiony ten, gdzie kliknięcie)
+	- pola tekstowe: numer, nazwa, combo:typ, cbox: primary (może dodatkowe moto z adresem)
+	- [CANCEL], [SAVE] (sprawdzać replace)
+
+LISTA:
+- dodac do nazw kolumne z wartosciami (ile numerow, ile smsow, warto???)
+
+LISTA SMS:
+	- superitem SMS - view z listą folderów:
+		numery do centrum SMS?
+	- lista sms - wyświetlać nazwy? (smslistitem nie zna smsnumbertext(...)content z smsboxview)
 - PB:
+	- (superitem) lista slotów z informacją o wykorzystaniu
+	- dodatkowe pola z motoroli (adres, urodziny itd.)
 	- przy dzialaniu pomijac sloty MD i AT
+	- lista numerów: ikonki z typem (home/mobile/pager etc.)
+	- nowy slot wirtualny [All numbers]
+		- połączone dane z wszystkich
+		- w widoku rozwijana lista według nazw, do każdej nazwy kolumna z liczbą numerów
+		- do każdego rozwiniętego: jak w poszczególnych
+		- guziki jak w poszczególnych
 
 TODO:
 - statystyki użycia slotów (total?)
-- PB - dodatkowe pola z motoroli (adres, urodziny itd.)
 - sms PDU mode (odczytywanie wszystkich informacji)
 - coś pochodnego CLVEasyItem, ale żeby na żądanie pisało się bold (mark new)
-- lista sms - wyświetlać nazwy? (smslistitem nie zna smsnumbertext(...)content z smsboxview)
 - przepisac listy pb/sms jako zamkniete klasy?
 - opcje eksportu smsów, eksportu/importu phonebooka
-- phonebook:
-	- na superitems (phonebook/call register)
-		- lista wszystkich numerow z oznaczeniem slotu? moze tylko informacje o slotach? (raczej 1sze)
-	- osobno phonebooks (phone, sim, fixed, etc.)
-		- lista nazw pionowa:
-			- po wyborze: po prawej wypisanie wszystkich dostępnych numerów i ich rodzajów
-			  (gdy dostępne)
-		- guziki [REFRESH], [DIAL], [NEW], [DELETE], [EDIT]
-			(NEW/EDIT - brać pod uwagę ograniczenia długości!)
-	- osobno call register (dialed, missed, received)
-		- tylko lista podglądu <ikonarodzaj> <numertel> <nazwa>
-		- guzik [DIAL], [DELETE] (o ile to możliwe)
-- zaraz po uruchomieniu okno tymczasowe z informacją który port jest otwierany
-  (wlasciwie na razie widac to ladnie w logu)
-
 
 IKONY
 - ikony typu numeru (telefon/email/dom/praca itd.) - 8-9
 - ikony typu smsa (nowy,przeczytany,nowyniewysłany,wysłany) - 4 koperty
 - ikona baterii/baterii krytycznej (użyć z resources, gdzie?)
+- ikona z wieżą nadawczą (do siły sygnału)
