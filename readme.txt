@@ -47,6 +47,7 @@ TODO:
 - coś pochodnego CLVEasyItem, ale żeby na żądanie pisało się bold (mark new)
 - przepisac listy pb/sms jako zamkniete klasy?
 - opcje eksportu smsów, eksportu/importu phonebooka
+- ikony: poprawić przezroczystość w rsrc (R119,G116,B119?), uwaga: CVS nie przechowa atrybutów
 
 IKONY
 - ikony typu numeru (telefon/email/dom/praca itd.) - 8-9
