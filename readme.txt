@@ -9,16 +9,8 @@ OPCJE:
 			at+cmss=<id>
 
 	OKNO [NOWY SMS]
-	- combo z listą slotów writable
-	- lista numerów z wybranego slotu do wyboru i wpisania w textedit
-	- treść SMSa
-	- [OK], [CANCEL], [SEND NOW], [SAVE TO SLOT]
-	- [COMPRESS] "this is a test" -> "ThisIsATest"
+	- encode gsm!
 	- licznik znaków (jaki limit?)
-		zmiana slotu "IM", <slot>
-		at+cmgw="<numer>"<CR>tresc<CTRL+Z>
-		treść zakodowana heksem(? spr. na c550)
-		l6 - utf8 plaintext
 		at+cmgs j/w
 
 	CALLBOX, PBBOX
