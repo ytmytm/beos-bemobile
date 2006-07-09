@@ -10,6 +10,7 @@ class BButton;
 class BStatusBar;
 class BTextView;
 class ColumnListView;
+class dialNewSMS;
 
 class smsBoxView : public mobileView {
 	public:
@@ -33,6 +34,8 @@ class smsBoxView : public mobileView {
 		BTextView *prv;
 		BStatusBar *progress;
 		BButton *but_refresh, *but_new, *but_send, *but_del, *but_dial;
+
+		dialNewSMS *smsNewDialog;
 };
 
 class smsBoxListItem : public CLVEasyItem {

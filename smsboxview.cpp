@@ -10,6 +10,7 @@
 #include "ColumnListView.h"
 #include "globals.h"
 #include "smsboxview.h"
+#include "dialnewsms.h"
 
 #include <stdio.h>
 
@@ -279,6 +280,10 @@ void smsBoxView::MessageReceived(BMessage *Message) {
 			fullListRefresh();
 			fillList();
 			break;
+		case SMSNEW:
+			{
+				smsNewDialog = new dialNewSMS(memSlot.String(), gsm);
+			}
 		case SMSDELETE:
 			{	int i = list->CurrentSelection(0);
 
