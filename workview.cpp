@@ -15,6 +15,8 @@
 
 #include <stdio.h>
 
+#define VSPLIT	200
+
 const uint32 LIST_INV 	= 'WL00';
 const uint32 LIST_SEL 	= 'WL01';
 
@@ -29,14 +31,14 @@ workView::workView(BRect r) : BView(r, "workView", B_FOLLOW_ALL_SIDES, B_WILL_DR
 
 	// add column list
 	CLVContainerView *containerView;
-	r.right = 150-15;
+	r.right = VSPLIT-15;
 	list = new ColumnListView(r, &containerView, NULL, B_FOLLOW_TOP_BOTTOM|B_FOLLOW_LEFT,
 		B_WILL_DRAW|B_FRAME_EVENTS|B_NAVIGABLE, B_SINGLE_SELECTION_LIST, true, true, true, true,
 		B_FANCY_BORDER);
 	list->AddColumn(new CLVColumn(NULL,20,CLV_EXPANDER|CLV_LOCK_AT_BEGINNING|CLV_NOT_MOVABLE));
 	list->AddColumn(new CLVColumn(NULL,20,CLV_LOCK_AT_BEGINNING|CLV_NOT_MOVABLE|
 		CLV_NOT_RESIZABLE|CLV_PUSH_PASS|CLV_MERGE_WITH_RIGHT));
-	list->AddColumn(new CLVColumn(_("Devices"), 150-20-20, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
+	list->AddColumn(new CLVColumn(_("Devices"), VSPLIT-20-20, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
 	list->SetSortFunction(CLVEasyItem::CompareItems);
 	this->AddChild(containerView);
 	list->SetInvocationMessage(new BMessage(LIST_INV));
@@ -66,7 +68,7 @@ void workView::SetDevice(GSM *g) {
 	mobileView *cv;
 	infoItem *item;
 	BRect r = this->Bounds();
-	r.left = 150;
+	r.left = VSPLIT;
 	int curitem = 0;
 
 	// main item with mobile manuf+model

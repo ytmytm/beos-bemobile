@@ -14,7 +14,7 @@ const uint32 MENU_SETDATETIME	= 'BM02';
 const uint32 MENU_UPDSTATUS		= 'BM03';
 
 BeMobileMainWindow::BeMobileMainWindow(const char *windowTitle, GSM *g) : BWindow(
-	BRect(200, 150, 840, 630), windowTitle, B_DOCUMENT_WINDOW, B_OUTLINE_RESIZE, B_CURRENT_WORKSPACE ) {
+	BRect(150, 150, 990, 630), windowTitle, B_DOCUMENT_WINDOW, B_OUTLINE_RESIZE, B_CURRENT_WORKSPACE ) {
 
 	BRect r;
 	r = this->Bounds();
