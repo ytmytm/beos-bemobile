@@ -1,16 +1,21 @@
 OPCJE:
-	SMS INBOX
-		- guzik [NEW], [DIAL]
-	SMS OUTBOX
-		- guzik [NEW], [DIAL], [SEND CURRENT]
-	SMS DRAFT i pozostałe
-		- guzik [NEW], [DIAL]
+	BUTTONS:
+	[REFRESH] [NEW] [SEND] [EDIT] [DELETE] [DIAL]
+	STATUS WINDOW:
+		- guzik [READ EVERYTHING] (czasochłonne) ?
+	SMSBOX:
+		- obsługa guzików [SEND] i [NEW]
 
 	OKNO [NOWY SMS]
 	- combo z listą slotów writable
 	- lista numerów z wybranego slotu do wyboru i wpisania w textedit
 	- treść SMSa
 	- [OK], [CANCEL], [SEND NOW], [SAVE TO SLOT]
+	- [COMPRESS] "this is a test" -> "ThisIsATest"
+	- licznik znaków (jaki limit?)
+
+	CALLBOX, PBBOX
+	- guziki podobnie jak SMSBOX
 
 	CALLREG
 	- guzik [DIAL], [DELETE]-o ile działa
@@ -34,7 +39,7 @@ LISTA SMS:
 	- (superitem) lista slotów z informacją o wykorzystaniu
 	- dodatkowe pola z motoroli (adres, urodziny itd.)
 	- przy dzialaniu pomijac sloty MD i AT
-	- lista numerów: ikonki z typem (home/mobile/pager etc.)
+	- lista numerów: ikonki z typem (home/mobile/pager etc.) (wziąć z mobilePhoneTools)
 	- nowy slot wirtualny [All numbers]
 		- połączone dane z wszystkich
 		- w widoku rozwijana lista według nazw, do każdej nazwy kolumna z liczbą numerów
@@ -42,7 +47,7 @@ LISTA SMS:
 		- guziki jak w poszczególnych
 
 TODO:
-- statystyki użycia slotów (total?)
+- statystyki użycia slotów (total?) na oknach głównych PB i CALLREG i w caption?
 - sms PDU mode (odczytywanie wszystkich informacji)
 - coś pochodnego CLVEasyItem, ale żeby na żądanie pisało się bold (mark new)
 - przepisac listy pb/sms jako zamkniete klasy?

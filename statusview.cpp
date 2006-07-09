@@ -1,5 +1,6 @@
 
 #include <Box.h>
+#include <Button.h>
 #include <CheckBox.h>
 #include <Font.h>
 #include <StatusBar.h>
@@ -12,6 +13,7 @@
 
 const uint32 MSG_ACBUT	= 'M001';
 const uint32 MSG_BABUT	= 'M002';
+const uint32 BUT_SETDATETIME = 'M003';
 
 statusView::statusView(BRect r) : mobileView(r, "statusView") {
 	// initialize widgets
@@ -109,6 +111,11 @@ statusView::statusView(BRect r) : mobileView(r, "statusView") {
 	//
 	signalBar->SetMaxValue(100);
 	batteryBar->SetMaxValue(100);
+	//
+	r = this->MyBounds();
+	r.InsetBy(20,20);
+	s = r; s.top = s.bottom - font.Size()*2; s.right = s.left + font.StringWidth("MMMMMMMMMM")+40;
+	this->AddChild(new BButton(s, "butSetDateTime", _("Set date and time"), new BMessage(BUT_SETDATETIME), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 }
 
 void statusView::RefreshStatus(void) {
@@ -159,6 +166,9 @@ void statusView::SetDevice(GSM *g) {
 
 void statusView::MessageReceived(BMessage *Message) {
 	switch (Message->what) {
+		case BUT_SETDATETIME:
+			gsm->setDateTime();
+			break;
 		case MSG_ACBUT:
 		case MSG_BABUT:
 			RefreshStatus();

@@ -10,7 +10,8 @@
 #include "statusview.h"
 
 const uint32 MENU_ABOUT			= 'BM01';
-const uint32 MENU_SETDATETIME	= 'BM02';
+//const uint32 MENU_SETDATETIME	= 'BM02';
+const uint32 MENU_HANGUP		= 'BM02';
 const uint32 MENU_UPDSTATUS		= 'BM03';
 
 BeMobileMainWindow::BeMobileMainWindow(const char *windowTitle, GSM *g) : BWindow(
@@ -41,8 +42,11 @@ BeMobileMainWindow::BeMobileMainWindow(const char *windowTitle, GSM *g) : BWindo
 	menuBar->AddItem(menu);
 
 	menu = new BMenu(_("Settings"), B_ITEMS_IN_COLUMN);
-	menu->AddItem(new BMenuItem(_("Set date and time"), new BMessage(MENU_SETDATETIME)));
 	menu->AddItem(updStatusItem = new BMenuItem(_("Monitor status"), new BMessage(MENU_UPDSTATUS)));
+	menuBar->AddItem(menu);
+
+	menu = new BMenu(_("Actions"), B_ITEMS_IN_COLUMN);
+	menu->AddItem(new BMenuItem(_("Hang up"), new BMessage(MENU_HANGUP)));
 	menuBar->AddItem(menu);
 
 	gsm = g;
@@ -61,8 +65,8 @@ BeMobileMainWindow::~BeMobileMainWindow() {
 void BeMobileMainWindow::MessageReceived(BMessage *Message) {
 	this->DisableUpdates();
 	switch (Message->what) {
-		case MENU_SETDATETIME:
-			gsm->setDateTime();
+		case MENU_HANGUP:
+			gsm->hangUp();
 			break;
 		case MENU_UPDSTATUS:
 			{

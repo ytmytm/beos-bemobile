@@ -17,6 +17,10 @@ const uint32	SMSLIST_INV		= 'SB00';
 const uint32	SMSLIST_SEL 	= 'SB01';
 const uint32	SMSREFRESH		= 'SB02';
 const uint32	SMSDELETE		= 'SB03';
+const uint32	SMSEDIT			= 'SB04';
+const uint32	SMSSEND			= 'SB05';
+const uint32	SMSDIAL			= 'SB06';
+const uint32	SMSNEW			= 'SB07';
 
 smsBoxView::smsBoxView(BRect r, const char *slot) : mobileView(r, "smsBoxView") {
 
@@ -83,10 +87,19 @@ smsBoxView::smsBoxView(BRect r, const char *slot) : mobileView(r, "smsBoxView") 
 
 	r = this->MyBounds();
 	r.InsetBy(20,20);
-	s = r; s.top = s.bottom - font.Size()*2; s.right = s.left + font.StringWidth("MMMMMMMMMM")+40;
-	this->AddChild(refresh = new BButton(s, "smsRefresh", _("Refresh"), new BMessage(SMSREFRESH), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
-	t = r; t.top = s.top; t.bottom = s.bottom; t.right = r.right; t.left = t.right - (font.StringWidth("MMMMMMMMMM")+40);
-	this->AddChild(del = new BButton(t, "smsDelete", _("Delete"), new BMessage(SMSDELETE), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
+	s = r; s.top = s.bottom - font.Size()*2;
+	float len = s.Width()/5;	
+	s.right = s.left + len - 10;
+	this->AddChild(but_refresh = new BButton(s, "smsRefresh", _("Refresh"), new BMessage(SMSREFRESH), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
+	s.OffsetBy(len,0);
+	this->AddChild(but_new = new BButton(s, "smsNew", _("New"), new BMessage(SMSNEW), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
+	s.OffsetBy(len,0);
+	this->AddChild(but_send = new BButton(s, "smsSend", _("Send"), new BMessage(SMSSEND), B_FOLLOW_LEFT_RIGHT|B_FOLLOW_BOTTOM));
+	but_send->Hide();
+	s.OffsetBy(len,0);
+	this->AddChild(but_del = new BButton(s, "smsDelete", _("Delete"), new BMessage(SMSDELETE), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
+	s.OffsetBy(len,0);
+	this->AddChild(but_dial = new BButton(s, "smsDial", _("Dial"), new BMessage(SMSDIAL), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
 }
 
 void smsBoxView::clearList(void) {
@@ -275,6 +288,22 @@ void smsBoxView::MessageReceived(BMessage *Message) {
 						struct SMS *sms = ((smsBoxListItem*)list->ItemAt(list->CurrentSelection(0)))->Msg();
 						if (gsm->removeSMS(sms) == 0)
 							list->RemoveItem(i);
+					}
+				}
+				break;
+			}
+		case SMSDIAL:
+			{	int i = list->CurrentSelection(0);
+				if (i>=0) {
+					struct SMS *sms = ((smsBoxListItem*)list->ItemAt(i))->Msg();
+					if (sms->pbnumbers.CountItems()>0) {
+						struct pbNum *p = (struct pbNum*)sms->pbnumbers.ItemAt(0);
+						if ((p->type != GSM::PB_PHONE) && (p->type != GSM::PB_INTLPHONE)) {
+							BAlert *err = new BAlert(APP_NAME, _("Selected item is not a phone number"), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+							err->Go();
+						} else {
+							gsm->dial(p->number.String());
+						}
 					}
 				}
 				break;

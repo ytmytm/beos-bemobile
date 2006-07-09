@@ -32,7 +32,7 @@ class smsBoxView : public mobileView {
 		ColumnListView *list;
 		BTextView *prv;
 		BStatusBar *progress;
-		BButton *refresh, *del, *newsms;
+		BButton *but_refresh, *but_new, *but_send, *but_del, *but_dial;
 };
 
 class smsBoxListItem : public CLVEasyItem {

@@ -106,6 +106,9 @@ class GSM {
 		struct pbNum *matchNumFromNum(const char *num);
 		void matchNumFromSMS(struct SMS *sms);
 
+		void dial(const char *num);
+		void hangUp(void);
+
 		// encodings
 		enum { ENC_UTF8 = 1, ENC_UCS2, ENC_GSM };
 		// sms TEXT mode states
@@ -126,6 +129,7 @@ const char *decodeSMSText(const char *input);
 const char *decodeText(const char *input);
 const char *parseDate(const char *input);
 void SMSClearNumList(SMS *sms);	// struct sms destructor
+int guessPBType(const char *num);
 		//
 		int sendCommand(const char *cmd, BString *out = NULL, bool debug = false);
 		// return codes from sendcommand

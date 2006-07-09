@@ -829,7 +829,8 @@ void GSM::getPBList(const char *slot) {
 					num->type = PB_EMAIL;
 					break;
 				default:
-					num->type = PB_OTHER;
+					num->type = guessPBType(num->number.String());
+					break;
 			}
 			if (mNum->getGroup(4).c_str()[0] != '"')
 				num->name = decodeText(mNum->getGroup(4).c_str());
@@ -918,11 +919,17 @@ void GSM::matchNumFromSMS(struct SMS *sms) {
 			newpb->id = pb->id;
 			newpb->number = pb->number;
 			newpb->name = pb->name;
+			newpb->type = pb->type;
+			newpb->kind = pb->kind;
+			newpb->primary = pb->primary;
 		} else {
 			newpb->slot = "??";
 			newpb->id = -1;
 			newpb->number = mNum->getGroup(0).c_str();
 			newpb->name = "";
+			newpb->type = guessPBType(newpb->number.String());
+			newpb->kind = PK_MAIN;
+			newpb->primary = true;
 		}
 		sms->pbnumbers.AddItem(newpb);
 	}
@@ -1001,4 +1008,38 @@ const char *GSM::decodeText(const char *input) {
 		// XXX implement!!!
 		out = input;
 	return out.String();
+}
+
+void GSM::dial(const char *num) {
+	if (!num)
+		return;
+	if (strlen(num) == 0)
+		return;
+
+	BString cmd;
+	cmd = "ATD"; cmd += num;
+	sendCommand(cmd.String());
+}
+
+void GSM::hangUp(void) {
+	sendCommand("+");
+	sendCommand("ATH");
+}
+
+int GSM::guessPBType(const char *num) {
+	BString tmp = num;
+
+	// probably has +<intl> prefix
+	if (tmp.FindFirst("+") != B_ERROR)
+		return PB_INTLPHONE;
+	// probably email
+	if (tmp.FindFirst("@") != B_ERROR)
+		return PB_EMAIL;
+	// if all are digits, then it is probably a phone number
+	int l = tmp.Length();
+	for (int i=0;i<l;i++) {
+		if ((tmp[i]<'0')||(tmp[i]>'9'))
+			return PB_OTHER;
+	}
+	return PB_PHONE;
 }
