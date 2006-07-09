@@ -16,7 +16,7 @@ class dialNewSMS : public BWindow {
 		virtual void MessageReceived (BMessage *Message);
 	private:
 		GSM *gsm;
-		struct memSlotSMS *slot;
+		struct memSlotSMS *slotWrite;
 
 		BView *view;
 		BPopUpMenu *slotMenu, *pbMenu;

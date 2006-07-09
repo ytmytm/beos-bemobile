@@ -644,6 +644,22 @@ int GSM::removeSMS(SMS *sms = NULL) {
 	return ret;
 }
 
+int GSM::storeSMS(const char *slot, const char *numbers, const char *msg) {
+	if ( (!msg) || (!numbers) || (!slot) )
+		return -1;
+	if ( (strlen(msg)==0) || (strlen(numbers)==0) || (strlen(slot)==0) )
+		return -1;
+//	printf("sending to [%s],to[%s],msg=[%s]\n",slot,numbers,msg);
+	BString sl = slot;
+	sl += "\",\""; sl += slot;
+	changeSMSMemSlot(sl.String());
+
+	BString cmd = "AT+CMGW=\"";
+	cmd += numbers; cmd +="\"\r";
+	cmd += encodeText(msg); cmd += "\x1A";
+	return sendCommand(cmd.String());
+}
+
 const char *GSM::getPBMemSlotName(const char *slot) {
 	static BString s;
 	s = slot;
@@ -968,6 +984,11 @@ const char *GSM::parseDate(const char *input) {
 	return datestring;
 }
 
+const char *GSM::encodeText(const char *input) {
+//	implement at least to hex conv!
+	return input;	// XXX this will work only w/ L6
+}
+
 const char *GSM::decodeSMSText(const char *input) {
 	if (fEncoding != ENC_UTF8)
 		return decodeText(input);
@@ -1022,7 +1043,7 @@ void GSM::dial(const char *num) {
 }
 
 void GSM::hangUp(void) {
-	sendCommand("+");
+	sendCommand("+++");
 	sendCommand("ATH");
 }
 

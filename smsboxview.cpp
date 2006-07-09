@@ -283,6 +283,7 @@ void smsBoxView::MessageReceived(BMessage *Message) {
 		case SMSNEW:
 			{
 				smsNewDialog = new dialNewSMS(memSlot.String(), gsm);
+				break;
 			}
 		case SMSDELETE:
 			{	int i = list->CurrentSelection(0);

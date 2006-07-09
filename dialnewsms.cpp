@@ -1,12 +1,13 @@
 //
-// counter (pochodna textview lub view z pulse)
+// counter znaków (pochodna textview lub view z pulse)
 //
 // obsługa:
-// przed zapisaniem: walidacja czy slot, czy numer
+// przed zapisaniem: walidacja czy numer
 // przed wysłaniem: walidacja czy numer
 //
 // encode2gsm!
 
+#include <Alert.h>
 #include <Box.h>
 #include <Button.h>
 #include <Font.h>
@@ -39,7 +40,7 @@ dialNewSMS::dialNewSMS(const char *sl, GSM *g) : BWindow(
 
 	gsm = g;
 
-	slot = NULL;
+	slotWrite = NULL;
 
 printf("new in slot:%s\n",sl);
 
@@ -60,6 +61,7 @@ printf("new in slot:%s\n",sl);
 			msg->AddPointer("_slot",slot);
 			slotMenu->AddItem(bi = new BMenuItem(slot->name.String(), msg));
 			if (slot->sname == sl) {
+				slotWrite = slot;
 				bi->SetMarked(true);
 			}
 		}
@@ -126,7 +128,7 @@ printf("new in slot:%s\n",sl);
 	view->AddChild(new BButton(r, "butSendNow", tmp.String(), new BMessage(BUT_SENDNOW), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 
 	r.OffsetBy(r.Width()+10,0);
-	tmp = _("Save");
+	tmp = _("Store");
 	r.right = r.left + font.StringWidth(tmp.String()) + 15;
 	view->AddChild(new BButton(r, "butSave", tmp.String(), new BMessage(BUT_SAVE), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 
@@ -143,6 +145,13 @@ printf("new in slot:%s\n",sl);
 void dialNewSMS::MessageReceived(BMessage *Message) {
 	void *ptr;
 	switch (Message->what) {
+		case MENU_SLOT:
+			{
+				if (Message->FindPointer("_slot",&ptr) == B_OK) {
+					slotWrite = (struct memSlotSMS*)ptr;
+				}
+				break;
+			}
 		case MENU_NAME:
 			{
 				if (Message->FindPointer("_pb",&ptr) == B_OK) {
@@ -161,6 +170,21 @@ void dialNewSMS::MessageReceived(BMessage *Message) {
 				content->SetText(tmp.String());
 				content->Looper()->Unlock();
 				break;
+			}
+		case BUT_SAVE:
+			{	// XXX check for correct data entry
+				if (!slotWrite) {
+					BAlert *err = new BAlert(APP_NAME, _("Please select memory slot"), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+					err->Go();
+					break;
+				}
+				// XXX number - tylko cyfry,+,#,spacje (? spr. g20.pdf)
+				printf("slot:%s\n",slotWrite->sname.String());
+				int ret = gsm->storeSMS(slotWrite->sname.String(),numberText->Text(),content->Text());
+				// check return, update slot list?
+				// close window
+				if (ret == 0)
+					Quit();
 			}
 		default:
 			BWindow::MessageReceived(Message);

@@ -92,6 +92,8 @@ class GSM {
 		void getSMSList(const char *slot);
 		int removeSMS(SMS *sms = NULL);
 
+		int storeSMS(const char *slot, const char *numbers, const char *msg);
+
 		const char *getPBMemSlotName(const char *slot);
 		bool changePBMemSlot(const char *slot);
 		bool hasPBSlot(const char *slot);
@@ -127,6 +129,7 @@ bool isPBSlotWritable(const char *slot);
 bool isPBSlotCallRegister(const char *slot);
 const char *decodeSMSText(const char *input);
 const char *decodeText(const char *input);
+const char *encodeText(const char *input);
 const char *parseDate(const char *input);
 void SMSClearNumList(SMS *sms);	// struct sms destructor
 int guessPBType(const char *num);
