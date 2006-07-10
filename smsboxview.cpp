@@ -18,7 +18,6 @@ const uint32	SMSLIST_INV		= 'SB00';
 const uint32	SMSLIST_SEL 	= 'SB01';
 const uint32	SMSREFRESH		= 'SB02';
 const uint32	SMSDELETE		= 'SB03';
-const uint32	SMSEDIT			= 'SB04';
 const uint32	SMSSEND			= 'SB05';
 const uint32	SMSDIAL			= 'SB06';
 const uint32	SMSNEW			= 'SB07';
@@ -281,8 +280,24 @@ void smsBoxView::MessageReceived(BMessage *Message) {
 			fillList();
 			break;
 		case SMSNEW:
-			{
-				smsNewDialog = new dialNewSMS(memSlot.String(), gsm);
+			smsNewDialog = new dialNewSMS(memSlot.String(), gsm);
+			break;
+		case SMSSEND:
+			{	int i = list->CurrentSelection(0);
+				if (i>=0) {
+					BAlert *ask = new BAlert(APP_NAME, _("Do you really want to send this message now?"), _("Yes"), _("No"), NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+					if (ask->Go() == 0) {
+						struct SMS *sms = ((smsBoxListItem*)list->ItemAt(list->CurrentSelection(0)))->Msg();
+						int ret = gsm->sendSMSFromStorage(sms->slot.String(),sms->id);
+						if (ret == 0) {
+							fullListRefresh();
+							fillList();
+						} else {
+							BAlert *err = new BAlert(APP_NAME, _("There was an error and message hasn't been sent."), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+							err->Go();
+						}
+					}
+				}
 				break;
 			}
 		case SMSDELETE:
@@ -300,6 +315,7 @@ void smsBoxView::MessageReceived(BMessage *Message) {
 			}
 		case SMSDIAL:
 			{	int i = list->CurrentSelection(0);
+
 				if (i>=0) {
 					struct SMS *sms = ((smsBoxListItem*)list->ItemAt(i))->Msg();
 					if (sms->pbnumbers.CountItems()>0) {
@@ -317,11 +333,11 @@ void smsBoxView::MessageReceived(BMessage *Message) {
 		case SMSLIST_INV:
 		case SMSLIST_SEL:
 			{	int i = list->CurrentSelection(0);
+
 				if (i>=0) {
 					struct SMS *sms = ((smsBoxListItem*)list->ItemAt(list->CurrentSelection(0)))->Msg();
 					if (sms)
 						updatePreview(sms);
-
 				} else {
 					prv->SetText("");
 				}

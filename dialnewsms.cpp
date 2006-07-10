@@ -121,19 +121,19 @@ printf("new in slot:%s\n",sl);
 	r.InsetBy(20,20);
 	r.top = r.bottom - font.Size()*2;
 	tmp = _("Send now");
-	r.right = r.left + font.StringWidth(tmp.String()) + 15;
+	r.right = r.left + font.StringWidth(tmp.String()) + 20;
 	view->AddChild(new BButton(r, "butSendNow", tmp.String(), new BMessage(BUT_SENDNOW), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 
 	r.OffsetBy(r.Width()+10,0);
 	tmp = _("Store");
-	r.right = r.left + font.StringWidth(tmp.String()) + 15;
+	r.right = r.left + font.StringWidth(tmp.String()) + 20;
 	view->AddChild(new BButton(r, "butSave", tmp.String(), new BMessage(BUT_SAVE), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 
 	r = view->Bounds();
 	r.InsetBy(20,20);
 	r.top = r.bottom - font.Size()*2;
-	tmp = _("Compress");
-	r.left = r.right - (font.StringWidth(tmp.String())+15);
+	tmp = _("Compress text");
+	r.left = r.right - (font.StringWidth(tmp.String())+20);
 	view->AddChild(new BButton(r, "butCompress", tmp.String(), new BMessage(BUT_COMPRESS), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 
 	Show();
@@ -169,17 +169,14 @@ void dialNewSMS::MessageReceived(BMessage *Message) {
 				break;
 			}
 		case BUT_SAVE:
-			{	// XXX check for correct data entry
+			{	// check for correct data entry
 				if (!slotWrite) {
 					BAlert *err = new BAlert(APP_NAME, _("Please select memory slot"), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
 					err->Go();
 					break;
 				}
-				if (! numberValid() ) {
-					BAlert *err = new BAlert(APP_NAME, _("The number is invalid. It may only contain digits, *, #, + and spaces."), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
-					err->Go();
+				if ( (!numberValid()) || (!contentValid()) )
 					break;
-				}
 				printf("slot:%s\n",slotWrite->sname.String());
 				int ret = gsm->storeSMS(slotWrite->sname.String(),numberText->Text(),content->Text());
 				// check return, update slot list?
@@ -193,15 +190,41 @@ void dialNewSMS::MessageReceived(BMessage *Message) {
 				}
 				break;
 			}
+		case BUT_SENDNOW:
+			{
+				BAlert *ask = new BAlert(APP_NAME, _("Do you really want to send this message now?"), _("Yes"), _("No"), NULL, B_WIDTH_AS_USUAL, B_IDEA_ALERT);
+				if (ask->Go() != 0)
+					break;
+				if ( (!numberValid()) || (!contentValid()) )
+					break;
+				int ret = gsm->sendSMS(numberText->Text(), content->Text());
+				// check return, update slot list?
+				// close window
+				if (ret == 0)
+					Quit();
+				else {
+					BAlert *err = new BAlert(APP_NAME, _("There was an error and message probably hasn't been sent.\nYour phone may not support direct SMS sending,\ntry saving the message and sending from list window."), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+					err->Go();
+					break;
+				}
+				break;
+			}
 		default:
 			BWindow::MessageReceived(Message);
 			break;
 	}
 }
 
-bool dialNewSMS::numberValid(void) {
+bool dialNewSMS::numberValid(bool showalert = true) {
 	BString tmp = numberText->Text();
 	int j = tmp.Length();
+	if (j == 0) {
+		if (showalert) {
+			BAlert *err = new BAlert(APP_NAME, _("Please enter destination number."), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+			err->Go();
+		}
+		return false;
+	}
 	int l = 0;	// number of good chars
 	for (int i=0; i<j; i++) {
 		if ( ( (tmp[i]>='0') && (tmp[i]<='9') ) ||
@@ -209,5 +232,24 @@ bool dialNewSMS::numberValid(void) {
 			l++;
 	}
 	// if every char is good return true
-	return (l == j);
+	bool ret = (l == j);
+	// alert user
+	if ((showalert) && (!ret)) {
+		BAlert *err = new BAlert(APP_NAME, _("The number is invalid. It may only contain digits, *, #, + and spaces."), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+		err->Go();
+	}
+	return ret;
+}
+
+bool dialNewSMS::contentValid(bool showalert = true) {
+	BString tmp = content->Text();
+	int j = tmp.Length();
+	if (j == 0) {
+		if (showalert) {
+			BAlert *err = new BAlert(APP_NAME, _("Please enter message"), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+			err->Go();
+		}
+		return false;
+	}
+	return true;
 }

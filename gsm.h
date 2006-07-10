@@ -93,6 +93,8 @@ class GSM {
 		int removeSMS(SMS *sms = NULL);
 
 		int storeSMS(const char *slot, const char *numbers, const char *msg);
+		int sendSMS(const char *numbers, const char *msg);
+		int sendSMSFromStorage(const char *slot, int id);
 
 		const char *getPBMemSlotName(const char *slot);
 		bool changePBMemSlot(const char *slot);

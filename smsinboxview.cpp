@@ -21,4 +21,5 @@ smsDraftboxView::smsDraftboxView(BRect r, const char *slot) : smsBoxView(r, slot
 
 	caption->SetText(_("SMS Drafts"));
 
+	but_send->Show();
 }

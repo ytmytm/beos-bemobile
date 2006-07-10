@@ -656,13 +656,47 @@ int GSM::storeSMS(const char *slot, const char *numbers, const char *msg) {
 		return -1;
 //	printf("sending to [%s],to[%s],msg=[%s]\n",slot,numbers,msg);
 	BString sl = slot;
-	sl += "\",\""; sl += slot;
+	sl += "\",\""; sl += slot;		// hackery!
 	changeSMSMemSlot(sl.String());
 
 	BString cmd = "AT+CMGW=\"";
 	cmd += numbers; cmd +="\"\r";
 	cmd += encodeText(msg); cmd += "\x1A";
-	return sendCommand(cmd.String());
+	int ret = sendCommand(cmd.String());
+	if ((ret == COM_OK) || (ret == COM_TIMEOUT))
+		return 0;
+	return -1;
+}
+
+int GSM::sendSMS(const char *numbers, const char *msg) {
+	if ( (!msg) || (!numbers) )
+		return -1;
+	if ( (strlen(msg)==0) || (strlen(numbers)==0) )
+		return -1;
+	BString cmd = "AT+CMGS=\"";
+	cmd += numbers; cmd +="\"\r";
+	cmd += encodeText(msg); cmd += "\x1A";
+	int ret = sendCommand(cmd.String());
+	if ((ret == COM_OK) || (ret == COM_TIMEOUT))
+		return 0;
+	return -1;
+}
+
+int GSM::sendSMSFromStorage(const char *slot, int id) {
+	if ( (!slot) || (id < 0) )
+		return -1;
+	if ( strlen(slot)==0 )
+		return -1;
+
+	BString sl = slot;
+	sl += "\",\""; sl += slot;		// hackery!
+	changeSMSMemSlot(sl.String());
+
+	BString cmd = "AT+CMSS="; cmd << id;
+	int ret = sendCommand(cmd.String());
+	if ((ret == COM_OK) || (ret == COM_TIMEOUT))
+		return 0;
+	return -1;
 }
 
 const char *GSM::getPBMemSlotName(const char *slot) {
@@ -990,10 +1024,12 @@ const char *GSM::parseDate(const char *input) {
 }
 
 const char *GSM::encodeText(const char *input) {
-	if (rawUTF8)
-		return input;	// for L6
 	if (fEncoding != ENC_UTF8)
 		return input;	// XXX implement!!!
+
+	// below is for UTF8 only
+	if (rawUTF8)
+		return input;	// for L6
 
 	static BString out;
 	BString in = input;
