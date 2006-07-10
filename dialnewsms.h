@@ -15,6 +15,8 @@ class dialNewSMS : public BWindow {
 		dialNewSMS(const char *sl, GSM *g);
 		virtual void MessageReceived (BMessage *Message);
 	private:
+		bool numberValid(void);
+
 		GSM *gsm;
 		struct memSlotSMS *slotWrite;
 

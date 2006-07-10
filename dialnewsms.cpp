@@ -2,10 +2,7 @@
 // counter znaków (pochodna textview lub view z pulse)
 //
 // obsługa:
-// przed zapisaniem: walidacja czy numer
 // przed wysłaniem: walidacja czy numer
-//
-// encode2gsm!
 
 #include <Alert.h>
 #include <Box.h>
@@ -178,13 +175,23 @@ void dialNewSMS::MessageReceived(BMessage *Message) {
 					err->Go();
 					break;
 				}
-				// XXX number - tylko cyfry,+,#,spacje (? spr. g20.pdf)
+				if (! numberValid() ) {
+					BAlert *err = new BAlert(APP_NAME, _("The number is invalid. It may only contain digits, *, #, + and spaces."), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+					err->Go();
+					break;
+				}
 				printf("slot:%s\n",slotWrite->sname.String());
 				int ret = gsm->storeSMS(slotWrite->sname.String(),numberText->Text(),content->Text());
 				// check return, update slot list?
 				// close window
 				if (ret == 0)
 					Quit();
+				else {
+					BAlert *err = new BAlert(APP_NAME, _("There was an error and message probably hasn't been stored."), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+					err->Go();
+					break;
+				}
+				break;
 			}
 		default:
 			BWindow::MessageReceived(Message);
@@ -192,3 +199,15 @@ void dialNewSMS::MessageReceived(BMessage *Message) {
 	}
 }
 
+bool dialNewSMS::numberValid(void) {
+	BString tmp = numberText->Text();
+	int j = tmp.Length();
+	int l = 0;	// number of good chars
+	for (int i=0; i<j; i++) {
+		if ( ( (tmp[i]>='0') && (tmp[i]<='9') ) ||
+			 ( (tmp[i]=='*') || (tmp[i]=='#') || (tmp[i]=='+') || (tmp[i]==' ') ) )
+			l++;
+	}
+	// if every char is good return true
+	return (l == j);
+}
