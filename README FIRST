@@ -21,7 +21,8 @@ RS232 or USB cable, then BeMobile should work too.
 Phone numbers from SMS and Call Register lists are matched against Phone Books, but you have to
 read (open the list) them first. Just 9 last digits are matched, without international prefixes madness
 (I send SMS without prefixes and receive them both with and without +48 so it is best to strip them
-all).
+all). Similarily, number picker in new SMS window is only filled with items from Phone Books that have
+been already visited.
 
 
 
@@ -29,17 +30,21 @@ CHANGES
 
 version 0.2
 - support for L6
-- icons for device list (can't get transparent background to work though)
-- match phone numbers in SMS preview and Call Register with Phone Book and show names+numbers
+- some icons for device list
+- match phone numbers in SMS preview and Call Register with Phone Book to show names+numbers
+- store new SMS on phone
+- (send sms from window/storage - milestone for release)
 
 
 
 OPTIONS
 
-There are really only two interesting menu items:
-- Set date and time - set date and time on the phone according to computer clock
+On the phone status view there is summary of informations about the phone and a button:
+- Set date and time - to set date and time on the phone according to computer clock
+Menu items:
 - Monitor status - disable this when troubleshooting, it won't fill the log with uninteresting
   data about phone battery status, network signal strength etc.
+- Hangup - allows to break call initiated either from computer or phone
 
 
 
@@ -62,13 +67,13 @@ disable 'Monitor status' menu option and try all options that don't work as they
 
 
 
-HELP
+HELP/SUPPORT
 
 Do you want to help? I'll be more than happy to receive any donations and reports (both success
 and failure).
 Do you want to donate? Please use http://www.moneybookers.com service and <mw4096@gmail.com>
 (that is my not-often checked email address) as receiver. Why not Paypal? The reason is that
-for residents of my country Paypal doesn't allow withdrawing money.
+Paypal doesn't allow withdrawing money by residents of my country.
 
 
 
