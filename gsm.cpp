@@ -244,6 +244,7 @@ bool GSM::phoneReset(void) {
 	// fetch character sets, default to utf8 or fallback to whatever is there
 //	sendCommand("AT+CSCS=?");
 	ringIncoming = false;
+	rawUTF8 = false;
 	return true;
 }
 
@@ -330,6 +331,10 @@ void GSM::getPhoneData(void) {
 	sendCommand("AT+CMGF=1");
 	getSMSMemSlots();
 	getPBMemSlots();
+
+	// model-specific
+	if (fModel == "L6")
+		rawUTF8 = true;
 }
 
 void GSM::getPhoneStatus(void) {
@@ -985,23 +990,38 @@ const char *GSM::parseDate(const char *input) {
 }
 
 const char *GSM::encodeText(const char *input) {
-//	implement at least to hex conv!
-	return input;	// XXX this will work only w/ L6
+	if (rawUTF8)
+		return input;	// for L6
+	if (fEncoding != ENC_UTF8)
+		return input;	// XXX implement!!!
+
+	static BString out;
+	BString in = input;
+	char tmp[3];
+
+	out = "";
+	int j = in.Length();
+	for (int i=0; i<j; i++) {
+		snprintf(tmp,3,"%X",in[i]);
+		out.Append(tmp);
+	}
+	return out.String();
 }
 
 const char *GSM::decodeSMSText(const char *input) {
 	if (fEncoding != ENC_UTF8)
 		return decodeText(input);
-	// guess if input is hex encoded or raw UTF8/ASCII
+	// guess if input is hex encoded or raw UTF8
 	int nothex = 0;
 	int i, j;
 	j = strlen(input);
 	for (i=0;i<j;i++)
 		if (input[i]>'F')
 			nothex++;
-	if (nothex > 0)
+	if (nothex > 0) {
+		rawUTF8 = true;	// remember that!
 		return input;
-	else
+	} else
 		return decodeText(input);
 }
 

@@ -9,7 +9,6 @@ OPCJE:
 			at+cmss=<id>
 
 	OKNO [NOWY SMS]
-	- encode gsm!
 	- licznik znaków (jaki limit?)
 		at+cmgs j/w
 

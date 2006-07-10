@@ -146,6 +146,7 @@ int guessPBType(const char *num);
 		// data
 		bool isMotorola;
 		int	fEncoding;
+		bool rawUTF8;	// for L6 send/recv raw (non-HEX-encoded) utf8
 		// status variables
 		bool fStatusUpdateEn;
 		bool ringIncoming;
