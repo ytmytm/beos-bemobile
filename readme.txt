@@ -3,14 +3,9 @@ OPCJE:
 	[REFRESH] [NEW] [SEND] [EDIT] [DELETE] [DIAL]
 	STATUS WINDOW:
 		- guzik [READ EVERYTHING] (czasochłonne) ?
-	SMSBOX:
-		- obsługa guzika [SEND]
-			zmiana slotu
-			at+cmss=<id>
 
 	OKNO [NOWY SMS]
-	- licznik znaków (jaki limit?)
-		at+cmgs j/w
+	- licznik znaków (jaki limit? skad brac? (reimpl. bview? blee)
 
 	CALLBOX, PBBOX
 	- guziki podobnie jak SMSBOX

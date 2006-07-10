@@ -5,9 +5,8 @@ http://members.elysium.pl/ytm/html/beos.html
 http://ytm.bossstation.dnsalias.org/html/beos.html
 
 BeMobile is a simple program to manage contacts and messages stored on your mobile phone.
-Currently it is possible only to browse phonebook and SMS storage. Editing options will
-come in the future, as well as data import and export. It has been developed for Motorola
-C550 and L6 models but should work with any phone that supports AT command set.
+It has been developed for Motorola C550 and L6 models but should work with any phone that
+supports AT command set.
 
 
 
@@ -32,8 +31,7 @@ version 0.2
 - support for L6
 - some icons for device list
 - match phone numbers in SMS preview and Call Register with Phone Book to show names+numbers
-- store new SMS on phone
-- (send sms from window/storage - milestone for release)
+- store new SMS on phone, send SMS directly and from memory slots
 
 
 
