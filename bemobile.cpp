@@ -34,17 +34,12 @@ void BeMobileApp::ReadyToRun() {
 }
 
 void BeMobileApp::MessageReceived(BMessage *msg) {
-	const char *dev;
-	bool log, term;
 	switch(msg->what) {
 		case MSG_INITMSG:
-			{	dev = NULL; log = false; term = false;
-				msg->FindString("_dev",&dev);
-				msg->FindBool("_log",&log);
-				msg->FindBool("_term",&term);
+			{
 				startWindow->Hide();
 // XXX show window that setup is going on
-				if (gsm->initDevice(dev,log,term)) {
+				if (gsm->initDevice(msg)) {
 					mainWindow = new BeMobileMainWindow(APP_NAME,gsm);
 					if (mainWindow != NULL) {
 						mainWindow->Show();
