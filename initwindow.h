@@ -22,10 +22,20 @@
 			BButton *but_quit, *but_ok;
 			BCheckBox *cb_log, *cb_term;
 			BMenuItem **devitems;
+			BMenuItem *parItems[3], *datItems[2], *stoItems[2], *floItems[4], *bauItems[7];
+			BMenuItem *dtrItem, *rtsItem;
 			// results
 			int nports;
 			bool log, term;
 			BString device;
+			// serial settings
+			int parity;
+			int databits;
+			int stopbits;
+			int flowcontrol;
+			int baudrate;
+			bool dtr;
+			bool rts;
 	};
 
 #endif
