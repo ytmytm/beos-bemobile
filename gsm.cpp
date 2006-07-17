@@ -60,6 +60,14 @@ GSM::GSM(void) {
 	logView->MakeEditable(false);
 	logView->SetStylable(false);
 	v->AddChild(new BScrollView("terminalPrvScroll",logView,B_FOLLOW_ALL_SIDES,0,false,true));
+
+	parity = B_NO_PARITY;
+	databits = B_DATA_BITS_8;
+	stopbits = B_STOP_BITS_1;
+	flowcontrol = B_HARDWARE_CONTROL;
+	baudrate = B_19200_BPS;
+	dtr = true;
+	rts = true;
 }
 
 GSM::~GSM() {
@@ -72,6 +80,23 @@ GSM::~GSM() {
 	if (!logWindow)
 		delete logWindow;
 	delete port;
+}
+
+bool GSM::initDevice(BMessage *msg) {
+	const char *dev;
+	if (! msg)
+		return false;
+	msg->FindString("_dev", &dev);
+	msg->FindBool("_log", &log);
+	msg->FindBool("_term", &term);
+	msg->FindInt32("_parity", &parity);
+	msg->FindInt32("_databits", &databits);
+	msg->FindInt32("_stopbits", &stopbits);
+	msg->FindInt32("_flowcontrol", &flowcontrol);
+	msg->FindInt32("_baudrate", &baudrate);
+	msg->FindBool("_dtr", &dtr);
+	msg->FindBool("_rts", &rts);
+	return initDevice(dev, log, term);
 }
 
 bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
@@ -89,13 +114,16 @@ bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
 		logWindow->Show();
 	}
 	if (log || term) {
-		tmp = "opening device:["; tmp += device; tmp += "]\n";
+		tmp = "opening device:["; tmp += device; tmp += "] ";
+		tmp += "dr:"; tmp << baudrate; tmp += " db:"; tmp << databits; tmp += " sb:"; tmp << stopbits;
+		tmp += " pr:"; tmp << parity; tmp += " fl:"; tmp << flowcontrol;
+		tmp += " dtr:"; tmp << dtr; tmp += " rts:"; tmp << rts; tmp += "\n";
 		logWrite(tmp.String());
 	}
 	doneDevice();
 	if (strlen(device)==0)
 		return false;
-	port->SetFlowControl(B_HARDWARE_CONTROL);
+	port->SetFlowControl(flowcontrol);
 	if (port->Open(device) <= 0) {
 		if (log || term) {
 			tmp = "can't open bserialport\n";
@@ -103,11 +131,13 @@ bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
 		}
 		return false;
 	} else {
-		port->SetDataRate(B_19200_BPS);
-		port->SetDataBits(B_DATA_BITS_8);
-		port->SetStopBits(B_STOP_BITS_1);
-		port->SetParityMode(B_NO_PARITY);
+		port->SetDataRate((data_rate)baudrate);
+		port->SetDataBits((data_bits)databits);
+		port->SetStopBits((stop_bits)stopbits);
+		port->SetParityMode((parity_mode)parity);
 		port->SetTimeout(100000);
+		port->SetDTR(dtr);
+		port->SetRTS(rts);
 		snooze(100000);
 		// success?
 		active = phoneReset();

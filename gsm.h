@@ -48,6 +48,7 @@ struct memSlotSMS {
 
 class BFile;
 class BList;
+class BMessage;
 class BSerialPort;
 class BTextView;
 class BWindow;
@@ -57,6 +58,7 @@ class GSM {
 		GSM (void);
 		~GSM();
 		//
+		bool initDevice(BMessage *msg);
 		bool initDevice(const char *device, bool l = false, bool t = false);
 		void doneDevice(void);
 		bool phoneReset(void);
@@ -145,6 +147,9 @@ int guessPBType(const char *num);
 		sem_id sem;
 		bool active;
 		bool log, term;
+		// serial config
+		int32 parity, databits, stopbits, flowcontrol, baudrate;
+		bool dtr, rts;
 		// data
 		bool isMotorola;
 		int	fEncoding;
