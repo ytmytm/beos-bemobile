@@ -29,7 +29,7 @@ CHANGES
 
 version 0.3
 - initial window has menu with all possible serial configuration options, useful for real (COM) ports,
-  meaningless for USB ACM devices
+  meaningless for USB ACM devices; also with custom initalization string
 
 version 0.2
 - support for L6

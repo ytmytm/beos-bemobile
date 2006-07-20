@@ -9,6 +9,7 @@
 	class BCheckBox;
 	class BSerialPort;
 	class BStringView;
+	class BTextControl;
 
 	class initWindow : public BWindow {
 		public:
@@ -24,6 +25,7 @@
 			BMenuItem **devitems;
 			BMenuItem *parItems[3], *datItems[2], *stoItems[2], *floItems[4], *bauItems[7];
 			BMenuItem *dtrItem, *rtsItem;
+			BTextControl *initStr;
 			// results
 			int nports;
 			bool log, term;

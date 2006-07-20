@@ -51,7 +51,7 @@ GSM::GSM(void) {
 
 	port = new BSerialPort;
 	logFile = new BFile;
-	logWindow = new BWindow(BRect(500,170,880,550),TERMLOG_WINDOWNAME,B_FLOATING_WINDOW_LOOK,B_NORMAL_WINDOW_FEEL,B_NOT_ZOOMABLE);
+	logWindow = new BWindow(BRect(500,170,880,550),_(TERMLOG_WINDOWNAME),B_FLOATING_WINDOW_LOOK,B_NORMAL_WINDOW_FEEL,B_NOT_ZOOMABLE);
 	BView *v = new BView(logWindow->Bounds(),"terminalView",B_FOLLOW_ALL_SIDES,B_WILL_DRAW);
 	logWindow->AddChild(v);
 	BRect s = v->Bounds(); s.InsetBy(10,10); s.right -= B_V_SCROLL_BAR_WIDTH;
@@ -61,6 +61,7 @@ GSM::GSM(void) {
 	logView->SetStylable(false);
 	v->AddChild(new BScrollView("terminalPrvScroll",logView,B_FOLLOW_ALL_SIDES,0,false,true));
 
+	// default config
 	parity = B_NO_PARITY;
 	databits = B_DATA_BITS_8;
 	stopbits = B_STOP_BITS_1;
@@ -68,6 +69,8 @@ GSM::GSM(void) {
 	baudrate = B_19200_BPS;
 	dtr = true;
 	rts = true;
+	initString = "ATZ";
+//	initString = "AT S7=45 S0=0 V1 X4 &c1";	// from Kmobiletools (except E0)
 }
 
 GSM::~GSM() {
@@ -83,7 +86,7 @@ GSM::~GSM() {
 }
 
 bool GSM::initDevice(BMessage *msg) {
-	const char *dev;
+	const char *dev, *ini;
 	if (! msg)
 		return false;
 	msg->FindString("_dev", &dev);
@@ -96,6 +99,8 @@ bool GSM::initDevice(BMessage *msg) {
 	msg->FindInt32("_baudrate", &baudrate);
 	msg->FindBool("_dtr", &dtr);
 	msg->FindBool("_rts", &rts);
+	msg->FindString("_initstring", &ini);
+	initString = ini;
 	return initDevice(dev, log, term);
 }
 
@@ -264,7 +269,11 @@ if (debug) printf("error!\n");
 bool GSM::phoneReset(void) {
 	// reset
 	active = true;	// lie for a moment
-	if (sendCommand("ATZ") != 0) {
+	// send some stuff to flush and drain
+	sendCommand("\x1A");
+	sendCommand("ATZ");
+	// initialization string can't be ignored, it may ERR, but not timeout
+	if (sendCommand(initString.String()) == COM_TIMEOUT) {
 		active = false;
 		return false;
 	}

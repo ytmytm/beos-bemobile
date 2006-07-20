@@ -9,6 +9,7 @@
 #include <PopUpMenu.h>
 #include <Screen.h>
 #include <SerialPort.h>
+#include <TextControl.h>
 #include <stdio.h>
 
 #include "globals.h"
@@ -19,6 +20,7 @@ const uint32	MSG_IWCBTERM	= 'IW02';
 const uint32	MSG_IWBUTOK		= 'IW03';
 const uint32	MSG_IWBUTQUIT	= 'IW04';
 const uint32	MSG_IWDEVICE	= 'IW05';
+const uint32	MSG_IWINITSTR	= 'IW06';
 // settings
 const uint32	SET_PARITY		= 'SPAR';
 const uint32	SET_DATABITS	= 'SDAT';
@@ -33,13 +35,6 @@ initWindow::initWindow(const char *name) : BWindow(
 		name,
 		B_FLOATING_WINDOW_LOOK,
 		B_MODAL_APP_WINDOW_FEEL, B_NOT_ZOOMABLE | B_NOT_RESIZABLE) {
-
-	// initialize w/ defaults (or read config here)
-	log = false;
-	term = false;
-	device = "";
-	// my stuff
-	log = term = true; device = "usb0";
 
 	// center onscreen
 	BScreen	*screen = new BScreen();
@@ -65,6 +60,7 @@ initWindow::initWindow(const char *name) : BWindow(
 	int n, i=0;
 	char devName[B_OS_NAME_LENGTH];
 
+	device = "usb0";	// sane default, possibly read from config
 	for (n = nports-1; n >=0; n--, i++) {
 		port->GetDeviceName(n, devName);
 		msg = new BMessage(MSG_IWDEVICE);
@@ -77,6 +73,11 @@ initWindow::initWindow(const char *name) : BWindow(
 	BMenuField *devmf = new BMenuField(s,"iw_devmf",_("Select serial port:"), menu, B_FOLLOW_LEFT|B_FOLLOW_TOP, B_WILL_DRAW);
 	devmf->SetAlignment(B_ALIGN_RIGHT);
 	view->AddChild(devmf);
+
+	BRect u = r;
+	u.top = s.bottom+5; u.bottom = u.top + 15;
+	view->AddChild(initStr = new BTextControl(u,"iw_initstring",_("Init string"),NULL,new BMessage(MSG_IWINITSTR)));
+	initStr->SetDivider(80);
 
 	BRect t = r;
 	t.top = 80; t.bottom = t.top + 15;
@@ -144,6 +145,12 @@ initWindow::initWindow(const char *name) : BWindow(
 	setMenu->AddItem(dtrItem = new BMenuItem(_("DTR active"), new BMessage(SET_DTR)));
 	setMenu->AddItem(rtsItem = new BMenuItem(_("RTS active"), new BMessage(SET_RTS)));
 
+	// defaults, possibly read from config (if any)
+	// initialize w/ defaults (or read config here)
+	// [device] is set earlier (see menu construction)
+	log = term = true;
+	//
+	initStr->SetText("ATZ");
 	// defaults for 19200,8N1,hard,dtr+rts
 	parity = B_NO_PARITY;
 	parItems[0]->SetMarked(true);
@@ -177,6 +184,9 @@ void initWindow::MessageReceived(BMessage *msg) {
 			case MSG_IWDEVICE:
 				if (msg->FindString("_dev",&dev) == B_OK)
 					device = dev;
+				break;
+			case MSG_IWINITSTR:
+				// validate somehow?
 				break;
 			case MSG_IWBUTQUIT:
 				be_app->PostMessage(B_QUIT_REQUESTED);
@@ -279,6 +289,7 @@ void initWindow::DoFinish(void) {
 	msg->AddInt32("_baudrate",baudrate);
 	msg->AddBool("_dtr",dtr);
 	msg->AddBool("_rts",rts);
+	msg->AddString("_initstring",initStr->Text());
 	// pass
 	be_app->PostMessage(msg);
 }

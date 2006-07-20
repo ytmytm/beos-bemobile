@@ -150,6 +150,7 @@ int guessPBType(const char *num);
 		// serial config
 		int32 parity, databits, stopbits, flowcontrol, baudrate;
 		bool dtr, rts;
+		BString initString;
 		// data
 		bool isMotorola;
 		int	fEncoding;
