@@ -111,6 +111,7 @@ class GSM {
 		// may return value from pb or NULL
 		struct pbNum *matchNumFromNum(const char *num);
 		void matchNumFromSMS(struct SMS *sms);
+		int removePBItem(struct pbNum *num = NULL);
 
 		void dial(const char *num);
 		void hangUp(void);

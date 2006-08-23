@@ -28,7 +28,7 @@ class phoneListView : public mobileView {
 
 		ColumnListView *list;
 		BStatusBar *progress;
-		BButton *refresh, *call;
+		BButton *but_refresh, *but_new, *but_edit, *but_del, *but_dial;
 };
 
 class phoneSlotListItem : public CLVEasyItem {

@@ -1,4 +1,5 @@
 
+#include <Button.h>
 #include <StringView.h>
 #include <stdio.h>
 
@@ -6,7 +7,9 @@
 #include "phonelistslotview.h"
 
 phoneListSlotView::phoneListSlotView(BRect r, const char *slot) : phoneListView(r, slot, "phoneListSlotView") {
-
+	but_del->Show();
+	but_edit->Show();
+	but_new->Show();
 }
 
 void phoneListSlotView::fillList(void) {

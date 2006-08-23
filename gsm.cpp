@@ -991,11 +991,25 @@ struct pbNum *GSM::matchNumFromNum(const char *num) {
 }
 
 struct pbNum *GSM::matchNumFromPB(struct pbNum *num) {
+	struct pbNum *newpb = new pbNum;
+	newpb->slot = num->slot;
+	newpb->id = num->id;		// slot and id from original
 	struct pbNum *pb = matchNumFromNum(num->number.String());
-	if (pb)
-		return pb;
-	// no match, return input
-	return num;
+	if (pb) {
+		// phone book entry matched
+		newpb->number = pb->number;	// all other data from phonebook
+		newpb->name = pb->name;
+		newpb->type = pb->type;
+		newpb->kind = pb->kind;
+		newpb->primary = pb->primary;
+	} else {
+		newpb->number = num->number;
+		newpb->name = num->name;
+		newpb->type = num->type;
+		newpb->kind = num->kind;
+		newpb->primary = num->primary;
+	}
+	return newpb;
 }
 
 void GSM::matchNumFromSMS(struct SMS *sms) {
@@ -1027,6 +1041,21 @@ void GSM::matchNumFromSMS(struct SMS *sms) {
 		}
 		sms->pbnumbers.AddItem(newpb);
 	}
+}
+
+// don't call this routine for callreg - it won't work: 1) no support, 2) stored pbNum* is different (new struct after match)
+int GSM::removePBItem(struct pbNum *num = NULL) {
+	if (!num)
+		return -1;
+	BString cmd = "AT+CPBW="; cmd << num->id;
+	changePBMemSlot(num->slot.String());
+	int ret = sendCommand(cmd.String());
+	if (ret == COM_OK) {
+		struct pbSlot *sl = getPBSlot(num->slot.String());
+		sl->items--;
+		sl->pb->RemoveItem(num);
+	}
+	return ret;
 }
 
 void GSM::SMSClearNumList(struct SMS *sms) {
