@@ -1,22 +1,17 @@
 OPCJE:
 	BUTTONS:
-	[REFRESH] [NEW] [SEND] [EDIT] [DELETE] [DIAL]
+	[REFRESH] [NEW] [SEND/EDIT] [DELETE] [DIAL]
 	STATUS WINDOW:
 		- guzik [READ EVERYTHING] (czasochłonne) ?
 
 	OKNO [NOWY SMS]
 	- licznik znaków (jaki limit? skad brac? (reimpl. bview? blee)
 
-	CALLBOX, PBBOX
-	- guziki podobnie jak SMSBOX
-
 	CALLREG
-	- guzik [DIAL], [DELETE]-o ile działa
+	- jakie guziki? co mozna oprocz [DIAL]?
 
-	PB
-	- guzik [DIAL], [DELETE], [EDIT]-na zaznaczone/dwuklik, [NEW]
-
-	OKNO [NOWY NUMER]
+	OKNO [EDIT/NEW]
+	- [EDIT] - wypełnić domyślnymi danymi
 	- combo z listą slotów (domyślnie ustawiony ten, gdzie kliknięcie)
 	- pola tekstowe: numer, nazwa, combo:typ, cbox: primary (może dodatkowe moto z adresem)
 	- [CANCEL], [SAVE] (sprawdzać replace)
@@ -52,3 +47,9 @@ IKONY
 - ikony typu smsa (nowy,przeczytany,nowyniewysłany,wysłany) - 4 koperty
 - ikona baterii/baterii krytycznej (użyć z resources, gdzie?)
 - ikona z wieżą nadawczą (do siły sygnału)
+
+MODULARYZACJA
+- wydzielic z klasy GSM klase Engine (wirtualna)
+	- Engine: wysylanie komend, odczytywanie statusu itp
+	- GSM: manipulacja listami, wyszukiwanie
+	- pochodna Engine: ATMotoEngine
