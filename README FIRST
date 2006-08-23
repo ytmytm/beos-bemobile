@@ -30,6 +30,7 @@ CHANGES
 version 0.3
 - initial window has menu with all possible serial configuration options, useful for real (COM) ports,
   meaningless for USB ACM devices; also with custom initalization string
+- you can dial and delete items from phone books
 
 version 0.2
 - support for L6
