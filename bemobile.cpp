@@ -65,6 +65,6 @@ void BeMobileApp::AboutRequested(void) {
 	aboutDialog->SetApplicationName(APP_NAME);
 	aboutDialog->SetVersionNumber(APP_VERSION);
 	aboutDialog->SetCopyrightString(_(B_UTF8_COPYRIGHT"2006 by Maciej Witkowiak"));
-	aboutDialog->SetText(_("About text..."));
+	aboutDialog->SetText(_("Mobile phone manager for BeOS\n\nDo you like this program? Do you want to help?\n\nPlease donate via http://www.moneybookers.com\nto <mw4096@gmail.com>"));
 	aboutDialog->Show();
 }

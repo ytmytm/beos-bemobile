@@ -41,6 +41,15 @@ version 0.2
 
 OPTIONS
 
+On the initial screen there is a number of settings that you can change. The menu has all available
+serial port options (important for COM cable, mostly meaningless for USB). You can also type custom
+initialization string. It should be something like
+	ATZ - modem reset
+	AT&F - restore factory settings
+or just AT (which does nothing).
+You can also choose if you want to see communications between the phone and your computer.
+It is very important for debugging.
+
 On the phone status view there is summary of informations about the phone and a button:
 - Set date and time - to set date and time on the phone according to computer clock
 Menu items:
@@ -52,7 +61,7 @@ Menu items:
 
 NOKIA
 
-I expect that this will come often - NO, MOST LIKELY IT WILL NOT RUN WITH YOUR NOKIA.
+I expect that this will come often - NO, MOST LIKELY IT WILL NOT RUN WITH YOUR NOKIA (YET).
 As far as I know, most Nokia phones use something different than plain old modem AT commands.
 If you're really interested, you should port gnokii (http://www.gnokii.org) to BeOS, or convince
 someone to do it. Myself, I don't have a Nokia phone, so buy me one before asking about compatibility
