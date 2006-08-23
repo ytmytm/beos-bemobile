@@ -293,7 +293,7 @@ void smsBoxView::MessageReceived(BMessage *Message) {
 							fullListRefresh();
 							fillList();
 						} else {
-							BAlert *err = new BAlert(APP_NAME, _("There was an error and message hasn't been sent."), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+							BAlert *err = new BAlert(APP_NAME, _("There was an error and message hadn't been sent."), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
 							err->Go();
 						}
 					}
@@ -306,7 +306,7 @@ void smsBoxView::MessageReceived(BMessage *Message) {
 				if (i>=0) {
 					BAlert *ask = new BAlert(APP_NAME, _("Do you really want to delete this message?"), _("Yes"), _("No"), NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
 					if (ask->Go() == 0) {
-						struct SMS *sms = ((smsBoxListItem*)list->ItemAt(list->CurrentSelection(0)))->Msg();
+						struct SMS *sms = ((smsBoxListItem*)list->ItemAt(i))->Msg();
 						if (gsm->removeSMS(sms) == 0)
 							list->RemoveItem(i);
 					}
