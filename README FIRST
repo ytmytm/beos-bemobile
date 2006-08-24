@@ -1,5 +1,5 @@
 
-BeMobile 0.3
+BeMobile 0.4
 (c) Maciej Witkowiak <ytm@elysium.pl>, <mwitkowiak@gmail.com>
 http://members.elysium.pl/ytm/html/beos.html
 http://ytm.bossstation.dnsalias.org/html/beos.html
@@ -26,6 +26,9 @@ been already visited.
 
 
 CHANGES
+
+version 0.4
+- ?
 
 version 0.3
 - initial window has menu with all possible serial configuration options, useful for real (COM) ports,
