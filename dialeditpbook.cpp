@@ -26,7 +26,7 @@ const uint32 BUT_REVERT = 'DP03';
 const uint32 BUT_SAVE	= 'DP04';
 
 // this (quietly) depends on PK_* enum in GSM!!! (also revertData and msgrcvd)
-const char *numTypes[] = { "Work", "Home", "Main", "Mobile", "Fax", "Pager", "E-mail", "Mailing list", NULL };
+const char *numTypes[] = { "Work", "Home", "General", "Mobile", "Fax", "Pager", "E-mail", "Mailing list", NULL };
 
 dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow(
 	BRect(350,250,650,250+145),
@@ -188,15 +188,27 @@ printf("min:%i,max:%i\n",slotWrite->min,slotWrite->max);
 	if (slotWrite == iniSlot)
 		id = num->id;
 	updateIdText();
-	// check slot caps and limits
+	// XXX check slot caps and limits
 }
 
 bool dialEditPB::saveData(void) {
 	validateData();
-// XXX implement me!
-	// switch slot
-	// send data
-	// check result, show error
+	struct pbNum n;
+	n.id = id;
+	n.slot = slotWrite->sname;
+	n.number = tcNumber->Text();
+	n.name = tcName->Text();
+	if (slotWrite->has_phtype || true) {
+		n.kind = curType;
+		n.primary = (cbPrimary->Value() == B_CONTROL_ON);
+	}
+
+	if (gsm->storePBItem(&n) != 0) {
+// XXX quite user friendly :/
+		BAlert *a = new BAlert(APP_NAME, _("There was an error."),_("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+		a->Go();
+		return false;
+	}
 	return true;
 }
 
