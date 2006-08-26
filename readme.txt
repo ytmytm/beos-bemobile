@@ -8,6 +8,7 @@ OPCJE:
 	- licznik znaków (jaki limit? skad brac? (reimpl. bview? blee)
 
 	CALLREG
+	- [BUG!] - dwuklik na liście otwiera edycje!
 	- jakie guziki? co mozna oprocz [DIAL]?
 
 	OKNO [EDIT/NEW]
