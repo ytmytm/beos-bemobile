@@ -28,7 +28,8 @@ been already visited.
 CHANGES
 
 version 0.4
-- ?
+- fixed some bugs (like handling empty numbers when someone hides it)
+- dialog to edit/add new phonebook entries
 
 version 0.3
 - initial window has menu with all possible serial configuration options, useful for real (COM) ports,

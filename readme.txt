@@ -8,7 +8,7 @@ OPCJE:
 	- licznik znaków (jaki limit? skad brac? (reimpl. bview? blee)
 
 	CALLREG
-	- [BUG!] - dwuklik na liście otwiera edycje!
+	- [BUG!] - dwuklik na liście otwiera edycje! (jeśli wyczyścić id, to można potraktować jako save as...)
 	- jakie guziki? co mozna oprocz [DIAL]?
 
 	OKNO [EDIT/NEW]
