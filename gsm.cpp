@@ -1082,6 +1082,42 @@ int GSM::removePBItem(struct pbNum *num = NULL) {
 	return ret;
 }
 
+int GSM::storePBItem(struct pbNum *num = NULL) {
+	if (!num)
+		return -1;
+	changePBMemSlot(num->slot.String());
+	struct pbSlot *sl = getPBSlot(num->slot.String());
+
+	BString cmd, out;
+	if (isMotorola)
+		cmd = "AT+MPBW=";
+	else
+		cmd = "AT+CPBW=";
+	if (num->id > 0)
+		cmd << num->id;
+	cmd += ",\""; cmd += num->number; cmd += "\",,";
+	if (rawUTF8) cmd += "\"";
+	cmd += encodeText(num->name.String());
+	if (rawUTF8) cmd += "\"";
+
+	if (sl->has_phtype) {
+		cmd += ",";
+		cmd << num->kind;
+		cmd += ",,,,";
+		cmd += (num->primary ? "1" : "0");
+	}
+
+	printf("cmd:[%s]\n",cmd.String());
+
+	int ret = sendCommand(cmd.String(),&out,true);
+
+	// sometimes this gives the delayed error
+	if (ret == COM_OK)
+		ret = sendCommand("AT",NULL,true);
+
+	return ret;
+}
+
 void GSM::SMSClearNumList(struct SMS *sms) {
 	if (sms->pbnumbers.CountItems()>0) {
 		struct pbNum *anItem;

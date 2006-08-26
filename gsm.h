@@ -110,12 +110,12 @@ class GSM {
 
 		void getPBList(const char *slot);
 		const char *stripLeadNum(const char *num);
-		// may return value from pb or input
+		// these return(add to sms) new struct pbNum
 		struct pbNum *matchNumFromPB(struct pbNum *num);
-		// may return value from pb or NULL
 		struct pbNum *matchNumFromNum(const char *num);
 		void matchNumFromSMS(struct SMS *sms);
 		int removePBItem(struct pbNum *num = NULL);
+		int storePBItem(struct pbNum *num = NULL);
 
 		void dial(const char *num);
 		void hangUp(void);
