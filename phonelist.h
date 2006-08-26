@@ -50,7 +50,7 @@ class phoneSlotListItem : public CLVEasyItem {
 				case GSM::PK_FAX:	tmp = _("Fax"); break;
 				case GSM::PK_PAGER:	tmp = _("Pager"); break;
 				case GSM::PK_EMAIL:	tmp = _("E-mail"); break;
-				case GSM::PK_MAILLIST:	tmp = _("Mailing list");
+				case GSM::PK_MAILLIST:	tmp = _("Mailing list"); break;
 				case GSM::PK_MOBILE:
 				default:
 					tmp = _("Mobile");
