@@ -13,8 +13,20 @@ OPCJE:
 	OKNO [EDIT/NEW]
 	- [EDIT] - wypełnić domyślnymi danymi
 	- combo z listą slotów (domyślnie ustawiony ten, gdzie kliknięcie)
-	- pola tekstowe: numer, nazwa, combo:typ, cbox: primary (może dodatkowe moto z adresem)
 	- [CANCEL], [SAVE] (sprawdzać replace)
+	- pola (default):
+		- slot (tylko dla nowych?)
+		- numer, nazwa
+		- dla !moto - numer musi być \+?\d+, zapisywać z typ=129 (numer) lub 145 (+numer)
+	- pola (moto):
+		- combo: typ, cbox: primary
+			- jeśli typ=mailinglist, to zamiast numeru podaje się "a b c d" - jakiś sposób do wyboru id
+			(widget listy z wielokrotnym wyborem zamiast pola tekstowego?)
+		- jeśli obsługiwane, to dodatkowe pola (adres, bday, miasto, kraj itd.)
+		- pomijać nieznane atrybuty: voiceid,ringer itp. (przy edycji lepiej zachowywać aktualne wartości)
+		(pamietane w num->raw, moze niekoniecznie, wystarczy wstawiac puste przecinki dla edycji
+		CPBW=x,,,"newname" zmieni tylko nazwe, zeby nadpisac numer trzeba go usunac i dopiero
+		zapisac")
 
 LISTA:
 - dodac do nazw kolumne z wartosciami (ile numerow, ile smsow, warto???)
