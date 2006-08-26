@@ -816,7 +816,7 @@ void GSM::getPBMemSlots(void) {
 			slot->pb = new BList;
 			listMemSlotPB->AddItem(slot);
 			slot->min = slot->max = slot->numlen = slot->namelen = 0;
-			if (changePBMemSlot(slot->sname.String()) == false) {
+			if (checkPBMemSlot(slot) == false) {
 				listMemSlotPB->RemoveItem(slot);
 				delete slot;
 			}
@@ -826,29 +826,37 @@ void GSM::getPBMemSlots(void) {
 }
 
 bool GSM::changePBMemSlot(const char *slot) {
+	BString cmd = "AT+CPBS=\"";
+	cmd += slot; cmd += "\"";
+
+	return (sendCommand(cmd.String()) == COM_OK);
+}
+
+bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 	static Pattern *pSlot = Pattern::compile("^\\+CPBR: \\((\\d+)-(\\d+)\\),(\\d+),(\\d+)", Pattern::MULTILINE_MATCHING);
 	static Matcher *mSlot = pSlot->createMatcher("");
 
-	BString out, cmd = "AT+CPBS=\"";
-	cmd += slot; cmd +="\"";
+	if (!sl)
+		return false;
 
-	sendCommand(cmd.String());
-	cmd = "AT+CPBR=?";
+	if (changePBMemSlot(sl->sname.String()) == false)
+		return false;
+
+	BString out;
 	// return false on error -> don't add such slot
-	if (sendCommand(cmd.String(),&out) == COM_ERROR)
+	if (sendCommand("AT+CPBR=?",&out) == COM_ERROR)
 		return false;
 
 	mSlot->setString(out.String());
 	if (mSlot->findFirstMatch()) {
-		struct pbSlot *sl = getPBSlot(slot);
-		if (sl) {
-			sl->min = toint(mSlot->getGroup(1).c_str());
-			sl->max = toint(mSlot->getGroup(2).c_str());
-			sl->numlen = toint(mSlot->getGroup(3).c_str());
-			sl->namelen = toint(mSlot->getGroup(4).c_str());
-			printf("got:%s - (%i-%i),%i,%i\n",slot,sl->min,sl->max,sl->numlen,sl->namelen);
-		}
+		sl->min = toint(mSlot->getGroup(1).c_str());
+		sl->max = toint(mSlot->getGroup(2).c_str());
+		sl->numlen = toint(mSlot->getGroup(3).c_str());
+		sl->namelen = toint(mSlot->getGroup(4).c_str());
+		printf("got:%s - (%i-%i),%i,%i\n",sl->sname.String(),sl->min,sl->max,sl->numlen,sl->namelen);
 	}
+	// check motorola caps with +mpbr,+mpbw (identical output? check l6)
+
 	return true;
 }
 
@@ -896,7 +904,7 @@ void GSM::getPBList(const char *slot) {
 	// accept timeout (SIM reading may be slow)
 	if ((rs == COM_OK)||(rs == COM_TIMEOUT)) {
 		pat = isMotorola ? "^\\+MP" : "^\\+CP";
-		pat += "BR: (\\d+),\"([^\"]+)\",(\\d+),([^,\r\n]*)";
+		pat += "BR: (\\d+),\"([^\"]*)\",(\\d+),([^,\r\n]*)";
 		if (isMotorola) {
 			// 5phtype,6voicetag,7alerttone,8backlight,9primary,10categorynum
 			pat += ",(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)";
@@ -910,6 +918,7 @@ void GSM::getPBList(const char *slot) {
 		while (mNum->findNextMatch()) {
 			num = new pbNum;
 			num->slot = slot;
+			num->raw = mNum->getGroup(0).c_str();
 			num->id = toint(mNum->getGroup(1).c_str());
 			num->number = mNum->getGroup(2).c_str();
 			switch (toint(mNum->getGroup(3).c_str())) {

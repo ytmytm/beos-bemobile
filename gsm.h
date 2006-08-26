@@ -12,6 +12,7 @@ struct pbNum {
 	int type;	// number/email/other
 	int kind;	// home/work/etc.
 	bool primary;
+	BString raw;	// raw input to preserve unsupported extended attributes for editing
 };
 //
 struct pbSlot {
@@ -100,6 +101,7 @@ class GSM {
 
 		const char *getPBMemSlotName(const char *slot);
 		bool changePBMemSlot(const char *slot);
+		bool checkPBMemSlot(struct pbSlot *sl = NULL);
 		bool hasPBSlot(const char *slot);
 		struct pbSlot *getPBSlot(const char *slot);
 		BList *listMemSlotPB;
