@@ -963,8 +963,12 @@ const char *GSM::stripLeadNum(const char *num) {
 	static BString tmp;
 	tmp = num;
 	tmp.RemoveSet("+");
-	while (tmp[0] == '0')
-		tmp.Remove(0,1);
+again:	// remove leading zeros, quite ugly
+	if (tmp.Length()>0)
+		if (tmp[0] == '0') {
+			tmp.Remove(0,1);
+			goto again;
+		}
 	// assume 9 digit numbers
 	if (tmp.Length()>9) {
 		BString tmp2 = tmp;
