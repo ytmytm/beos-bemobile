@@ -25,6 +25,8 @@ struct pbSlot {
 	int namelen;
 	bool callreg;
 	bool writable;
+	bool has_phtype;
+	bool has_address;
 	BList *pb;
 };
 //

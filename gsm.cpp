@@ -855,7 +855,14 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 		sl->namelen = toint(mSlot->getGroup(4).c_str());
 		printf("got:%s - (%i-%i),%i,%i\n",sl->sname.String(),sl->min,sl->max,sl->numlen,sl->namelen);
 	}
+	sl->has_phtype = false;
+	sl->has_address = false;
 	// check motorola caps with +mpbr,+mpbw (identical output? check l6)
+	if (isMotorola) {
+		// AT+MPBR=?	
+		sl->has_phtype = true;
+		sl->has_address = true;
+	}
 
 	return true;
 }
@@ -906,9 +913,12 @@ void GSM::getPBList(const char *slot) {
 		pat = isMotorola ? "^\\+MP" : "^\\+CP";
 		pat += "BR: (\\d+),\"([^\"]*)\",(\\d+),([^,\r\n]*)";
 		if (isMotorola) {
+			if (sl->has_phtype)
 			// 5phtype,6voicetag,7alerttone,8backlight,9primary,10categorynum
-			pat += ",(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)";
+				pat += ",(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)";
 			// 11,12,13-??,14iconpath,15-16??,17adres2,18adres1,19miasto,20stan,21kod,22kraj,23pseudo,24bday(mm-dd-yyyy),25??
+			if (sl->has_address)
+				pat += "";
 		}
 		Pattern *pNum = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
 		Matcher *mNum = pNum->createMatcher("");
@@ -945,14 +955,15 @@ void GSM::getPBList(const char *slot) {
 			num->kind = PK_MAIN;
 			if (isMotorola) {
 				// extended params
-				num->kind = toint(mNum->getGroup(5).c_str());
-				if (toint(mNum->getGroup(9).c_str()) == 0)
-					num->primary = false;
+				if (sl->has_phtype) {
+					num->kind = toint(mNum->getGroup(5).c_str());
+					if (toint(mNum->getGroup(9).c_str()) == 0)
+						num->primary = false;
+				}
 			}
 //			printf("%i:%s:%s:%i:%i,%i\n",num->id,num->number.String(),num->name.String(),num->kind,num->type,num->primary?0:1);
 			pbList->AddItem(num);
 		}
-
 	}
 	sl->items = pbList->CountItems();
 
