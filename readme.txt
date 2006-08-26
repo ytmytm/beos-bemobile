@@ -27,6 +27,7 @@ OPCJE:
 		(pamietane w num->raw, moze niekoniecznie, wystarczy wstawiac puste przecinki dla edycji
 		CPBW=x,,,"newname" zmieni tylko nazwe, zeby nadpisac numer trzeba go usunac i dopiero
 		zapisac")
+	- zapis: rozroznic update od overwrite! kontrolowac dlugosc pol
 
 LISTA:
 - dodac do nazw kolumne z wartosciami (ile numerow, ile smsow, warto???)
