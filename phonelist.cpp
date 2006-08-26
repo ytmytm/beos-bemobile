@@ -8,6 +8,7 @@
 #include "ColumnListView.h"
 #include "globals.h"
 #include "phonelist.h"
+#include "dialeditpbook.h"
 
 #include <stdio.h>
 
@@ -164,8 +165,10 @@ void phoneListView::MessageReceived(BMessage *Message) {
 			}
 		case CRNEW:
 			{
-				BAlert *a = new BAlert(APP_NAME, _("Implement me! (NEW)"),_("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
-				a->Go();
+//				BAlert *a = new BAlert(APP_NAME, _("Implement me! (NEW)"),_("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+//				a->Go();
+				dialEditPB *dn;
+				dn = new dialEditPB(memSlot.String(), gsm);
 				break;
 			}
 		case CRLIST_INV:
@@ -173,8 +176,10 @@ void phoneListView::MessageReceived(BMessage *Message) {
 		case CREDIT:
 			{	int i = list->CurrentSelection(0);
 				if (i>=0) {
-					BAlert *a = new BAlert(APP_NAME, _("Implement me! (EDIT)"),_("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
-					a->Go();
+//					BAlert *a = new BAlert(APP_NAME, _("Implement me! (EDIT)"),_("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+//					a->Go();
+					dialEditPB *dn;
+					dn = new dialEditPB(memSlot.String(),gsm,((phoneSlotListItem*)list->ItemAt(i))->Num());
 				}
 				break;
 			}
