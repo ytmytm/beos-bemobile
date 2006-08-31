@@ -1,4 +1,6 @@
 OPCJE:
+	[DIAL]
+	- dzwoni  w trybie transmisji danych??? (z L6 na C550)
 	BUTTONS:
 	[REFRESH] [NEW] [SEND/EDIT] [DELETE] [DIAL]
 	STATUS WINDOW:
@@ -40,6 +42,7 @@ LISTA SMS:
 		- guziki jak w poszczególnych PB
 
 TODO:
+- zapisywanie/odczyt parametrów z initWindow
 - statystyki użycia slotów (total?) na oknach głównych PB i CALLREG i w caption?
 - sms PDU mode (odczytywanie wszystkich informacji)
 - coś pochodnego CLVEasyItem, ale żeby na żądanie pisało się bold (mark new)
