@@ -349,6 +349,7 @@ void dialEditPB::MessageReceived(BMessage *Message) {
 				break;
 			}
 		default:
+			BWindow::MessageReceived(Message);
 			break;
 	}
 }

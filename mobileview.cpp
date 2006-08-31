@@ -27,7 +27,8 @@ void mobileView::SetDevice(GSM *g) {
 }
 
 void mobileView::MessageReceived(BMessage *Message) {
-
+// may cause crash (e.g. using mouse roller on the view)
+//	BView::MessageReceived(Message);
 }
 
 BRect mobileView::MyBounds(void) {

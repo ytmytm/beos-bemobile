@@ -1,5 +1,4 @@
 OPCJE:
-	- we wszystkich klasach potomnych dodać obsługę msg default --> klasy podstawowej!
 	BUTTONS:
 	[REFRESH] [NEW] [SEND/EDIT] [DELETE] [DIAL]
 	STATUS WINDOW:

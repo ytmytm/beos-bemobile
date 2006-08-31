@@ -198,6 +198,7 @@ void phoneListView::MessageReceived(BMessage *Message) {
 //				break;
 //			}
 		default:
+			mobileView::MessageReceived(Message);
 			break;
 	}
 }

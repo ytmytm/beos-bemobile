@@ -270,6 +270,7 @@ void initWindow::MessageReceived(BMessage *msg) {
 				}
 				break;				
 			default:
+				BWindow::MessageReceived(msg);
 				break;
 		}
 	}

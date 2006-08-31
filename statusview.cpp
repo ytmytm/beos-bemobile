@@ -174,6 +174,7 @@ void statusView::MessageReceived(BMessage *Message) {
 			RefreshStatus();
 			break;
 		default:
+			mobileView::MessageReceived(Message);
 			break;
 	}
 }
