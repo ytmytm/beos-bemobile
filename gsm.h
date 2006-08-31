@@ -13,6 +13,7 @@ struct pbNum {
 	int kind;	// home/work/etc.
 	bool primary;
 	BString raw;	// raw input to preserve unsupported extended attributes for editing
+	BList *attr;	// extended attributes, as described in slot->fields
 };
 //
 struct pbSlot {
@@ -20,14 +21,30 @@ struct pbSlot {
 	BString name;
 	int min;
 	int max;
-	int items;
-	int numlen;
-	int namelen;
 	bool callreg;
 	bool writable;
-	bool has_phtype;
-	bool has_address;
-	BList *pb;
+	bool has_phtype;	// XXX remove this
+	BList *pb;			// list of contents
+	BList *fields;		// description of extended attributes
+};
+//
+struct pbCombo {		// single combo item
+	BString text;
+	int v;
+};
+//
+union pbVal {			// single pbNum.attr value
+	BString *text;
+	bool b;
+	int v;
+};
+//
+struct pbField {
+	int type;		// GSM::PF_*
+	int max;		// maxlen for text, maxvalue for combo
+	int offset;		// # of field in {C,M}PBW 0=id, 1=number, 2=type, 3=name,...
+	BString name;	// field name (show it to user)
+	BList *cb;		// combo items: <name>,<value>
 };
 //
 struct SMS {
@@ -114,13 +131,14 @@ class GSM {
 		struct pbNum *matchNumFromPB(struct pbNum *num);
 		struct pbNum *matchNumFromNum(const char *num);
 		void matchNumFromSMS(struct SMS *sms);
+
 		int removePBItem(struct pbNum *num = NULL);
 		int storePBItem(struct pbNum *num = NULL);
 
 		void dial(const char *num);
 		void hangUp(void);
 
-		// encodings
+		// character encodings
 		enum { ENC_UTF8 = 1, ENC_UCS2, ENC_GSM };
 		// sms TEXT mode states
 		enum { REC_READ=1, REC_UNREAD, STO_SENT, STO_UNSENT, MSG_UNK };
@@ -128,7 +146,9 @@ class GSM {
 		enum { PB_PHONE = 1, PB_INTLPHONE, PB_EMAIL, PB_OTHER };
 		// direct pNum.kind mapping (for motorola)
 		enum { PK_WORK = 0, PK_HOME, PK_MAIN, PK_MOBILE, PK_FAX, PK_PAGER, PK_EMAIL, PK_MAILLIST };
-	
+		// phonebook fields' types
+		enum { PF_PHONE = 0, PF_PHONEEMAIL, PF_TEXT, PF_BOOL, PF_COMBO };
+
 	private:
 void logWrite(const char *log);
 int getSMSType(const char *type);

@@ -12,9 +12,9 @@ OPCJE:
 	- jakie guziki? co mozna oprocz [DIAL]?
 
 	OKNO [EDIT/NEW]
+	- przepisać phonelistslotview tak, żeby atrybuty do kolumn brane były z listy
 	- wykrywanie pozostałych atrybutów i ich długości
 	- włączenie [primary] działa, wyłączenie - nie bardzo
-	- widgety do pozostałych atrybutów (na sztywno, czy jak? na początek na sztywno)
 	- przy mailing list coś do wyboru numerów (warto...?) np. lista z wielokrotnym wyborem
 
 LISTA:

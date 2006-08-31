@@ -1,10 +1,8 @@
 
 #include <Alert.h>
-//#include <Box.h>
 #include <Button.h>
 #include <CheckBox.h>
 #include <Font.h>
-//#include <List.h>
 #include <MenuField.h>
 #include <MenuItem.h>
 #include <Message.h>
@@ -21,15 +19,12 @@
 
 const uint32 NC			= 'DP00';
 const uint32 MENU_SLOT	= 'DP01';
-const uint32 MENU_TYPE	= 'DP02';
+const uint32 MENU_FIELD	= 'DP02';
 const uint32 BUT_REVERT = 'DP03';
 const uint32 BUT_SAVE	= 'DP04';
 
-// this (quietly) depends on PK_* enum in GSM!!! (also revertData and msgrcvd)
-const char *numTypes[] = { "Work", "Home", "General", "Mobile", "Fax", "Pager", "E-mail", "Mailing list", NULL };
-
 dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow(
-	BRect(350,250,650,250+145),
+	BRect(350,250,650,250+85),
 	_("Phonebook entry"),
 	B_TITLED_WINDOW, 0) {
 
@@ -47,7 +42,7 @@ dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow
 
 	float left = view->Bounds().left+10;
 	float right = view->Bounds().right-10;
-	float half = left+(view->Bounds().Width()-20)/2-10;
+//	float half = left+(view->Bounds().Width()-20)/2-10;
 	float quarters3 = left+(view->Bounds().Width()-20)*3/4-10;
 
 	slotMenu = new BPopUpMenu(_("[select]"));
@@ -74,6 +69,38 @@ dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow
 	}
 
 	// XXX at this point slotWrite can't be NULL! assert or do sth about it
+	if (p) {
+		num = p;
+	} else {
+		// create an empty pbNum
+		num = new pbNum;
+		num->id = -1;
+		num->kind = GSM::PK_MOBILE;
+		num->primary = false;
+		// create attribute list
+		num->attr = new BList;
+		int j = slotWrite->fields->CountItems();
+		struct pbField *pf;
+		union pbVal *v;
+		for (int i=0; i<j; i++) {
+			pf = (struct pbField*)slotWrite->fields->ItemAt(i);
+			v = new pbVal;
+			switch (pf->type) {
+				case GSM::PF_PHONE:
+				case GSM::PF_PHONEEMAIL:
+				case GSM::PF_TEXT:
+					v->text = new BString("");
+					break;
+				case GSM::PF_BOOL:
+					v->b = false;
+					break;
+				case GSM::PF_COMBO:
+					v->v = -1;
+					break;
+			}
+			num->attr->AddItem(v);
+		}
+	}
 
 	BMenuField *mf;
 	view->AddChild(mf = new BMenuField(BRect(15,15,quarters3,40),"slotMenuf",_("Slot:"),slotMenu));
@@ -88,30 +115,53 @@ dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow
 	r.top = 55;
 	r.bottom = r.top + 30;
 
-	view->AddChild(tcNumber = new BTextControl(BRect(r),"tcNumber",_("Number"),NULL,new BMessage(NC)));
-	tcNumber->SetDivider(50);
-	r.OffsetBy(0,30);
-	view->AddChild(tcName = new BTextControl(BRect(r),"tcName",_("Name"),NULL,new BMessage(NC)));
-	tcName->SetDivider(50);
-	r.OffsetBy(0,30);
-
-	if (slotWrite->has_phtype || true) {
-		this->ResizeBy(0, 30);
-		r.right = half;
-		r.top += 5;
-		view->AddChild(cbPrimary = new BCheckBox(BRect(r),"cbPrimary",_("Primary number"),new BMessage(NC)));
-		r.top -= 5;
-
-		typeMenu = new BPopUpMenu(_("[select]"));
-		for (int i=0;numTypes[i];i++) {
-			msg = new BMessage(MENU_TYPE);
-			msg->AddInt32("_id", i);
-			mTypes[i] = new BMenuItem(numTypes[i], msg);
-			typeMenu->AddItem(mTypes[i]);
+	// process slot fields
+	int j = slotWrite->fields->CountItems();
+	struct pbField *pf;
+	BString id;
+	BView *c;
+	attr = new BList;
+	union pbVal *pv;
+	for (int i=0; i<j; i++) {
+		// provide placeholder for menu value
+		attr->AddItem(pv = new pbVal);
+		pf = (struct pbField*)slotWrite->fields->ItemAt(i);
+		id = "pf"; id << i;
+		c = NULL;
+		switch (pf->type) {
+			case GSM::PF_PHONE:
+			case GSM::PF_PHONEEMAIL:
+				c = new BTextControl(BRect(r),id.String(),pf->name.String(),NULL,new BMessage(NC));
+				break;
+			case GSM::PF_TEXT:
+				c = new BTextControl(BRect(r),id.String(),pf->name.String(),NULL,new BMessage(NC));
+				break;
+			case GSM::PF_BOOL:
+				c = new BCheckBox(BRect(r),id.String(),pf->name.String(),new BMessage(NC));
+				break;
+			case GSM::PF_COMBO:
+				{
+					BPopUpMenu *m = new BPopUpMenu(_("[select]"));
+					int l = pf->cb->CountItems();
+					struct pbCombo *pc;
+					for (int k=0; k<l; k++) {
+						pc = (struct pbCombo*)pf->cb->ItemAt(k);
+						msg = new BMessage(MENU_FIELD);
+						msg->AddInt32("_id",i);
+						msg->AddInt32("_value",pc->v);
+						m->AddItem(new BMenuItem(pc->text.String(), msg));
+					}
+					c = new BMenuField(r, id.String(), pf->name.String(), m);
+					// remember initial state
+					pv->v = ((union pbVal*)num->attr->ItemAt(i))->v;
+				}
+				break;
 		}
-		r.OffsetBy(half,0);
-		view->AddChild(mf = new BMenuField(r, "typeMenuf", _("Type"), typeMenu));
-		mf->SetDivider(be_plain_font->StringWidth(mf->Label())+5);
+		if (c) {
+			this->ResizeBy(0,30);
+			view->AddChild(c);
+			r.OffsetBy(0,30);
+		}
 	}
 
 	BFont font(be_plain_font);
@@ -131,14 +181,6 @@ dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow
 	r.left = r.right - (font.StringWidth(tmp.String())+40);
 	view->AddChild(new BButton(r, "butSave", tmp.String(), new BMessage(BUT_SAVE), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
 
-	if (p) {
-		num = p;
-	} else {
-		num = new pbNum;
-		num->id = -1;
-		num->kind = GSM::PK_MOBILE;
-		num->primary = false;
-	}
 	revertData();
 
 	Show();
@@ -149,25 +191,51 @@ void dialEditPB::revertData(void) {
 	mSlots[iniSlotNum]->SetMarked(true);
 	slotWrite = iniSlot;
 	// restore data
-	tcNumber->SetText(num->number.String());
-	tcName->SetText(num->name.String());
 	id = num->id;
 	updateIdText();
 	// extended attributes
-	if (slotWrite->has_phtype || true) {
-		if ((num->kind>=GSM::PK_WORK) && (num->kind<=GSM::PK_MAILLIST))
-			curType = num->kind;
-		else
-			curType = GSM::PK_MOBILE;
-		mTypes[curType]->SetMarked(true);
-		cbPrimary->SetValue(num->primary ? B_CONTROL_ON : B_CONTROL_OFF);
+	int j = slotWrite->fields->CountItems();
+	struct pbField *pf;
+	union pbVal *v;
+	BView *c;
+	BString id;
+	for (int i=0; i<j; i++) {
+		pf = (struct pbField*)slotWrite->fields->ItemAt(i);
+		v = (union pbVal*)num->attr->ItemAt(i);
+		id = "pf"; id << i;
+		c = view->FindView(id.String());
+		switch (pf->type) {
+			case GSM::PF_PHONEEMAIL:
+			case GSM::PF_PHONE:
+			case GSM::PF_TEXT:
+				((BTextControl*)c)->SetText(v->text->String());
+				break;
+			case GSM::PF_BOOL:
+				((BCheckBox*)c)->SetValue(v->b ? B_CONTROL_ON : B_CONTROL_OFF);
+				break;
+			case GSM::PF_COMBO:
+				{	BMenu *m = ((BMenuField*)c)->Menu();
+					BMenuItem *it;
+					int32 value;
+					int k = m->CountItems();
+					for (int l=0; l<k; l++) {
+						it = m->ItemAt(l);
+						it->Message()->FindInt32("_value",&value);
+						if (value == v->v) {
+							it->SetMarked(true);
+							break;
+						} else
+							it->SetMarked(false);	// XXX doesn't quite work as deselector
+					}
+					((union pbVal*)attr->ItemAt(i))->v = v->v;
+				}
+				break;
+		}
 	}
 }
 
 void dialEditPB::validateData(void) {
-	BString tmp;
-	tmp = tcNumber->Text(); tmp.Truncate(slotWrite->numlen); tcNumber->SetText(tmp.String());
-	tmp = tcName->Text(); tmp.Truncate(slotWrite->numlen); tcName->SetText(tmp.String());
+	// go through all phone/p+e/text attributes, validate them and truncate
 }
 
 void dialEditPB::updateIdText(void) {
@@ -196,13 +264,36 @@ bool dialEditPB::saveData(void) {
 	struct pbNum n;
 	n.id = id;
 	n.slot = slotWrite->sname;
-	n.number = tcNumber->Text();
-	n.name = tcName->Text();
-	if (slotWrite->has_phtype || true) {
-		n.kind = curType;
-		n.primary = (cbPrimary->Value() == B_CONTROL_ON);
+	// go through all attributes and copy their values
+	n.attr = new BList;	// XXX memleak - this is never freed
+	union pbVal *nv;
+	struct pbField *pf;
+	BString id;
+	BView *c;
+	int j = slotWrite->fields->CountItems();
+	for (int i=0; i<j; i++) {
+		nv = new pbVal;
+		pf = (struct pbField*)slotWrite->fields->ItemAt(i);
+		// if 'combo' - read from own attr copy, otherwise from widget
+		id = "pf"; id << i;
+		c = view->FindView(id.String());
+		switch (pf->type) {
+			case GSM::PF_PHONEEMAIL:
+			case GSM::PF_PHONE:
+			case GSM::PF_TEXT:
+				nv->text = new BString(((BTextControl*)c)->Text());
+				break;
+			case GSM::PF_BOOL:
+				nv->b = (((BCheckBox*)c)->Value() == B_CONTROL_ON);
+				break;
+			case GSM::PF_COMBO:
+				nv->v = ((union pbVal*)(attr->ItemAt(i)))->v;
+				break;
+		}
+		n.attr->AddItem(nv);
 	}
-
+	// XXX validation - don't allow empty number/name??
+	//
 	if (gsm->storePBItem(&n) != 0) {
 // XXX quite user friendly :/
 		BAlert *a = new BAlert(APP_NAME, _("There was an error."),_("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
@@ -213,9 +304,6 @@ bool dialEditPB::saveData(void) {
 }
 
 void dialEditPB::MessageReceived(BMessage *Message) {
-	int32 type = GSM::PK_MOBILE;
-	void *ptr;
-
 	switch (Message->what) {
 		case NC:
 			validateData();
@@ -227,14 +315,19 @@ void dialEditPB::MessageReceived(BMessage *Message) {
 			if (saveData())
 				Quit();
 			break;
-		case MENU_TYPE:
-			if (Message->FindInt32("_id", &type) == B_OK)
-				curType = type;
-			break;
 		case MENU_SLOT:
-			if (Message->FindPointer("_slot",&ptr) == B_OK)
-				switchToSlot((struct pbSlot*)ptr);
-			break;
+			{	void *ptr;
+				if (Message->FindPointer("_slot",&ptr) == B_OK)
+					switchToSlot((struct pbSlot*)ptr);
+				break;
+			}
+		case MENU_FIELD:
+			{	int32 id, value;
+				Message->FindInt32("_id",&id);
+				Message->FindInt32("_value",&value);
+				((union pbVal*)attr->ItemAt(id))->v = value;
+				break;
+			}
 		default:
 			break;
 	}

@@ -26,16 +26,14 @@ class dialEditPB : public BWindow {
 		GSM *gsm;
 		struct pbNum *num;
 		struct pbSlot *slotWrite, *iniSlot;
-		int curType;	// current number type
 		int iniSlotNum; // number of menu w/ default slot
-		int id; // if >0 then store new, otherwise update
+		int id; 		// if >0 then store new, otherwise update
+
+		BList *attr;	// work copy of attributes
 
 		BView *view;
-		BPopUpMenu *slotMenu, *typeMenu;
-		BMenuItem **mSlots, *mTypes[8];
-		BCheckBox *cbPrimary;
-		BTextControl *tcNumber, *tcName, *tcAddress1, *tcAddress2;
-		BTextControl *tcCity, *tcState, *tcZip, *tcCountry, *tcNick, *tcBday;
+		BPopUpMenu *slotMenu;
+		BMenuItem **mSlots;
 		BStringView *idText;
 };
 

@@ -3,6 +3,8 @@
 // - sendcommand:
 // 		- regexy w sendcommand do wykrycia statusu
 //
+// dodać usuwanie listy fields ze slotów i attr z pbnum przy refresh (?)
+// matchNum* nie kopiuje listy fields
 
 #include <Application.h>
 #include <File.h>
@@ -812,10 +814,10 @@ void GSM::getPBMemSlots(void) {
 			slot->name = getPBMemSlotName(slot->sname.String());
 			slot->writable = isPBSlotWritable(slot->sname.String());
 			slot->callreg = isPBSlotCallRegister(slot->sname.String());
-			slot->items = -1;
 			slot->pb = new BList;
+			slot->fields = new BList;
 			listMemSlotPB->AddItem(slot);
-			slot->min = slot->max = slot->numlen = slot->namelen = 0;
+			slot->min = slot->max = 0;
 			if (checkPBMemSlot(slot) == false) {
 				listMemSlotPB->RemoveItem(slot);
 				delete slot;
@@ -851,19 +853,51 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 	if (mSlot->findFirstMatch()) {
 		sl->min = toint(mSlot->getGroup(1).c_str());
 		sl->max = toint(mSlot->getGroup(2).c_str());
-		sl->numlen = toint(mSlot->getGroup(3).c_str());
-		sl->namelen = toint(mSlot->getGroup(4).c_str());
-		printf("got:%s - (%i-%i),%i,%i\n",sl->sname.String(),sl->min,sl->max,sl->numlen,sl->namelen);
+		printf("got:%s - (%i-%i)\n",sl->sname.String(),sl->min,sl->max);
+		// two fields: name & number are always present, always put them as first on the list
+		pbField *pf;
+		pf = new pbField;
+		pf->type = isMotorola ? PF_PHONEEMAIL : PF_PHONE;	// be cautious
+		pf->max = toint(mSlot->getGroup(3).c_str());
+		pf->name = _("Number");
+		pf->offset = 1;
+		sl->fields->AddItem(pf);
+		pf = new pbField;
+		pf->type = PF_TEXT;
+		pf->max = toint(mSlot->getGroup(4).c_str());
+		pf->name = _("Name");
+		pf->offset = 3;
+		sl->fields->AddItem(pf);
 	}
 	sl->has_phtype = false;
-	sl->has_address = false;
 	// check motorola caps with +mpbr,+mpbw (identical output? check l6)
 	if (isMotorola) {
+		pbField *pf;
+		// AT+MPBR=?
+		pf = new pbField;
+		pf->type = PF_COMBO;
+		pf->name = _("Type");
+		pf->offset = 4;
+		pf->cb = new BList;
+		pbCombo *pc;
+		pc = new pbCombo; pc->text = _("Work"); pc->v = PK_WORK; pf->cb->AddItem(pc);
+		pc = new pbCombo; pc->text = _("Home"); pc->v = PK_HOME; pf->cb->AddItem(pc);
+		pc = new pbCombo; pc->text = _("Main"); pc->v = PK_MAIN; pf->cb->AddItem(pc);
+		pc = new pbCombo; pc->text = _("Mobile"); pc->v = PK_MOBILE; pf->cb->AddItem(pc);
+		pc = new pbCombo; pc->text = _("Fax"); pc->v = PK_FAX; pf->cb->AddItem(pc);
+		pc = new pbCombo; pc->text = _("Pager"); pc->v = PK_PAGER; pf->cb->AddItem(pc);
+		pc = new pbCombo; pc->text = _("E-mail"); pc->v = PK_EMAIL; pf->cb->AddItem(pc);
+		pc = new pbCombo; pc->text = _("Mailing list"); pc->v = PK_MAILLIST; pf->cb->AddItem(pc);
+		pf->max = PK_MAILLIST;
+		sl->fields->AddItem(pf);
+		pf = new pbField;
+		pf->type = PF_BOOL;
+		pf->name = _("Primary number");
+		pf->offset = 8;
+		sl->fields->AddItem(pf);
 		// AT+MPBR=?	
 		sl->has_phtype = true;
-		sl->has_address = true;
 	}
-
 	return true;
 }
 
@@ -917,8 +951,8 @@ void GSM::getPBList(const char *slot) {
 			// 5phtype,6voicetag,7alerttone,8backlight,9primary,10categorynum
 				pat += ",(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)";
 			// 11,12,13-??,14iconpath,15-16??,17adres2,18adres1,19miasto,20stan,21kod,22kraj,23pseudo,24bday(mm-dd-yyyy),25??
-			if (sl->has_address)
-				pat += "";
+//			if (sl->has_address)
+//				pat += "";
 		}
 		Pattern *pNum = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
 		Matcher *mNum = pNum->createMatcher("");
@@ -930,6 +964,7 @@ void GSM::getPBList(const char *slot) {
 			num->slot = slot;
 			num->raw = mNum->getGroup(0).c_str();
 			num->id = toint(mNum->getGroup(1).c_str());
+			// XXX these should be derived from attr, but are needed for phonelistviews
 			num->number = mNum->getGroup(2).c_str();
 			switch (toint(mNum->getGroup(3).c_str())) {
 				case 129:
@@ -962,10 +997,47 @@ void GSM::getPBList(const char *slot) {
 				}
 			}
 //			printf("%i:%s:%s:%i:%i,%i\n",num->id,num->number.String(),num->name.String(),num->kind,num->type,num->primary?0:1);
+			//
+			num->attr = new BList;
+			union pbVal *v;
+			struct pbField *pf;
+			int j = sl->fields->CountItems();
+			int offset;
+			for (int i=0; i<j; i++) {
+				pf = (struct pbField*)sl->fields->ItemAt(i);
+				v = new pbVal;
+				offset = pf->offset + 1;
+				switch (pf->type) {
+					case PF_PHONEEMAIL:
+					case PF_PHONE:
+						v->text = new BString(mNum->getGroup(offset).c_str());
+						break;
+					case PF_TEXT:
+						{	if (mNum->getGroup(offset).c_str()[0] != '"')
+								v->text = new BString(decodeText(mNum->getGroup(offset).c_str()));
+							else {
+								BString tmp2;
+								BString tmp(mNum->getGroup(offset).c_str());
+								tmp.CopyInto(tmp2,1,tmp.Length()-2);
+								v->text = new BString(tmp2);
+							}
+						}
+						break;
+					case PF_BOOL:
+						v->b = (toint(mNum->getGroup(offset).c_str()) != 0);
+						break;
+					case PF_COMBO:
+						v->v = toint(mNum->getGroup(offset).c_str());
+						if (v->v > pf->max)
+							v->v = -1;
+						break;
+				}
+				num->attr->AddItem(v);
+			}
+			//
 			pbList->AddItem(num);
 		}
 	}
-	sl->items = pbList->CountItems();
 
 	//changePBMemSlot("MT");		// XXX change to default?
 }
@@ -1076,12 +1148,12 @@ int GSM::removePBItem(struct pbNum *num = NULL) {
 	int ret = sendCommand(cmd.String());
 	if (ret == COM_OK) {
 		struct pbSlot *sl = getPBSlot(num->slot.String());
-		sl->items--;
 		sl->pb->RemoveItem(num);
 	}
 	return ret;
 }
 
+// XXX this stores only attr fields, number/name are ignored!
 int GSM::storePBItem(struct pbNum *num = NULL) {
 	if (!num)
 		return -1;
@@ -1089,31 +1161,60 @@ int GSM::storePBItem(struct pbNum *num = NULL) {
 	struct pbSlot *sl = getPBSlot(num->slot.String());
 
 	BString cmd, out;
-	if (isMotorola)
-		cmd = "AT+MPBW=";
-	else
-		cmd = "AT+CPBW=";
+
+	cmd = isMotorola ? "AT+MPBW=" : "AT+CPBW=";
 	if (num->id > 0)
 		cmd << num->id;
-	cmd += ",\""; cmd += num->number; cmd += "\",,";
-	if (rawUTF8) cmd += "\"";
-	cmd += encodeText(num->name.String());
-	if (rawUTF8) cmd += "\"";
-
-	if (sl->has_phtype) {
-		cmd += ",";
-		cmd << num->kind;
-		cmd += ",,,,";
-		cmd += (num->primary ? "1" : "0");
+	// go through fields (asc offset) and add attributes and commas
+	// XXX assume that fields list is sorted by offset asc
+	union pbVal *v;
+	struct pbField *pf;
+	int j = sl->fields->CountItems();
+	int pos = 1;
+	for (int i=0; i<j; i++) {
+		pf = (struct pbField*)sl->fields->ItemAt(i);
+		v = (union pbVal*)num->attr->ItemAt(i);
+		// fix commas, track position
+		while (pf->offset > pos) {
+			pos++;
+			cmd += ",";
+		}
+		switch (pf->type) {
+			case PF_PHONEEMAIL:
+			case PF_PHONE:
+				cmd += ",\""; cmd += v->text->String(); cmd += "\"";
+				break;
+			case PF_TEXT:
+				cmd += ",";
+				if (rawUTF8) cmd += "\"";
+				cmd += encodeText(v->text->String());
+				if (rawUTF8) cmd += "\"";
+				break;
+			case PF_BOOL:
+				cmd += ","; cmd += (v->b ? "1" : "0");
+				break;
+			case PF_COMBO:
+				cmd += ",";
+				if ((v->v > 0) && (v->v <= pf->max))
+					cmd << v->v;
+				break;
+		}
+		pos++;
 	}
-
 	printf("cmd:[%s]\n",cmd.String());
 
 	int ret = sendCommand(cmd.String(),&out,true);
 
 	// sometimes this gives the delayed error
-	if (ret == COM_OK)
+	if (ret == COM_OK) {
 		ret = sendCommand("AT",NULL,true);
+		// if there is error, try again and try delayed error
+		if (ret != COM_OK) {
+			ret = sendCommand(cmd.String(), &out, true);
+			if (ret == COM_OK)
+				ret = sendCommand("AT",NULL,true);
+		}
+	}
 
 	return ret;
 }
