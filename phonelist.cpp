@@ -23,6 +23,7 @@ const uint32	CRNEW			= 'CR06';
 phoneListView::phoneListView(BRect r, const char *slot, const char *name) : mobileView(r, name) {
 
 	memSlot = slot;
+	editable = false;
 
 	BFont font(be_plain_font);
 	float maxw, totalw = 0;
@@ -175,7 +176,7 @@ void phoneListView::MessageReceived(BMessage *Message) {
 			printf("inv\n");
 		case CREDIT:
 			{	int i = list->CurrentSelection(0);
-				if (i>=0) {
+				if ((i>=0) && editable) {
 //					BAlert *a = new BAlert(APP_NAME, _("Implement me! (EDIT)"),_("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
 //					a->Go();
 					dialEditPB *dn;

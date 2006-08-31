@@ -10,6 +10,7 @@ phoneListSlotView::phoneListSlotView(BRect r, const char *slot) : phoneListView(
 	but_del->Show();
 	but_edit->Show();
 	but_new->Show();
+	editable = true;
 }
 
 void phoneListSlotView::fillList(void) {
