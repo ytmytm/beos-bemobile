@@ -9,8 +9,10 @@ OPCJE:
 
 	CALLREG
 	- jakie guziki? co mozna oprocz [DIAL]?
+	- usunac dodatkowe kolumny z listy (tylko #, number, name)?
 
 	OKNO [EDIT/NEW]
+	- przetestowac na modelu bez zadnych dodatkowych atrybutow!
 	- zmiana slotu może być fatalna w skutkach!!!
 	- a co jeśli niczego nie wpiszę w oba pola???
 	- usunac pbNum->{number,name} i zobaczyc co jeszcze do poprawki
