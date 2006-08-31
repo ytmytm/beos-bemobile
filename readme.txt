@@ -13,7 +13,7 @@ OPCJE:
 	OKNO [EDIT/NEW]
 	- zmiana slotu może być fatalna w skutkach!!!
 	- a co jeśli niczego nie wpiszę w oba pola???
-	- przepisać phonelistslotview tak, żeby atrybuty do kolumn brane były z listy
+	- usunac pbNum->{number,name} i zobaczyc co jeszcze do poprawki
 	- wykrywanie pozostałych atrybutów i ich długości, usunięcie has_phtype
 	- włączenie [primary] działa, wyłączenie - nie bardzo, może usunąć z edycji?
 	- przy mailing list coś do wyboru numerów (warto...?) np. lista z wielokrotnym wyborem

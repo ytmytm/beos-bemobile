@@ -6,7 +6,7 @@
 #include "ColumnListView.h"
 #include "phonelistslotview.h"
 
-phoneListSlotView::phoneListSlotView(BRect r, const char *slot) : phoneListView(r, slot, "phoneListSlotView") {
+phoneListSlotView::phoneListSlotView(BRect r, const char *slot, GSM *g) : phoneListView(r, slot, "phoneListSlotView", g) {
 	but_del->Show();
 	but_edit->Show();
 	but_new->Show();
@@ -22,7 +22,7 @@ void phoneListSlotView::fillList(void) {
 	int j = sl->pb->CountItems();
 	for (int i=0;i<j;i++) {
 		num = (struct pbNum*)sl->pb->ItemAt(i);
-		list->AddItem(new phoneSlotListItem(num));
+		list->AddItem(new phoneSlotListItem(num, gsm));
 	}
 }
 

@@ -20,7 +20,7 @@ const uint32	CRDIAL			= 'CR04';
 const uint32	CREDIT			= 'CR05';
 const uint32	CRNEW			= 'CR06';
 
-phoneListView::phoneListView(BRect r, const char *slot, const char *name) : mobileView(r, name) {
+phoneListView::phoneListView(BRect r, const char *slot, const char *name, GSM *g) : mobileView(r, name, g) {
 
 	memSlot = slot;
 	editable = false;
@@ -41,12 +41,43 @@ phoneListView::phoneListView(BRect r, const char *slot, const char *name) : mobi
 	maxw = font.StringWidth("XXXX"); totalw += maxw;
 	list->AddColumn(new CLVColumn("#", maxw, flags));
 	maxw = font.StringWidth("+999999999") + 20; totalw += maxw;
+	// these are required fields
 	list->AddColumn(new CLVColumn(_("Number"), maxw, flags));
 	maxw = font.StringWidth("MMMMMMMMMMMMMMMMMMMM") + 20; totalw += maxw;
 	list->AddColumn(new CLVColumn(_("Name"), maxw, flags));
-	maxw = font.StringWidth("MMMMMMMMMMMM") + 20; totalw += maxw;
-	list->AddColumn(new CLVColumn(_("Type"), maxw, flags));
-	list->AddColumn(new CLVColumn(_("Primary"), r.right-B_V_SCROLL_BAR_WIDTH-totalw, flags));
+	// go through fields
+	struct pbSlot *sl = gsm->getPBSlot(memSlot.String());
+	struct pbField *pf;
+	bool last;
+	int j = sl->fields->CountItems();
+	for (int i=2;i<j;i++) {	// skip number and name
+		last = (i+1 == j);
+		printf("last:%i, id=%i of %i\n",last,i,j);
+		pf = (struct pbField*)sl->fields->ItemAt(i);
+		printf("fieldname:%s\n",pf->name.String());
+		switch (pf->type) {
+			case GSM::PF_PHONEEMAIL:
+			case GSM::PF_PHONE:
+				maxw = font.StringWidth("9")*(pf->max)+20;
+				break;
+			case GSM::PF_TEXT:
+				maxw = font.StringWidth("M")*(pf->max)+20;
+				break;
+			case GSM::PF_COMBO:
+				maxw = font.StringWidth("MMMMMMM")+20;
+				break;
+			case GSM::PF_BOOL:
+				maxw = font.StringWidth("MMM")+20;
+				break;
+			default:
+				maxw = font.StringWidth("M")*3+20;
+				break;
+		}
+		if ((last) && (maxw < r.right-B_V_SCROLL_BAR_WIDTH-totalw))
+				maxw = r.right-B_V_SCROLL_BAR_WIDTH-totalw;
+		totalw += maxw;
+		list->AddColumn(new CLVColumn(pf->name.String(), maxw, flags));
+	}
 	list->SetSortFunction(CLVEasyItem::CompareItems);
 	this->AddChild(containerView);
 	list->SetInvocationMessage(new BMessage(CRLIST_INV));
@@ -100,7 +131,7 @@ void phoneListView::fillList(void) {
 	int j = sl->pb->CountItems();
 	for (int i=0;i<j;i++) {
 		num = (struct pbNum*)sl->pb->ItemAt(i);
-		list->AddItem(new phoneSlotListItem(num));
+		list->AddItem(new phoneSlotListItem(num,gsm));
 	}
 }
 
@@ -124,10 +155,6 @@ void phoneListView::Show(void) {
 			fullListRefresh();
 	}
 	fillList();
-}
-
-void phoneListView::SetDevice(GSM *g) {
-	mobileView::SetDevice(g);
 }
 
 void phoneListView::MessageReceived(BMessage *Message) {
@@ -182,19 +209,50 @@ void phoneListView::MessageReceived(BMessage *Message) {
 			}
 		case CRLIST_SEL:
 //			printf("sel\n");
-//			{	int i = list->CurrentSelection(0);
-//				if (i>=0) {
-//					struct SMS *sms = ((smsBoxListItem*)list->ItemAt(list->CurrentSelection(0)))->Msg();
-//					if (sms)
-//						updatePreview(sms);
-//
-//				} else {
-//					prv->SetText("");
-//				}
-//				break;
-//			}
+//			break;
 		default:
 			mobileView::MessageReceived(Message);
 			break;
+	}
+}
+
+
+phoneSlotListItem::phoneSlotListItem(struct pbNum *num, GSM *gsm) : CLVEasyItem(0, false, false, 20.0) {
+	BString tmp;
+
+	fNum = num;
+	fId = num->id;
+	tmp = ""; tmp << num->id;
+	SetColumnContent(0,tmp.String());
+
+	struct pbSlot *sl = gsm->getPBSlot(num->slot.String());
+	struct pbField *pf;
+	union pbVal *v;
+	int j = sl->fields->CountItems();
+	for (int i=0;i<j;i++) {
+		pf = (struct pbField*)sl->fields->ItemAt(i);
+		v = (union pbVal*)num->attr->ItemAt(i);
+		switch (pf->type) {
+			case GSM::PF_PHONEEMAIL:
+			case GSM::PF_PHONE:
+			case GSM::PF_TEXT:
+				SetColumnContent(i+1,v->text->String());
+				break;
+			case GSM::PF_BOOL:
+				tmp = (v->b ? _("Yes") : _("No"));
+				SetColumnContent(i+1,tmp.String());
+				break;
+			case GSM::PF_COMBO:
+				int l = pf->cb->CountItems();
+				struct pbCombo *pc;
+				for (int k=0; k<l; k++) {
+					pc = (struct pbCombo*)pf->cb->ItemAt(k);
+					if (pc->v == v->v) {
+						SetColumnContent(i+1,pc->text.String());
+						break;
+					}
+				}
+				break;
+		}
 	}
 }

@@ -104,10 +104,9 @@ void workView::SetDevice(GSM *g) {
 				hadcompositepb = true;
 				list->AddItem(item = new infoItem(curitem++, gsm->getPBMemSlotName(sl->sname.String()),2,iconNameForSlot(pb.String())));
 				item->SetSlot(sl->sname.String());
-				this->AddChild(cv = new phoneListSlotView(r,sl->sname.String()));
+				this->AddChild(cv = new phoneListSlotView(r,sl->sname.String(),gsm));
 				pageView->AddItem(cv);
 				cv->Hide();
-				cv->SetDevice(gsm);
 				}
 			}
 		}
@@ -122,37 +121,33 @@ void workView::SetDevice(GSM *g) {
 		VV_DIALED = curitem++;
 		list->AddItem(item = new infoItem(VV_DIALED,gsm->getPBMemSlotName("DC"),2,iconNameForSlot("DC")));
 		item->SetSlot("DC");
-		this->AddChild(cv = new callRegSlotView(r,"DC"));
+		this->AddChild(cv = new callRegSlotView(r,"DC",gsm));
 		pageView->AddItem(cv);
 		cv->Hide();
-		cv->SetDevice(gsm);
 	}
 	if (gsm->hasPBSlot("LD")) {
 		VV_DIALEDSIM = curitem++;
 		list->AddItem(item = new infoItem(VV_DIALEDSIM,gsm->getPBMemSlotName("LD"),2,iconNameForSlot("LD")));
 		item->SetSlot("LD");
-		this->AddChild(cv = new callRegSlotView(r,"LD"));
+		this->AddChild(cv = new callRegSlotView(r,"LD",gsm));
 		pageView->AddItem(cv);
 		cv->Hide();
-		cv->SetDevice(gsm);
 	}
 	if (gsm->hasPBSlot("MC")) {
 		VV_MISSED = curitem++;
 		list->AddItem(item = new infoItem(VV_MISSED,gsm->getPBMemSlotName("MC"),2,iconNameForSlot("MC")));
 		item->SetSlot("MC");
-		this->AddChild(cv = new callRegSlotView(r,"MC"));
+		this->AddChild(cv = new callRegSlotView(r,"MC",gsm));
 		pageView->AddItem(cv);
 		cv->Hide();
-		cv->SetDevice(gsm);
 	}
 	if (gsm->hasPBSlot("RC")) {
 		VV_RECEIVED = curitem++;
 		list->AddItem(item = new infoItem(VV_RECEIVED,gsm->getPBMemSlotName("RC"),2,iconNameForSlot("RC")));
 		item->SetSlot("RC");
-		this->AddChild(cv = new callRegSlotView(r,"RC"));
+		this->AddChild(cv = new callRegSlotView(r,"RC",gsm));
 		pageView->AddItem(cv);
 		cv->Hide();
-		cv->SetDevice(gsm);
 	}
 	//	- Calendar	XXX
 	//	icons		XXX

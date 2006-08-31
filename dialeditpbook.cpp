@@ -75,8 +75,6 @@ dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow
 		// create an empty pbNum
 		num = new pbNum;
 		num->id = -1;
-		num->kind = GSM::PK_MOBILE;
-		num->primary = false;
 		// create attribute list
 		num->attr = new BList;
 		int j = slotWrite->fields->CountItems();

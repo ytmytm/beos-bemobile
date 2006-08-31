@@ -9,7 +9,7 @@ class GSM;
 
 class mobileView : public BView {
 	public:
-		mobileView(BRect r, const char *name);
+		mobileView(BRect r, const char *name, GSM *g = NULL);
 		~mobileView() { };
 		virtual void MessageReceived(BMessage *Message);
 		virtual void SetDevice(GSM *g);

@@ -6,7 +6,7 @@
 
 class callRegSlotView : public phoneListView {
 	public:
-		callRegSlotView(BRect r, const char *slot);
+		callRegSlotView(BRect r, const char *slot, GSM *g);
 		~callRegSlotView() { };
 //		void MessageReceived(BMessage *Message);
 		void SetDevice(GSM *g);

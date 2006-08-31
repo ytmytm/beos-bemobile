@@ -6,9 +6,9 @@
 
 #define CAPTION_SIZE 20.0
 
-mobileView::mobileView(BRect r, const char *name) : BView(r, name, B_FOLLOW_ALL_SIDES, B_WILL_DRAW|B_PULSE_NEEDED) {
+mobileView::mobileView(BRect r, const char *name, GSM *g = NULL) : BView(r, name, B_FOLLOW_ALL_SIDES, B_WILL_DRAW|B_PULSE_NEEDED) {
 	// initialize data
-	gsm = NULL;
+	SetDevice(g);
 	//
 	this->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 
