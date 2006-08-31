@@ -13,10 +13,12 @@ supports AT command set.
 COMPATIBILITY
 
 BeMobile works only with phones that can be driven with AT commands. It has been developed
-and tested ONLY on Motorola C550 and L6. It should work on some other models too, like Siemens,
-Ericsson and some Nokia phones.
+and tested ONLY on Motorola C550 and L6. It has been reported to work with RAZR V3 and V220.
+It should also work with phones from other vendors, like Siemens, Ericsson and some Nokia phones.
+
 To make a long story short - if SerialConnect can talk with your phone via infra-red link,
 RS232 or USB cable, then BeMobile should work too.
+
 Phone numbers from SMS and Call Register lists are matched against Phone Books, but you have to
 read (open the list) them first. Just 9 last digits are matched, without international prefixes madness
 (I send SMS without prefixes and receive them both with and without +48 so it is best to strip them
@@ -28,8 +30,9 @@ been already visited.
 CHANGES
 
 version 0.4
-- fixed some bugs (like handling empty numbers when someone hides it)
+- fixed some bugs (like handling hidden/empty numbers on call register)
 - dialog to edit/add new phonebook entries
+- support for device-dependent additional attributes (phone number type, address, city, etc.)
 
 version 0.3
 - initial window has menu with all possible serial configuration options, useful for real (COM) ports,
