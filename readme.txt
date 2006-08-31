@@ -1,4 +1,5 @@
 OPCJE:
+	- we wszystkich klasach potomnych dodać obsługę msg default --> klasy podstawowej!
 	BUTTONS:
 	[REFRESH] [NEW] [SEND/EDIT] [DELETE] [DIAL]
 	STATUS WINDOW:
@@ -8,14 +9,16 @@ OPCJE:
 	- licznik znaków (jaki limit? skad brac? (reimpl. bview? blee)
 
 	CALLREG
-	- [BUG!] - dwuklik na liście otwiera edycje! (jeśli wyczyścić id, to można potraktować jako save as...)
 	- jakie guziki? co mozna oprocz [DIAL]?
 
 	OKNO [EDIT/NEW]
+	- zmiana slotu może być fatalna w skutkach!!!
+	- a co jeśli niczego nie wpiszę w oba pola???
 	- przepisać phonelistslotview tak, żeby atrybuty do kolumn brane były z listy
-	- wykrywanie pozostałych atrybutów i ich długości
-	- włączenie [primary] działa, wyłączenie - nie bardzo
+	- wykrywanie pozostałych atrybutów i ich długości, usunięcie has_phtype
+	- włączenie [primary] działa, wyłączenie - nie bardzo, może usunąć z edycji?
 	- przy mailing list coś do wyboru numerów (warto...?) np. lista z wielokrotnym wyborem
+	- dlaczego trzeba zapisywać dwa razy?
 
 LISTA:
 - dodac do nazw kolumne z wartosciami (ile numerow, ile smsow, warto???)
