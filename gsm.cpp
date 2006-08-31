@@ -896,7 +896,7 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 		pf->offset = 8;
 		sl->fields->AddItem(pf);
 		// AT+MPBR=?	
-		sl->has_phtype = true;
+		sl->has_phtype = true;	// XXX
 	}
 	return true;
 }
