@@ -166,26 +166,22 @@ void phoneListView::MessageReceived(BMessage *Message) {
 			}
 		case CRNEW:
 			{
-//				BAlert *a = new BAlert(APP_NAME, _("Implement me! (NEW)"),_("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
-//				a->Go();
 				dialEditPB *dn;
 				dn = new dialEditPB(memSlot.String(), gsm);
 				break;
 			}
 		case CRLIST_INV:
-			printf("inv\n");
+//			printf("inv\n");
 		case CREDIT:
 			{	int i = list->CurrentSelection(0);
 				if ((i>=0) && editable) {
-//					BAlert *a = new BAlert(APP_NAME, _("Implement me! (EDIT)"),_("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
-//					a->Go();
 					dialEditPB *dn;
 					dn = new dialEditPB(memSlot.String(),gsm,((phoneSlotListItem*)list->ItemAt(i))->Num());
 				}
 				break;
 			}
 		case CRLIST_SEL:
-			printf("sel\n");
+//			printf("sel\n");
 //			{	int i = list->CurrentSelection(0);
 //				if (i>=0) {
 //					struct SMS *sms = ((smsBoxListItem*)list->ItemAt(list->CurrentSelection(0)))->Msg();
