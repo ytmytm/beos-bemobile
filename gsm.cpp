@@ -1098,12 +1098,14 @@ struct pbNum *GSM::matchNumFromPB(struct pbNum *num) {
 		newpb->type = pb->type;
 		newpb->kind = pb->kind;
 		newpb->primary = pb->primary;
+		newpb->attr = pb->attr;
 	} else {
 		newpb->number = num->number;
 		newpb->name = num->name;
 		newpb->type = num->type;
 		newpb->kind = num->kind;
 		newpb->primary = num->primary;
+		newpb->attr = num->attr;
 	}
 	return newpb;
 }
@@ -1126,6 +1128,7 @@ void GSM::matchNumFromSMS(struct SMS *sms) {
 			newpb->type = pb->type;
 			newpb->kind = pb->kind;
 			newpb->primary = pb->primary;
+			newpb->attr = pb->attr;
 		} else {
 			newpb->slot = "??";
 			newpb->id = -1;
@@ -1134,6 +1137,15 @@ void GSM::matchNumFromSMS(struct SMS *sms) {
 			newpb->type = guessPBType(newpb->number.String());
 			newpb->kind = PK_MAIN;
 			newpb->primary = true;
+			// basic required attributes
+			newpb->attr = new BList;
+			union pbVal *v;
+			v = new pbVal;
+			v->text = new BString(mNum->getGroup(0).c_str());
+			newpb->attr->AddItem(v);
+			v = new pbVal;
+			v->text = new BString("");
+			newpb->attr->AddItem(v);
 		}
 		sms->pbnumbers.AddItem(newpb);
 	}
@@ -1195,7 +1207,7 @@ int GSM::storePBItem(struct pbNum *num = NULL) {
 				break;
 			case PF_COMBO:
 				cmd += ",";
-				if ((v->v > 0) && (v->v <= pf->max))
+				if ((v->v >= 0) && (v->v <= pf->max))
 					cmd << v->v;
 				break;
 		}
