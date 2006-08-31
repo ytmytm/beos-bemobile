@@ -116,12 +116,12 @@ dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow
 	r.bottom = r.top + 30;
 
 	// process slot fields
-	int j = slotWrite->fields->CountItems();
 	struct pbField *pf;
 	BString id;
 	BView *c;
 	attr = new BList;
 	union pbVal *pv;
+	int j = slotWrite->fields->CountItems();
 	for (int i=0; i<j; i++) {
 		// provide placeholder for menu value
 		attr->AddItem(pv = new pbVal);
@@ -194,11 +194,11 @@ void dialEditPB::revertData(void) {
 	id = num->id;
 	updateIdText();
 	// extended attributes
-	int j = slotWrite->fields->CountItems();
 	struct pbField *pf;
 	union pbVal *v;
 	BView *c;
 	BString id;
+	int j = slotWrite->fields->CountItems();
 	for (int i=0; i<j; i++) {
 		pf = (struct pbField*)slotWrite->fields->ItemAt(i);
 		v = (union pbVal*)num->attr->ItemAt(i);
@@ -235,7 +235,27 @@ void dialEditPB::revertData(void) {
 }
 
 void dialEditPB::validateData(void) {
-	// go through all phone/p+e/text attributes, validate them and truncate
+	struct pbField *pf;
+	BString id, tmp;
+	BView *c;
+	int j = slotWrite->fields->CountItems();
+	for (int i=0; i<j; i++) {
+		pf = (struct pbField*)slotWrite->fields->ItemAt(i);
+		id = "pf"; id << i;
+		c = view->FindView(id.String());
+		switch (pf->type) {
+			case GSM::PF_PHONEEMAIL:
+			case GSM::PF_PHONE:
+			case GSM::PF_TEXT:
+				tmp = ((BTextControl*)c)->Text();
+				// XXX validate contents (phnumbers vs email vs text)
+				tmp.Truncate(pf->max);
+				((BTextControl*)c)->SetText(tmp.String());
+				break;
+			default:
+				break;
+		}
+	}
 }
 
 void dialEditPB::updateIdText(void) {
