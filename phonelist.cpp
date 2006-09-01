@@ -52,9 +52,7 @@ phoneListView::phoneListView(BRect r, const char *slot, const char *name, GSM *g
 	int j = sl->fields->CountItems();
 	for (int i=2;i<j;i++) {	// skip number and name
 		last = (i+1 == j);
-		printf("last:%i, id=%i of %i\n",last,i,j);
 		pf = (struct pbField*)sl->fields->ItemAt(i);
-		printf("fieldname:%s\n",pf->name.String());
 		switch (pf->type) {
 			case GSM::PF_PHONEEMAIL:
 			case GSM::PF_PHONE:

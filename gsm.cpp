@@ -4,7 +4,10 @@
 // 		- regexy w sendcommand do wykrycia statusu
 //
 // dodać usuwanie listy fields ze slotów i attr z pbnum przy refresh (?)
-// matchNum* nie kopiuje listy fields
+// przepisać pbField jako klasę i niech samo się troszczy o walidację (?)
+// przepisać pbNum jako klasę (jakie korzyści?) (?)
+// przepisać pbSlot jako klasę (jakie korzyści?) (?)
+// zrobić prawdziwą detekcję własności telefonu
 
 #include <Application.h>
 #include <File.h>
@@ -858,25 +861,36 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 		pbField *pf;
 		pf = new pbField;
 		pf->type = isMotorola ? PF_PHONEEMAIL : PF_PHONE;	// be cautious
-		pf->max = toint(mSlot->getGroup(3).c_str());
 		pf->name = _("Number");
+		pf->max = toint(mSlot->getGroup(3).c_str());
 		pf->offset = 1;
 		sl->fields->AddItem(pf);
 		pf = new pbField;
 		pf->type = PF_TEXT;
-		pf->max = toint(mSlot->getGroup(4).c_str());
 		pf->name = _("Name");
+		pf->max = toint(mSlot->getGroup(4).c_str());
 		pf->offset = 3;
 		sl->fields->AddItem(pf);
 	}
 	sl->has_phtype = false;
-	// check motorola caps with +mpbr,+mpbw (identical output? check l6)
+	sl->has_address = false;
 	if (isMotorola) {
+		if (sendCommand("AT+MPBR=?",&out) == COM_OK) {
+			// count commas... XXX this is stupid!
+			int c = 0;
+			for (int i=0; i<out.Length(); i++) {
+				if (out[i] == ',')
+					c++;
+			}
+//printf("%i commas\n",c);
+			sl->has_phtype = (c>9);
+			sl->has_address = (c>16);
+		}
+	}
+	// device capabilities
+	if (sl->has_phtype) {
 		pbField *pf;
-		// AT+MPBR=?
-		pf = new pbField;
-		pf->type = PF_COMBO;
-		pf->name = _("Type");
+		pf = new pbField; pf->type = PF_COMBO; pf->name = _("Type");
 		pf->offset = 4;
 		pf->cb = new BList;
 		pbCombo *pc;
@@ -890,13 +904,36 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 		pc = new pbCombo; pc->text = _("Mailing list"); pc->v = PK_MAILLIST; pf->cb->AddItem(pc);
 		pf->max = PK_MAILLIST;
 		sl->fields->AddItem(pf);
-		pf = new pbField;
-		pf->type = PF_BOOL;
-		pf->name = _("Primary number");
+		pf = new pbField; pf->type = PF_BOOL; pf->name = _("Primary number");
 		pf->offset = 8;
 		sl->fields->AddItem(pf);
-		// AT+MPBR=?	
-		sl->has_phtype = true;	// XXX
+		// add address attributes if required
+		if (sl->has_address) {
+			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Address (2)");
+			pf->max = 30; pf->offset = 16;
+			sl->fields->AddItem(pf);
+			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Address");
+			pf->max = 30; pf->offset = 17;
+			sl->fields->AddItem(pf);
+			pf = new pbField; pf->type = PF_TEXT; pf->name = _("City");
+			pf->max = 30; pf->offset = 18;
+			sl->fields->AddItem(pf);
+			pf = new pbField; pf->type = PF_TEXT; pf->name = _("State");
+			pf->max = 30; pf->offset = 19;
+			sl->fields->AddItem(pf);
+			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Zip");
+			pf->max = 7; pf->offset = 20;
+			sl->fields->AddItem(pf);
+			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Country");
+			pf->max = 20; pf->offset = 21;
+			sl->fields->AddItem(pf);
+			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Nick");
+			pf->max = 24; pf->offset = 22;
+			sl->fields->AddItem(pf);
+			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Birthday (MM-DD-YYYY)");
+			pf->max = 10; pf->offset = 23;
+			sl->fields->AddItem(pf);
+		}
 	}
 	return true;
 }
@@ -951,8 +988,8 @@ void GSM::getPBList(const char *slot) {
 			// 5phtype,6voicetag,7alerttone,8backlight,9primary,10categorynum
 				pat += ",(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)";
 			// 11,12,13-??,14iconpath,15-16??,17adres2,18adres1,19miasto,20stan,21kod,22kraj,23pseudo,24bday(mm-dd-yyyy),25??
-//			if (sl->has_address)
-//				pat += "";
+			if (sl->has_address)
+				pat += ",(\\d+),(\\d+),(\\d+),([^,\r\n]*),(\\d+),(\\d+),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*)";
 		}
 		Pattern *pNum = Pattern::compile(pat.String(), Pattern::MULTILINE_MATCHING);
 		Matcher *mNum = pNum->createMatcher("");
@@ -1318,7 +1355,7 @@ void GSM::dial(const char *num) {
 		return;
 
 	BString cmd;
-	cmd = "ATD"; cmd += num;
+	cmd = "ATD"; cmd += num; cmd += ";";
 	sendCommand(cmd.String());
 }
 

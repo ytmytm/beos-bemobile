@@ -1,6 +1,4 @@
 OPCJE:
-	[DIAL]
-	- dzwoni  w trybie transmisji danych??? (z L6 na C550)
 	BUTTONS:
 	[REFRESH] [NEW] [SEND/EDIT] [DELETE] [DIAL]
 	STATUS WINDOW:
@@ -12,13 +10,15 @@ OPCJE:
 	CALLREG
 	- jakie guziki? co mozna oprocz [DIAL]?
 	- usunac dodatkowe kolumny z listy (tylko #, number, name)?
+	(to samo przy edycji SM i niektórych innych slotów)
 
 	OKNO [EDIT/NEW]
+	- przetestowac na C550
 	- przetestowac na modelu bez zadnych dodatkowych atrybutow!
 	- zmiana slotu może być fatalna w skutkach!!!
 	- a co jeśli niczego nie wpiszę w oba pola???
 	- usunac pbNum->{number,name} i zobaczyc co jeszcze do poprawki
-	- wykrywanie pozostałych atrybutów i ich długości, usunięcie has_phtype
+	- wykrywanie pozostałych atrybutów i ich długości, usunięcie has_phtype, has_address (naiwna detekcja!)
 	- włączenie [primary] działa, wyłączenie - nie bardzo, może usunąć z edycji?
 	- przy mailing list coś do wyboru numerów (warto...?) np. lista z wielokrotnym wyborem
 	- dlaczego trzeba zapisywać dwa razy?
@@ -42,6 +42,8 @@ LISTA SMS:
 		- guziki jak w poszczególnych PB
 
 TODO:
+- informacja o sieci at+cops?, wyszukiwanie sieci (dlugo!) at+cops=?
+- informacja o przychodzących: at+cnmi (doczytać co i jak)
 - zapisywanie/odczyt parametrów z initWindow
 - statystyki użycia slotów (total?) na oknach głównych PB i CALLREG i w caption?
 - sms PDU mode (odczytywanie wszystkich informacji)

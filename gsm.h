@@ -22,6 +22,7 @@ struct pbSlot {
 	bool callreg;
 	bool writable;
 	bool has_phtype;	// XXX remove this
+	bool has_address;	// XXX remove this
 	BList *pb;			// list of contents
 	BList *fields;		// description of extended attributes
 };
