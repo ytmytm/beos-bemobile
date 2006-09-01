@@ -68,6 +68,13 @@ dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow
 		}
 	}
 
+	BMenuField *mf;
+	view->AddChild(mf = new BMenuField(BRect(15,15,quarters3,40),"slotMenuf",_("Slot:"),slotMenu));
+	mf->SetDivider(be_plain_font->StringWidth(mf->Label())+5);
+	mf->SetEnabled(false);	// XXX disable as slot change may be harmful
+
+	view->AddChild(idText = new BStringView(BRect(quarters3+5,15,right,30),"idText","ID:"));
+
 	// XXX at this point slotWrite can't be NULL! assert or do sth about it
 	if (p) {
 		num = p;
@@ -99,12 +106,6 @@ dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow
 			num->attr->AddItem(v);
 		}
 	}
-
-	BMenuField *mf;
-	view->AddChild(mf = new BMenuField(BRect(15,15,quarters3,40),"slotMenuf",_("Slot:"),slotMenu));
-	mf->SetDivider(be_plain_font->StringWidth(mf->Label())+5);
-
-	view->AddChild(idText = new BStringView(BRect(quarters3+5,15,right,30),"idText","ID:"));
 
 	BString tmp;
 	BRect r = view->Bounds();
