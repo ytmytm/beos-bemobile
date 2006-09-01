@@ -1041,9 +1041,10 @@ void GSM::getPBList(const char *slot) {
 						v->text = new BString(mNum->getGroup(offset).c_str());
 						break;
 					case PF_TEXT:
-						{	if (mNum->getGroup(offset).c_str()[0] != '"')
-								v->text = new BString(decodeText(mNum->getGroup(offset).c_str()));
-							else {
+						{	if (mNum->getGroup(offset).c_str()[0] != '"') {
+								BString tmp(decodeText(mNum->getGroup(offset).c_str()));
+								v->text = new BString(tmp);
+							} else {
 								BString tmp2;
 								BString tmp(mNum->getGroup(offset).c_str());
 								tmp.CopyInto(tmp2,1,tmp.Length()-2);
