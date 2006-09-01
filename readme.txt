@@ -13,6 +13,7 @@ OPCJE:
 	(to samo przy edycji SM i niektórych innych slotów)
 
 	OKNO [EDIT/NEW]
+	- po zapisie rekord na liście _musi_ być odświeżony/dodany
 	- zmiana slotu może być fatalna w skutkach!!! (wyłączone do czasu poprawienia)
 	- a co jeśli niczego nie wpiszę w oba pola???
 	- usunac pbNum->{number,name} i zobaczyc co jeszcze do poprawki
