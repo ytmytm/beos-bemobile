@@ -14,8 +14,7 @@ OPCJE:
 
 	OKNO [EDIT/NEW]
 	- przetestowac na C550
-	- przetestowac na modelu bez zadnych dodatkowych atrybutow!
-	- zmiana slotu może być fatalna w skutkach!!!
+	- zmiana slotu może być fatalna w skutkach!!! (wyłączone do czasu poprawienia)
 	- a co jeśli niczego nie wpiszę w oba pola???
 	- usunac pbNum->{number,name} i zobaczyc co jeszcze do poprawki
 	- wykrywanie pozostałych atrybutów i ich długości, usunięcie has_phtype, has_address (naiwna detekcja!)
@@ -31,8 +30,7 @@ LISTA SMS:
 		numery do centrum SMS?
 	- lista sms - wyświetlać nazwy? (smslistitem nie zna smsnumbertext(...)content z smsboxview)
 - PB:
-	- (superitem) lista slotów z informacją o wykorzystaniu; guzik [NEW]
-	- dodatkowe pola z motoroli (adres, urodziny itd.)
+	- (superitem) lista slotów z informacją o wykorzystaniu; guziki [NEW],[EXPORT/IMPORT/SYNC]
 	- przy dzialaniu pomijac sloty MD i AT
 	- lista numerów: ikonki z typem (home/mobile/pager etc.) (wziąć z mobilePhoneTools)
 	- nowy slot wirtualny [All numbers]
@@ -51,6 +49,10 @@ TODO:
 - przepisac listy pb/sms jako zamkniete klasy?
 - opcje eksportu smsów, eksportu/importu phonebooka
 - ikony uwaga: CVS nie przechowa atrybutów, tylko ZIP
+IDEA:
+- eksport slotów PB do plików people
+- j/w import/sync (jak dopasowywać? własny atrybut <slot>-<id>?)
+- eksport smsów do plików poczty
 
 IKONY
 - ikony typu numeru (telefon/email/dom/praca itd.) - 8-9
