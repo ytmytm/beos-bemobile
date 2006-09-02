@@ -45,6 +45,7 @@ class smsListItem : public CLVEasyItem {
 			SetColumnContent(1,tmp.String());
 			tmp = "";
 			if (fSlot->unread>=0) tmp << fSlot->unread; else tmp = "?";
+			if (fSlot->unread>0) SetBold(true);
 			SetColumnContent(2,tmp.String());
 			tmp = ""; tmp << fSlot->items;
 			SetColumnContent(3,tmp.String());
