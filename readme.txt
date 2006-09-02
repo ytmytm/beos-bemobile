@@ -47,7 +47,6 @@ TODO:
 - zapisywanie/odczyt parametrów z initWindow
 - statystyki użycia slotów PB/CALLREG w caption stron?
 - sms PDU mode (odczytywanie wszystkich informacji)
-- coś pochodnego CLVEasyItem, ale żeby na żądanie pisało się bold (mark new)
 - eksport smsów, eksport/import phonebooków
 - ikony uwaga: CVS nie przechowa atrybutów, tylko ZIP
 IDEA:

@@ -34,6 +34,7 @@ version 0.4
 - dialog to edit/add new phonebook entries
 - support for device-dependent additional attributes (phone number type, address, city, nick, etc.)
 - phonebooks summary page
+- mark unread/unsent messages
 
 version 0.3
 - initial window has menu with all possible serial configuration options, useful for real (COM) ports,

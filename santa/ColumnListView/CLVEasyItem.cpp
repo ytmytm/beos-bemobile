@@ -59,6 +59,7 @@ CLVEasyItem::CLVEasyItem(uint32 level, bool superitem, bool expanded, float minh
 : CLVListItem(level,superitem,expanded,minheight)
 {
 	text_offset = 0.0;
+	fBold = false;
 }
 
 
@@ -114,6 +115,12 @@ void CLVEasyItem::PrepListsForSet(int column_index)
 			delete ((BBitmap*)old_content);
 		((BRect**)m_cached_rects.Items())[column_index]->Set(-1,-1,-1,-1);
 	}
+}
+
+
+void CLVEasyItem::SetBold(bool bold)
+{
+	fBold = bold;
 }
 
 
@@ -294,7 +301,17 @@ void CLVEasyItem::DrawItemColumn(BView *owner, BRect item_column_rect, int32 col
 				owner->GetFont(&font);
 				float string_width = font.StringWidth(text);
 				draw_point.Set(item_column_rect.right-2.0-string_width,item_column_rect.top+text_offset);
-			}				
+			}
+			//
+			if (fBold) {
+				BFont oldfont;
+				owner->GetFont(&oldfont);
+				BFont boldfont(be_bold_font);
+				owner->SetFont(&boldfont);
+				owner->DrawString(text,draw_point);
+				owner->SetFont(&oldfont);
+			} else
+			//
 			owner->DrawString(text,draw_point);
 		}
 	}

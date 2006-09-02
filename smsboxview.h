@@ -50,6 +50,7 @@ class smsBoxListItem : public CLVEasyItem {
 				case GSM::REC_UNREAD:
 				case GSM::STO_UNSENT:
 					SetColumnContent(0,"!");
+					SetBold(true);
 					break;
 				default:
 					break;

@@ -56,6 +56,7 @@ class CLVEasyItem : public CLVListItem
 		virtual void FrameChanged(int32 column_index, BRect new_frame, ColumnListView* the_view);
 		inline float GetTextOffset() {return text_offset;}
 		virtual const char* GetUserText(int32 column_index, float column_width) const;
+		void SetBold(bool bold = false);
 
 	private:
 		void PrepListsForSet(int column_index);
@@ -64,6 +65,8 @@ class CLVEasyItem : public CLVListItem
 		BList m_column_content;	//List of char* (full content) or BBitmap*
 		BList m_aux_content;	//List of char* (truncated content) or int32 for bitmap horizontal offset
 		BList m_cached_rects;	//List of BRect for truncated text
+
+		bool fBold;
 
 	protected:
 		float text_offset;
