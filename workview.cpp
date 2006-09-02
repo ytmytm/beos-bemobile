@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "gsm.h"
 #include "callregslotview.h"
+#include "pbview.h"
 #include "phonelistslotview.h"
 #include "smsview.h"
 #include "smsinboxview.h"
@@ -83,18 +84,22 @@ void workView::SetDevice(GSM *g) {
 	cv->SetDevice(gsm);
 
 	// phonebook items
+	// superitem for PB
 	list->AddItem(item = new infoItem(curitem++,_("Phonebook"),1,"Img:Contacts",true));
-	pageView->AddItem(NULL);
+	this->AddChild(cv = new pbView(r));
+	pageView->AddItem(cv);
+	cv->Hide();
+	cv->SetDevice(gsm);
 	// pb items, except call register
 	// XXX just a test
 	// add default slots
 	// add the rest of slots: except ??,??,??
 	{
-	int i, j = gsm->listMemSlotPB->CountItems();
+	int j = gsm->listMemSlotPB->CountItems();
 	struct pbSlot *sl;
 	bool hadcompositepb = false;
 	BString pb;
-	for (i=0;i<j;i++) {
+	for (int i=0;i<j;i++) {
 		sl = (struct pbSlot*)gsm->listMemSlotPB->ItemAt(i);
 		if (!sl->callreg) {
 			pb = sl->sname;
@@ -191,10 +196,10 @@ void workView::SetDevice(GSM *g) {
 
 	// add the rest of slots: except MT, IM, OM, DM
 	{
-	int i, j = gsm->listMemSlotSMS->CountItems();
+	int j = gsm->listMemSlotSMS->CountItems();
 	struct memSlotSMS *sl;
 	BString sn;
-	for (i=0;i<j;i++) {
+	for (int i=0;i<j;i++) {
 		sl = (struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(i);
 		sn = sl->sname;
 		if ( (sn != "MT") && (sn != "IM") && (sn != "OM") && (sn != "DM") ) {
@@ -207,7 +212,6 @@ void workView::SetDevice(GSM *g) {
 		}
 	}
 	}
-
 	// reset current right-hand view to curView
 	SetCurView(0);
 }
