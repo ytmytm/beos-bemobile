@@ -85,10 +85,9 @@ void smsView::fillList(void) {
 		list->AddItem(new smsListItem(gsm->getSMSSlot("DM")));
 	}
 	// the rest
-	int i;
 	int j = gsm->listMemSlotSMS->CountItems();
 	struct memSlotSMS *sl;
-	for (i=0;i<j;i++) {
+	for (int i=0;i<j;i++) {
 		sl = (struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(i);
 		if ( (strcmp(sl->sname.String(),"MT")!=0) &&
 			 (strcmp(sl->sname.String(),"IM")!=0) &&
@@ -116,9 +115,8 @@ void smsView::fullListRefresh(void) {
 	right = ""; right << msgnum;
 
 	// read from slots
-	int i;
 	int j = gsm->listMemSlotSMS->CountItems();
-	for (i=0;i<j;i++) {
+	for (int i=0;i<j;i++) {
 		sl = (struct memSlotSMS*)gsm->listMemSlotSMS->ItemAt(i);
 		if (sl != mt) {
 			// change slot, read all messages
@@ -150,17 +148,7 @@ void smsView::MessageReceived(BMessage *Message) {
 			break;
 		case SMSLIST_INV:
 		case SMSLIST_SEL:
-			{	int i = list->CurrentSelection(0);
-				if (i>=0) {
-//					struct SMS *sms = ((smsListItem*)list->ItemAt(list->CurrentSelection(0)))->Msg();
-//					if (sms)
-//						updatePreview(sms);
-
-				} else {
-//					prv->SetText("");
-				}
-				break;
-			}
+			break;
 		default:
 			mobileView::MessageReceived(Message);
 			break;
