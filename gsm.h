@@ -19,6 +19,7 @@ struct pbSlot {
 	BString name;
 	int min;
 	int max;
+	bool initialized;
 	bool callreg;
 	bool writable;
 	bool has_phtype;	// XXX remove this

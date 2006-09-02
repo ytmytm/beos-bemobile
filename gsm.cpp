@@ -821,6 +821,7 @@ void GSM::getPBMemSlots(void) {
 			slot->fields = new BList;
 			listMemSlotPB->AddItem(slot);
 			slot->min = slot->max = 0;
+			slot->initialized = false;
 			if (checkPBMemSlot(slot) == false) {
 				listMemSlotPB->RemoveItem(slot);
 				delete slot;
@@ -962,6 +963,8 @@ struct pbSlot *GSM::getPBSlot(const char *slot) {
 
 void GSM::getPBList(const char *slot) {
 	struct pbSlot *sl = getPBSlot(slot);
+	sl->initialized = true;
+
 	changePBMemSlot(slot);
 
 	BList *pbList = sl->pb;
