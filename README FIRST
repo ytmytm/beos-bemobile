@@ -32,7 +32,8 @@ CHANGES
 version 0.4
 - fixed some bugs (like handling hidden/empty numbers on call register)
 - dialog to edit/add new phonebook entries
-- support for device-dependent additional attributes (phone number type, address, city, etc.)
+- support for device-dependent additional attributes (phone number type, address, city, nick, etc.)
+- phonebooks summary page
 
 version 0.3
 - initial window has menu with all possible serial configuration options, useful for real (COM) ports,
@@ -64,6 +65,13 @@ Menu items:
 - Monitor status - disable this when troubleshooting, it won't fill the log with uninteresting
   data about phone battery status, network signal strength etc.
 - Hangup - allows to break call initiated either from computer or phone
+
+On phonebooks listings you can use buttons to manipulate items or double-click to edit.
+If editing returns error check your input - extra spaces, etc. Check also type of item (email, number, etc.)
+if extended attributes were detected. E.g. email must have '@' character and this is validated by the
+phone.
+
+On my phones there seems no way to disable 'Primary number' flag.
 
 
 
