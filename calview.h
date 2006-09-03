@@ -37,7 +37,9 @@ class calListItem : public CLVEasyItem {
 			tmp = ""; tmp << fEvent->id;
 			SetColumnContent(0, tmp.String());
 			SetColumnContent(1, fEvent->title.String());
-			SetColumnContent(2, fixDate(fEvent->start_date.String(),fEvent->start_time.String()));
+			tmp = fEvent->timed ? fEvent->start_time.String() : "";
+			SetColumnContent(2, fixDate(fEvent->start_date.String(),tmp.String()));
+			// decode duration into hours, days?
 			tmp = ""; tmp << fEvent->dur; tmp += _(" min.");
 			SetColumnContent(3, tmp.String());
 			if (fEvent->alarm)
