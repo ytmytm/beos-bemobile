@@ -383,29 +383,6 @@ void GSM::getPhoneData(void) {
 		rawUTF8 = true;
 }
 
-void GSM::getCalendarInfo(void) {
-	static Pattern *pCalendar = Pattern::compile("^\\+MDBR: (\\d+),(\\d+),(\\d+)", Pattern::MULTILINE_MATCHING);
-	static Matcher *mCalendar = pCalendar->createMatcher("");
-	BString tmp;
-
-	// we only know how to handle Motorola calendars
-	if (isMotorola) {
-		int ret = sendCommand("AT+MDBR=?",&tmp,true);
-		if (ret == COM_OK) {
-			mCalendar->setString(tmp.String());
-			if (mCalendar->findFirstMatch()) {
-				fHasCalendar = true;
-				calSlot.maxnum = toint(mCalendar->getGroup(1).c_str());
-				calSlot.used = toint(mCalendar->getGroup(2).c_str());
-				calSlot.title_len = toint(mCalendar->getGroup(3).c_str());
-				printf("max:%i,used:%i,tlen:%i\n",calSlot.maxnum,calSlot.used,calSlot.title_len);
-				return;
-			}
-		}
-	}
-	fHasCalendar = false;
-}
-
 void GSM::getPhoneStatus(void) {
 	static Pattern *pPower = Pattern::compile("^\\+CBC: (\\d+),(\\d+)", Pattern::MULTILINE_MATCHING);
 	static Matcher *mPower = pPower->createMatcher("");
@@ -1412,6 +1389,29 @@ int GSM::guessPBType(const char *num) {
 			return PB_OTHER;
 	}
 	return PB_PHONE;
+}
+
+void GSM::getCalendarInfo(void) {
+	static Pattern *pCalendar = Pattern::compile("^\\+MDBR: (\\d+),(\\d+),(\\d+)", Pattern::MULTILINE_MATCHING);
+	static Matcher *mCalendar = pCalendar->createMatcher("");
+	BString tmp;
+
+	// we only know how to handle Motorola calendars
+	if (isMotorola) {
+		int ret = sendCommand("AT+MDBR=?",&tmp);
+		if (ret == COM_OK) {
+			mCalendar->setString(tmp.String());
+			if (mCalendar->findFirstMatch()) {
+				fHasCalendar = true;
+				calSlot.maxnum = toint(mCalendar->getGroup(1).c_str());
+				calSlot.used = toint(mCalendar->getGroup(2).c_str());
+				calSlot.title_len = toint(mCalendar->getGroup(3).c_str());
+				printf("calendar: max:%i,used:%i,tlen:%i\n",calSlot.maxnum,calSlot.used,calSlot.title_len);
+				return;
+			}
+		}
+	}
+	fHasCalendar = false;
 }
 
 int GSM::getCalendarEvents(void) {
