@@ -910,7 +910,20 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 		pf = new pbField; pf->type = PF_BOOL; pf->name = _("Primary number");
 		pf->offset = 8;
 		sl->fields->AddItem(pf);
-		// add address attributes if required
+		// categories
+		// we have no idea about categories' names, just use numbers for now or allow
+		// user to XXX edit it
+		pf = new pbField; pf->type = PF_COMBO; pf->name = _("Category");
+		pf->offset = 9;
+		pf->cb = new BList;
+		pf->max = 9;	// XXX max number of categories is buried in +MPBR?
+		BString tmp;
+		for (int i=1; i<10; i++) {
+			tmp = ""; tmp << i;
+			pc = new pbCombo; pc->text = tmp.String(); pc->v = i; pf->cb->AddItem(pc);
+		}
+		sl->fields->AddItem(pf);
+		// add address attributes if available
 		if (sl->has_address) {
 			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Address (2)");
 			pf->max = 30; pf->offset = 16;
