@@ -875,7 +875,9 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 	}
 	sl->has_phtype = false;
 	sl->has_address = false;
-	if (isMotorola) {
+	// there is no point in checking parameters for slots other than:
+	// phone storage and quick dial
+	if ((isMotorola) && ((sl->sname == "ME")||(sl->sname == "QD")||(sl->sname == "DD"))) {
 		if (sendCommand("AT+MPBR=?",&out) == COM_OK) {
 			// count commas... XXX this is stupid!
 			int c = 0;

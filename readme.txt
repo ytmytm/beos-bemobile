@@ -5,14 +5,14 @@ OPCJE:
 		- guzik [READ EVERYTHING] (czasochłonne) ?
 
 	OKNO [NOWY SMS]
-	- licznik znaków (jaki limit? skad brac? (reimpl. bview? blee)
+	- licznik znaków (jaki limit? skad brac? (reimpl. bview i chwytać keydown? blee)
 
 	CALLREG
-	- jakie guziki? co mozna oprocz [DIAL]?
-	- usunac dodatkowe kolumny z listy (tylko #, number, name)?
-	(to samo przy edycji SM i niektórych innych slotów)
+	- jakie guziki? co mozna oprocz [DIAL]? co na superitem?
 
 	PB SUPERITEM
+	- kolumna z listą unikatowych
+	(potrzebne funkcje wyszukiwania, niezbędne do eksportu wielu rekordów jako jednego people)
 	- guziki [NEW],[EXPORT/IMPORT/SYNC] dotyczące zaznaczonego
 
 	OKNO [EDIT/NEW]
@@ -29,8 +29,8 @@ LISTA:
 - dodac do nazw kolumne z wartosciami (ile numerow, ile smsow, warto???)
 
 LISTA SMS:
-	- superitem SMS - view z listą folderów:
-		edycja/zmiana numeru do centrum SMS? wybór z predef. listy?
+	- superitem SMS - skrócić widok folderów o połowę, a niżej co?
+		- edycja/zmiana numeru do centrum SMS? wybór z predef. listy?
 - PB:
 	- przy dzialaniu pomijac sloty MD i AT
 	- lista numerów: ikonki z typem (home/mobile/pager etc.) (wziąć z mobilePhoneTools)
@@ -41,8 +41,7 @@ LISTA SMS:
 		- guziki jak w poszczególnych PB
 
 TODO:
-- informacje o SMSC, własnym numerze
-- informacja o sieci at+cops?, wyszukiwanie sieci (dlugo!) at+cops=?
+- informacje o SMSC, własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)
 - powiadamianie o przychodzących: at+cnmi (doczytać co i jak)
 - zapisywanie/odczyt parametrów z initWindow
 - statystyki użycia slotów PB/CALLREG w caption stron?
@@ -65,4 +64,5 @@ MODULARYZACJA
 	- Engine: wysylanie komend, odczytywanie statusu itp
 	- GSM: manipulacja listami, wyszukiwanie
 	- pochodna Engine: ATMotoEngine
+	- pod spodem: device jako DeviceSerial
 - przepisac listy pb/sms jako zamkniete klasy? elementy list też?
