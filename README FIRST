@@ -1,5 +1,5 @@
 
-BeMobile 0.4
+BeMobile 0.5
 (c) Maciej Witkowiak <ytm@elysium.pl>, <mwitkowiak@gmail.com>
 http://members.elysium.pl/ytm/html/beos.html
 http://ytm.bossstation.dnsalias.org/html/beos.html
@@ -28,6 +28,9 @@ been already visited.
 
 
 CHANGES
+
+version 0.5
+-
 
 version 0.4
 - fixed some bugs (like handling hidden/empty numbers on call register)
