@@ -19,7 +19,7 @@ OPCJE:
 	- po zapisie rekord na liście _musi_ być odświeżony/dodany
 	- zmiana slotu może być fatalna w skutkach!!! (wyłączone do czasu poprawienia)
 	- a co jeśli niczego nie wpiszę w oba pola???
-	- usunac pbNum->{number,name} i zobaczyc co jeszcze do poprawki
+	- usunac pbNum->{number} i zobaczyc co jeszcze do poprawki
 	- wykrywanie pozostałych atrybutów i ich długości, usunięcie has_phtype, has_address (naiwna detekcja!)
 	- włączenie [primary] działa, wyłączenie - nie bardzo, może usunąć z edycji?
 	- przy mailing list coś do wyboru numerów (warto...?) np. lista z wielokrotnym wyborem

@@ -8,10 +8,10 @@ struct pbNum {
 	BString slot;
 	int id;
 	BString number;	// XXX removethis (or make link to attr[0])
-	BString name;	// XXX removethis (or make link to attr[0])
-	int type;	// number/email/other
+	int type;		// number/email/other, not used neither shown
 	BString raw;	// raw input to preserve unsupported extended attributes for editing
 	BList *attr;	// extended attributes, as described in slot->fields
+					// attr[0] = number, attr[1] = name required
 };
 //
 struct pbSlot {

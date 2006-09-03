@@ -76,6 +76,7 @@ printf("new in slot:%s\n",sl);
 	struct pbNum *pb;
 	int k;
 	BString tmp;
+	BString *number, *name;
 	l = gsm->listMemSlotPB->CountItems();
 	for (int i=0;i<l;i++) {
 		pbSlot = (struct pbSlot*)gsm->listMemSlotPB->ItemAt(i);
@@ -85,10 +86,12 @@ printf("new in slot:%s\n",sl);
 				pb = (struct pbNum*)pbSlot->pb->ItemAt(j);
 				msg = new BMessage(MENU_NAME);
 				msg->AddPointer("_pb",pb);
-				if (pb->name.Length() > 0) {
-					tmp = pb->name; tmp += " ("; tmp += pb->number; tmp += ")";
+				number = ((union pbVal*)pb->attr->ItemAt(0))->text;
+				name = ((union pbVal*)pb->attr->ItemAt(1))->text;
+				if (name->Length() > 0) {
+					tmp = name->String(); tmp += " ("; tmp += number->String(); tmp += ")";
 				} else
-					tmp = pb->number;
+					tmp = number->String();
 				pbMenu->AddItem(new BMenuItem(tmp.String(),msg));
 			}
 		}

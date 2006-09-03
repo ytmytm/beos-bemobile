@@ -1035,15 +1035,7 @@ void GSM::getPBList(const char *slot) {
 					num->type = guessPBType(num->number.String());
 					break;
 			}
-			if (mNum->getGroup(4).c_str()[0] != '"')
-				num->name = decodeText(mNum->getGroup(4).c_str());
-			else {
-				BString tmp(mNum->getGroup(4).c_str());
-				tmp.CopyInto(num->name,1,tmp.Length()-2);
-			}
-//			printf("%i:%s:%s:%i\n",num->id,num->number.String(),num->name.String(),num->type);
-			//
-			// XXX isMotorola && has_phtype...
+			// process attributes (if any), 0 = always number, 1 = always name
 			num->attr = new BList;
 			union pbVal *v;
 			struct pbField *pf;
@@ -1141,12 +1133,10 @@ struct pbNum *GSM::matchNumFromPB(struct pbNum *num) {
 	if (pb) {
 		// phone book entry matched
 		newpb->number = pb->number;	// all other data from phonebook
-		newpb->name = pb->name;
 		newpb->type = pb->type;
 		newpb->attr = pb->attr;
 	} else {
 		newpb->number = num->number;
-		newpb->name = num->name;
 		newpb->type = num->type;
 		newpb->attr = num->attr;
 	}
@@ -1167,16 +1157,14 @@ void GSM::matchNumFromSMS(struct SMS *sms) {
 			newpb->slot = pb->slot;
 			newpb->id = pb->id;
 			newpb->number = pb->number;
-			newpb->name = pb->name;
 			newpb->type = pb->type;
 			newpb->attr = pb->attr;
 		} else {
 			newpb->slot = "??";
 			newpb->id = -1;
 			newpb->number = mNum->getGroup(0).c_str();
-			newpb->name = "";
 			newpb->type = guessPBType(newpb->number.String());
-			// basic required attributes
+			// two required attributes
 			newpb->attr = new BList;
 			union pbVal *v;
 			v = new pbVal;
