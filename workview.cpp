@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "gsm.h"
 #include "callregslotview.h"
+#include "calview.h"
 #include "pbview.h"
 #include "phonelistslotview.h"
 #include "smsview.h"
@@ -91,8 +92,6 @@ void workView::SetDevice(GSM *g) {
 	cv->Hide();
 	cv->SetDevice(gsm);
 	// pb items, except call register
-	// XXX just a test
-	// add default slots
 	// add the rest of slots: except ??,??,??
 	{
 	int j = gsm->listMemSlotPB->CountItems();
@@ -117,7 +116,6 @@ void workView::SetDevice(GSM *g) {
 		}
 	}
 	}
-	// XXX end of test
 	// superitem for Call register
 	list->AddItem(item = new infoItem(curitem++,_("Call register"),1,"Img:MobilePhone",true));
 	pageView->AddItem(NULL);
@@ -154,9 +152,6 @@ void workView::SetDevice(GSM *g) {
 		pageView->AddItem(cv);
 		cv->Hide();
 	}
-	//	- Calendar	XXX
-	//	icons		XXX
-
 	// superitem for SMS
 	list->AddItem(item = new infoItem(curitem++,_("SMS"),1,"Img:MailGeneric",true));
 	this->AddChild(cv = new smsView(r));
@@ -193,7 +188,6 @@ void workView::SetDevice(GSM *g) {
 		cv->Hide();
 		cv->SetDevice(gsm);
 	}
-
 	// add the rest of slots: except MT, IM, OM, DM
 	{
 	int j = gsm->listMemSlotSMS->CountItems();
@@ -212,6 +206,13 @@ void workView::SetDevice(GSM *g) {
 		}
 	}
 	}
+	// superitem for Calendar
+	list->AddItem(item = new infoItem(curitem++,_("Calendar"),1,"Img:Date"));
+	this->AddChild(cv = new calView(r));
+	pageView->AddItem(cv);
+	cv->Hide();
+	cv->SetDevice(gsm);
+
 	// reset current right-hand view to curView
 	SetCurView(0);
 }
