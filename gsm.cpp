@@ -44,6 +44,7 @@ GSM::GSM(void) {
 		return;
 	listMemSlotSMS = new BList(5);
 	listMemSlotPB = new BList(10);
+	listCalEvent = new BList;
 
 	// init status
 	active = false;
@@ -375,10 +376,34 @@ void GSM::getPhoneData(void) {
 	sendCommand("AT+CMGF=1");
 	getSMSMemSlots();
 	getPBMemSlots();
+	getCalendarInfo();
 
 	// model-specific
 	if (fModel == "L6")
 		rawUTF8 = true;
+}
+
+void GSM::getCalendarInfo(void) {
+	static Pattern *pCalendar = Pattern::compile("^\\+MDBR: (\\d+),(\\d+),(\\d+)", Pattern::MULTILINE_MATCHING);
+	static Matcher *mCalendar = pCalendar->createMatcher("");
+	BString tmp;
+
+	// we only know how to handle Motorola calendars
+	if (isMotorola) {
+		int ret = sendCommand("AT+MDBR=?",&tmp,true);
+		if (ret == COM_OK) {
+			mCalendar->setString(tmp.String());
+			if (mCalendar->findFirstMatch()) {
+				fHasCalendar = true;
+				calSlot.maxnum = toint(mCalendar->getGroup(1).c_str());
+				calSlot.used = toint(mCalendar->getGroup(2).c_str());
+				calSlot.title_len = toint(mCalendar->getGroup(3).c_str());
+				printf("max:%i,used:%i,tlen:%i\n",calSlot.maxnum,calSlot.used,calSlot.title_len);
+				return;
+			}
+		}
+	}
+	fHasCalendar = false;
 }
 
 void GSM::getPhoneStatus(void) {
@@ -1387,4 +1412,85 @@ int GSM::guessPBType(const char *num) {
 			return PB_OTHER;
 	}
 	return PB_PHONE;
+}
+
+int GSM::getCalendarEvents(void) {
+	static Pattern *pCalendar = Pattern::compile("^\\+MDBR: (\\d+),([^,\r\n]*),(\\d+),(\\d+),\"(\\d\\d:\\d\\d)\",\"(\\d\\d-\\d\\d-\\d\\d\\d\\d)\",(\\d+),\"(\\d\\d:\\d\\d)\",\"(\\d\\d-\\d\\d-\\d\\d\\d\\d)\",(\\d+)", Pattern::MULTILINE_MATCHING);
+	static Matcher *mCalendar = pCalendar->createMatcher("");
+	struct calEvent *ce;
+	BString cmd, out;
+
+	// we only know how to read Motorola calendar
+	if (!fHasCalendar)
+		return -1;
+
+	// clear the calendar events list
+	if (listCalEvent->CountItems()>0) {
+		for (int i=0; (ce=(struct calEvent*)listCalEvent->ItemAt(i)); i++)
+			delete ce;
+		if (!listCalEvent->IsEmpty())
+			listCalEvent->MakeEmpty();
+	}
+
+	// lock datebook
+	if (sendCommand("AT+MDBL=1") != COM_OK)
+		goto finish;	// something wrong, release the lock
+
+	// read stuff
+	cmd = "AT+MDBR=0,"; cmd << calSlot.maxnum-1;
+	if (sendCommand(cmd.String(),&out) != COM_OK)
+		goto finish;	// something wrong, release the lock
+
+	// parse returned data, add to the listCalEvents
+	mCalendar->setString(out.String());
+	while (mCalendar->findNextMatch()) {
+		ce = new calEvent;
+		ce->id = toint(mCalendar->getGroup(1).c_str());
+		if (mCalendar->getGroup(2).c_str()[0] != '"') {
+			BString tmp(decodeText(mCalendar->getGroup(2).c_str()));
+			ce->title = tmp;
+		} else {
+			BString tmp2;
+			BString tmp(mCalendar->getGroup(2).c_str());
+			tmp.CopyInto(tmp2,1,tmp.Length()-2);
+			ce->title = tmp2;
+		}
+		ce->timed = toint(mCalendar->getGroup(3).c_str());
+		ce->alarm = toint(mCalendar->getGroup(4).c_str());
+		ce->start_time = mCalendar->getGroup(5).c_str();
+		ce->start_date = mCalendar->getGroup(6).c_str();
+		ce->dur = toint(mCalendar->getGroup(7).c_str());
+		ce->alarm_time = mCalendar->getGroup(8).c_str();
+		ce->alarm_date = mCalendar->getGroup(9).c_str();
+		ce->repeat = toint(mCalendar->getGroup(10).c_str());
+		printf("%i,%i,%i,%s,%s,%i,%s,%s,%i\n",ce->id,ce->timed,ce->alarm,ce->start_time.String(),ce->start_date.String(),ce->dur,ce->alarm_time.String(),ce->alarm_date.String(),ce->repeat);
+		// add to list
+		listCalEvent->AddItem(ce);
+	}
+finish:
+	return sendCommand("AT+MDBL=0");	// release lock	
+}
+
+// returns: -2 if no calendar, -1 if no space, >=0 -> id of free slot
+// before: update calendar info, update listCalEvent contents
+int GSM::getCalendarFreeId(void) {
+	if (!fHasCalendar)
+		return -2;	// no calendar
+
+	if (calSlot.used == calSlot.maxnum)
+		return -1;	// no space
+
+	struct calEvent *ce;
+	int j = listCalEvent->CountItems();
+	int i;
+	for (i=0;i<j;i++) {
+		ce = (struct calEvent*)listCalEvent->ItemAt(i);
+		// if there is a hole - there is free id
+		if (ce->id != i)
+			return i;
+	}
+	// return number of the last entry
+	if (i<calSlot.maxnum)
+		return i;
+	return -2;
 }

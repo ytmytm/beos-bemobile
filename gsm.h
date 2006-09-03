@@ -4,6 +4,25 @@
 #include <String.h>
 #include <List.h>
 
+struct calEvent {
+	int id;
+	BString title;
+	bool timed;
+	bool alarm;
+	BString start_time;
+	BString start_date;
+	int dur;
+	BString alarm_time;
+	BString alarm_date;
+	int repeat;
+};
+//
+struct calInfo {
+	int maxnum;		// number of stored items (start with id=0)
+	int used;		// # of used items
+	int title_len;	// length of title field
+};
+//
 struct pbNum {
 	BString slot;
 	int id;
@@ -102,6 +121,7 @@ class GSM {
 		const char *getIMSI(void)	{ return fIMSI.String(); };
 		const char *getSoftwareVer(void) { return fSoftwareVer.String(); };
 		const char *getSMSInfo(void){ updateSMSInfo(); return fSMSInfo.String(); };
+		bool hasCalendar(void)	{ return fHasCalendar; };
 
 		const char *getSMSMemSlotName(const char *slot);
 		int changeSMSMemSlot(const char *slot);
@@ -138,6 +158,12 @@ class GSM {
 		void dial(const char *num);
 		void hangUp(void);
 
+		void getCalendarInfo(void);
+		int getCalendarEvents(void);
+		int getCalendarFreeId(void);
+		struct calInfo calSlot;
+		BList *listCalEvent;
+
 		// character encodings
 		enum { ENC_UTF8 = 1, ENC_UCS2, ENC_GSM };
 		// sms TEXT mode states
@@ -148,6 +174,8 @@ class GSM {
 		enum { PK_WORK = 0, PK_HOME, PK_MAIN, PK_MOBILE, PK_FAX, PK_PAGER, PK_EMAIL, PK_MAILLIST };
 		// phonebook fields' types
 		enum { PF_PHONE = 0, PF_PHONEEMAIL, PF_TEXT, PF_BOOL, PF_COMBO };
+		// calendar book repeat codes
+		enum { CAL_NONE = 0, CAL_DAILY, CAL_WEEKLY, CAL_MONTH_ON_DATE, CAL_MONTH_ON_DAY, CAL_YEARLY };
 
 	private:
 void logWrite(const char *log);
@@ -178,6 +206,7 @@ int guessPBType(const char *num);
 		BString initString;
 		// data
 		bool isMotorola;
+		bool fHasCalendar;
 		int	fEncoding;
 		bool rawUTF8;	// for L6 send/recv raw (non-HEX-encoded) utf8
 		// status variables
