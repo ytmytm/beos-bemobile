@@ -66,14 +66,14 @@ class calListItem : public CLVEasyItem {
 		struct calEvent *Event(void) { return fEvent; };
 	private:
 		struct calEvent *fEvent;
-		// convert to ISO YYYY-MM-DD HH:MM
+		// convert to YYYY/MM/DD HH:MM
 		const char *fixDate(const char *date, const char *time) {
 			static BString dn;
 			BString d = date;
 			dn = "";
 			d.CopyInto(dn,6,4);
-			dn += "-"; dn += d[0]; dn+= d[1];
-			dn += "-"; dn += d[3]; dn+= d[4];
+			dn += "/"; dn += d[0]; dn+= d[1];
+			dn += "/"; dn += d[3]; dn+= d[4];
 			dn += " "; dn += time;
 			return dn.String();
 		};
