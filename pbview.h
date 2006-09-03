@@ -8,7 +8,6 @@
 
 class BButton;
 class BStatusBar;
-class BTextView;
 class ColumnListView;
 
 class pbView : public mobileView {

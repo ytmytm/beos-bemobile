@@ -155,14 +155,7 @@ void pbView::MessageReceived(BMessage *Message) {
 			}
 		case PBLIST_INV:
 		case PBLIST_SEL:
-			{	int i = list->CurrentSelection(0);
-				if (i>=0) {
-				//
-				} else {
-				//
-				}
-				break;
-			}
+			break;
 		default:
 			mobileView::MessageReceived(Message);
 			break;

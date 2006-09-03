@@ -174,7 +174,7 @@ class GSM {
 		enum { PK_WORK = 0, PK_HOME, PK_MAIN, PK_MOBILE, PK_FAX, PK_PAGER, PK_EMAIL, PK_MAILLIST };
 		// phonebook fields' types
 		enum { PF_PHONE = 0, PF_PHONEEMAIL, PF_TEXT, PF_BOOL, PF_COMBO };
-		// calendar book repeat codes
+		// direct alendar book repeat codes mapping
 		enum { CAL_NONE = 0, CAL_DAILY, CAL_WEEKLY, CAL_MONTH_ON_DATE, CAL_MONTH_ON_DAY, CAL_YEARLY };
 
 	private:
