@@ -75,6 +75,9 @@ phone.
 
 On my phones there seems no way to disable 'Primary number' flag.
 
+Note that categories are represented as numbers. There is no easy way to fetch category names from
+the phone.
+
 
 
 NOKIA

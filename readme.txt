@@ -24,6 +24,7 @@ OPCJE:
 	- włączenie [primary] działa, wyłączenie - nie bardzo, może usunąć z edycji?
 	- przy mailing list coś do wyboru numerów (warto...?) np. lista z wielokrotnym wyborem
 	- dlaczego trzeba zapisywać dwa razy na L6?
+	- czy SIM zachowuje kategorię? (jeśli tak - jak to rozwiązać?)
 
 LISTA:
 - dodac do nazw kolumne z wartosciami (ile numerow, ile smsow, warto???)
