@@ -143,9 +143,9 @@ class GSM {
 		bool checkPBMemSlot(struct pbSlot *sl = NULL);
 		bool hasPBSlot(const char *slot);
 		struct pbSlot *getPBSlot(const char *slot);
+		void getPBList(const char *slot);
 		BList *listMemSlotPB;
 
-		void getPBList(const char *slot);
 		const char *stripLeadNum(const char *num);
 		// these return(add to sms) new struct pbNum
 		struct pbNum *matchNumFromPB(struct pbNum *num);
