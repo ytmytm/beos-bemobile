@@ -1,4 +1,8 @@
 OPCJE:
+- BUG:
+	- PB pusty na V220
+		- zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)
+
 	BUTTONS:
 	[REFRESH] [NEW] [SEND/EDIT] [DELETE] [DIAL]
 	STATUS WINDOW:
@@ -11,8 +15,6 @@ OPCJE:
 	- jakie guziki? co mozna oprocz [DIAL]? co na superitem?
 
 	PB SUPERITEM
-	- kolumna z listą unikatowych
-	(potrzebne funkcje wyszukiwania, niezbędne do eksportu wielu rekordów jako jednego people)
 	- guziki [NEW],[EXPORT/IMPORT/SYNC] dotyczące zaznaczonego
 
 	OKNO [EDIT/NEW]
