@@ -34,31 +34,10 @@ class pbListItem : public CLVEasyItem {
 			fSlot = slot;
 			RefreshData();
 		}
-		void RefreshData(void) {
-			BString tmp;
-			char percent[10];
-			float u, t;
-
-			SetColumnContent(0, fSlot->name.String());
-			tmp = ""; tmp << (fSlot->max - fSlot->min + 1);
-			SetColumnContent(2, tmp.String());
-			if (fSlot->initialized) {
-				tmp = "";
-				tmp << fSlot->pb->CountItems();
-				SetColumnContent(1, tmp.String());
-				u = fSlot->pb->CountItems();
-				t = fSlot->max - fSlot->min + 1;
-				sprintf(percent, "%2.0f", (u/t)*100);
-				tmp = ""; tmp << percent; tmp += "%";
-				SetColumnContent(3, tmp.String());
-			} else {
-				SetColumnContent(1, "?");
-				SetColumnContent(3, "?");
-			}
-		}
+		void RefreshData(void);
 		struct pbSlot *Slot(void) { return fSlot; }
-		private:
-			struct pbSlot *fSlot;
+	private:
+		struct pbSlot *fSlot;
 };
 
 #endif

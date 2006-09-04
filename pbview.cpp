@@ -32,6 +32,8 @@ pbView::pbView(BRect r) : mobileView(r, "pbView") {
 		B_FANCY_BORDER);
 	maxw = font.StringWidth(_("Folder"))*5+20; totalw += maxw;
 	list->AddColumn(new CLVColumn(_("Folder"), maxw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
+	maxw = font.StringWidth(_("Unique"))*2+20; totalw += maxw;
+	list->AddColumn(new CLVColumn(_("Unique"), maxw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
 	maxw = font.StringWidth(_("Used"))*2+20; totalw += maxw;
 	list->AddColumn(new CLVColumn(_("Used"), maxw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
 	maxw = font.StringWidth(_("Total"))*2+20; totalw += maxw;
@@ -159,5 +161,70 @@ void pbView::MessageReceived(BMessage *Message) {
 		default:
 			mobileView::MessageReceived(Message);
 			break;
+	}
+}
+
+// compare names from two struct pbNum items
+int pbSortByName(const void *a, const void *b) {
+	struct pbNum *ll, *rr;
+	BString *l, *r;
+	// my eyes! my eyes hurt!
+	ll = (*((struct pbNum**)a));
+	rr = (*((struct pbNum**)b));
+	l = ((union pbVal*)ll->attr->ItemAt(1))->text;
+	r = ((union pbVal*)rr->attr->ItemAt(1))->text;
+	return l->Compare(r->String());
+}
+
+// fetch number of unique names on the slot list
+int getNumUniquePBNames(struct pbSlot *sl = NULL) {
+	if (!sl)
+		return 0;
+	if (sl->pb->CountItems() == 0)
+		return 0;
+	// clone slot list
+	BList *l = new BList(*(sl->pb));
+	// sort slot list by name
+	l->SortItems(&pbSortByName);
+	int j = l->CountItems();
+	int n = 1;
+	struct pbNum *c = (struct pbNum*)l->ItemAt(0);
+	BString *last = ((union pbVal*)c->attr->ItemAt(1))->text;
+	BString *cur;
+	// go through the list and ++ on each change
+	for (int i=1;i<j;i++) {
+		c = (struct pbNum*)l->ItemAt(i);
+		cur = ((union pbVal*)c->attr->ItemAt(1))->text;
+		if (cur->Compare(last->String()) != 0) {
+			last = cur;
+			n++;
+		}
+	}
+	delete l;
+	return n;
+}
+
+void pbListItem::RefreshData(void) {
+	BString tmp;
+	char percent[10];
+	float u, t;
+
+	SetColumnContent(0, fSlot->name.String());
+	tmp = ""; tmp << (fSlot->max - fSlot->min + 1);
+	SetColumnContent(3, tmp.String());
+	if (fSlot->initialized) {
+		tmp = ""; tmp << getNumUniquePBNames(fSlot);
+		SetColumnContent(1, tmp.String());
+		tmp = ""; tmp << fSlot->pb->CountItems();
+		SetColumnContent(2, tmp.String());
+		u = fSlot->pb->CountItems();
+		t = fSlot->max - fSlot->min + 1;
+		sprintf(percent, "%2.0f", (u/t)*100);
+		tmp = ""; tmp << percent; tmp += "%";
+		SetColumnContent(4, tmp.String());
+	} else {
+		SetColumnContent(1, "?");
+		SetColumnContent(2, "?");
+		SetColumnContent(4, "?");
 	}
 }
