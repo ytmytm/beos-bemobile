@@ -881,10 +881,14 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 	// phone storage and quick dial
 	if ((isMotorola) && ((sl->sname == "ME")||(sl->sname == "QD")||(sl->sname == "DD"))) {
 		if (sendCommand("AT+MPBR=?",&out) == COM_OK) {
-			// count commas... XXX this is stupid!
+			// count commas outside ()... XXX this is stupid!
 			int c = 0;
+			bool parenth = false;
 			for (int i=0; i<out.Length(); i++) {
-				if (out[i] == ',')
+				unsigned char a = out[i];
+				if (a == '(') parenth = true;
+				if (a == ')') parenth = false;
+				if ((a == ',') && (!parenth))
 					c++;
 			}
 //printf("%i commas\n",c);

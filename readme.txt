@@ -1,8 +1,4 @@
 OPCJE:
-- BUG:
-	- PB pusty na V220
-		- zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)
-
 	BUTTONS:
 	[REFRESH] [NEW] [SEND/EDIT] [DELETE] [DIAL]
 	STATUS WINDOW:
@@ -44,6 +40,8 @@ LISTA SMS:
 		- guziki jak w poszczególnych PB
 
 TODO:
+- PB: zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)
+- PB: poprawić wykrywanie features (liczenie przecinków może być za głupie)
 - informacje o SMSC, własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)
 - powiadamianie o przychodzących: at+cnmi (doczytać co i jak)
 - zapisywanie/odczyt parametrów z initWindow
