@@ -39,9 +39,7 @@ class calListItem : public CLVEasyItem {
 			SetColumnContent(1, fEvent->title.String());
 			tmp = fEvent->timed ? fEvent->start_time.String() : "";
 			SetColumnContent(2, fixDate(fEvent->start_date.String(),tmp.String()));
-			// decode duration into hours, days?
-			tmp = ""; tmp << fEvent->dur; tmp += _(" min.");
-			SetColumnContent(3, tmp.String());
+			SetColumnContent(3, durationName(fEvent->dur));
 			if (fEvent->alarm)
 				SetColumnContent(4, fixDate(fEvent->alarm_date.String(),fEvent->alarm_time.String()));
 			else
@@ -76,6 +74,31 @@ class calListItem : public CLVEasyItem {
 			dn += "/"; dn += d[3]; dn+= d[4];
 			dn += " "; dn += time;
 			return dn.String();
+		};
+		// return duration in minutes in human format
+		const char *durationName(int minutes) {
+			static BString out;
+			int days = 0, hours = 0;
+		
+			out = "";
+			if (minutes >= 1440) {
+				days = minutes / 1440;
+				minutes = minutes % 1440;
+				out << days; out += _(" d");
+			}
+			if (minutes >= 60) {
+				hours = minutes / 60;
+				minutes = minutes % 60;
+				if (days>0)
+					out += " ";
+				out << hours; out += _(" h");
+			}
+			if (minutes>0) {
+				if ((hours>0)||(days>0))
+					out += " ";
+				out << minutes; out += _(" min.");
+			}
+			return out.String();
 		};
 };
 
