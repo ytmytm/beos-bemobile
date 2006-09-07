@@ -24,9 +24,6 @@ OPCJE:
 	- dlaczego trzeba zapisywać dwa razy na L6?
 	- czy SIM zachowuje kategorię? (jeśli tak - jak to rozwiązać?)
 
-LISTA:
-- dodac do nazw kolumne z wartosciami (ile numerow, ile smsow, warto???)
-
 LISTA SMS:
 	- superitem SMS - skrócić widok folderów o połowę, a niżej co?
 		- edycja/zmiana numeru do centrum SMS? wybór z predef. listy?
@@ -34,10 +31,8 @@ LISTA SMS:
 	- przy dzialaniu pomijac sloty MD i AT
 	- lista numerów: ikonki z typem (home/mobile/pager etc.) (wziąć z mobilePhoneTools)
 	- nowy slot wirtualny [All numbers]
-		- połączone dane z wszystkich
-		- w widoku rozwijana lista według nazw, do każdej nazwy kolumna z liczbą numerów
-		- do każdego rozwiniętego: jak w poszczególnych
-		- guziki jak w poszczególnych PB
+		- do każdego rozwiniętego: atrybuty jak w poszczególnych
+		- guziki jak w poszczególnych PB (dial, edit, itd. (???))
 
 TODO:
 - PB: zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)
@@ -45,12 +40,13 @@ TODO:
 - informacje o SMSC, własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)
 - powiadamianie o przychodzących: at+cnmi (doczytać co i jak)
 - zapisywanie/odczyt parametrów z initWindow
-- statystyki użycia slotów PB/CALLREG w caption stron?
 - sms PDU mode (odczytywanie wszystkich informacji)
 - eksport smsów, eksport/import phonebooków
 - ikony uwaga: CVS nie przechowa atrybutów, tylko ZIP
 IDEA:
 - eksport slotów PB do plików people (peeps)
+	- grupowanie zrobione dla pbbynameview zrobić gdzieś ogólniej do korzystania
+	- wykrywanie atrybutów (typ numeru) (towrite) zrobić ogólniej do korzystania - dopasowanie do people
 - j/w import/sync (jak dopasowywać? własny atrybut <slot>-<id>?)
 - eksport smsów do plików poczty (bemail, treść w plik, od/do/data w atrybuty, coś dziwnego z indeksami robi)
 
@@ -67,3 +63,4 @@ MODULARYZACJA
 	- pochodna Engine: ATMotoEngine
 	- pod spodem: device jako DeviceSerial
 - przepisac listy pb/sms jako zamkniete klasy? elementy list też?
+- sortowanie, grupowanie zawartości PB, wykrywanie atrybutów i typu numeru
