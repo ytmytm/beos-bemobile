@@ -38,7 +38,7 @@ pbByNameView::pbByNameView(BRect r) : mobileView(r, "pbByNameView") {
 	list->AddColumn(new CLVColumn(_("Number"), r.right-B_V_SCROLL_BAR_WIDTH-4-totalw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
 	list->SetSortFunction(CLVEasyItem::CompareItems);
 	this->AddChild(containerView);
-//	list->SetInvocationMessage(new BMessage(CALIST_INV));
+	list->SetInvocationMessage(new BMessage(PBNLIST_INV));
 //	list->SetSelectionMessage(new BMessage(CALIST_SEL));
 
 	r = this->MyBounds();
@@ -185,6 +185,11 @@ void pbByNameView::MessageReceived(BMessage *Message) {
 			fillList();
 			break;
 		case PBNLIST_INV:
+			{	int i = list->CurrentSelection(0);
+				if (i>=0)
+					list->Expand((pbByNameListItem*)list->ItemAt(i));
+			}
+			break;
 		case PBNLIST_SEL:
 			break;
 		default:

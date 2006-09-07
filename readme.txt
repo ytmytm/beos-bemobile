@@ -35,7 +35,6 @@ LISTA SMS:
 		- guziki jak w poszczególnych PB (dial, edit, itd. (???))
 
 TODO:
-- przerobić listy tak, żeby na dwukliku rozwijały się
 - PB: zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)
 - PB: poprawić wykrywanie features (liczenie przecinków może być za głupie)
 - informacje o SMSC, własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)

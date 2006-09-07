@@ -249,6 +249,11 @@ void workView::SetCurView(int v) {
 void workView::MessageReceived(BMessage *Message) {
 	switch (Message->what) {
 		case LIST_INV:
+			{	int i = list->CurrentSelection(0);
+				if (i>=0)
+					list->Expand((infoItem*)list->ItemAt(i));
+			}
+			break;
 		case LIST_SEL:
 			{	int i = list->CurrentSelection(0);
 				if (i>=0) {
