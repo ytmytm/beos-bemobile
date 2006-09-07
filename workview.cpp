@@ -8,6 +8,7 @@
 #include "gsm.h"
 #include "callregslotview.h"
 #include "calview.h"
+#include "pbbynameview.h"
 #include "pbview.h"
 #include "phonelistslotview.h"
 #include "smsview.h"
@@ -91,7 +92,13 @@ void workView::SetDevice(GSM *g) {
 	pageView->AddItem(cv);
 	cv->Hide();
 	cv->SetDevice(gsm);
-	// pb items, except call register
+	// one master item with contacts by name
+	list->AddItem(item = new infoItem(curitem++, _("All contacts by name"),2));
+	this->AddChild(cv = new pbByNameView(r));
+	pageView->AddItem(cv);
+	cv->SetDevice(gsm);
+	cv->Hide();
+	// rest of pb items, except call register
 	// add the rest of slots: except ??,??,??
 	{
 	int j = gsm->listMemSlotPB->CountItems();
