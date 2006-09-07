@@ -1498,3 +1498,15 @@ int GSM::getCalendarFreeId(void) {
 		return i;
 	return -2;
 }
+
+// compare names from two struct pbNum items
+int pbNumCompareByName(const void *a, const void *b) {
+	struct pbNum *ll, *rr;
+	BString *l, *r;
+	// my eyes! my eyes hurt!
+	ll = (*((struct pbNum**)a));
+	rr = (*((struct pbNum**)b));
+	l = ((union pbVal*)ll->attr->ItemAt(1))->text;
+	r = ((union pbVal*)rr->attr->ItemAt(1))->text;
+	return l->Compare(r->String());
+}

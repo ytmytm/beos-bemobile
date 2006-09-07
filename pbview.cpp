@@ -164,18 +164,6 @@ void pbView::MessageReceived(BMessage *Message) {
 	}
 }
 
-// compare names from two struct pbNum items
-int pbSortByName(const void *a, const void *b) {
-	struct pbNum *ll, *rr;
-	BString *l, *r;
-	// my eyes! my eyes hurt!
-	ll = (*((struct pbNum**)a));
-	rr = (*((struct pbNum**)b));
-	l = ((union pbVal*)ll->attr->ItemAt(1))->text;
-	r = ((union pbVal*)rr->attr->ItemAt(1))->text;
-	return l->Compare(r->String());
-}
-
 // fetch number of unique names on the slot list
 int getNumUniquePBNames(struct pbSlot *sl = NULL) {
 	if (!sl)
@@ -185,7 +173,7 @@ int getNumUniquePBNames(struct pbSlot *sl = NULL) {
 	// clone slot list
 	BList *l = new BList(*(sl->pb));
 	// sort slot list by name
-	l->SortItems(&pbSortByName);
+	l->SortItems(&pbNumCompareByName);
 	int j = l->CountItems();
 	int n = 1;
 	struct pbNum *c = (struct pbNum*)l->ItemAt(0);

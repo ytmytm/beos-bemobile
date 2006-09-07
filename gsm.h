@@ -228,4 +228,6 @@ int guessPBType(const char *num);
 		//
 };
 
+int pbNumCompareByName(const void *a, const void *b);
+
 #endif
