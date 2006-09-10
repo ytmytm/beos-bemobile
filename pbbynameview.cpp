@@ -85,8 +85,8 @@ void pbByNameView::fillList(void) {
 		return;
 	struct pbNum *c = (struct pbNum*)byNameList->ItemAt(0);
 	// add 1st item (master and secondary)
-	list->AddItem(new pbByNameListItem(c, 0, true));
-	list->AddItem(new pbByNameListItem(c, 1, false));
+	list->AddItem(new pbByNameListItem(c, gsm, 0, true));
+	list->AddItem(new pbByNameListItem(c, gsm, 1, false));
 	BString *last = ((union pbVal*)c->attr->ItemAt(1))->text;
 	BString *cur;
 	// go through the list and insert new master on each change
@@ -96,11 +96,11 @@ void pbByNameView::fillList(void) {
 		if (cur->Compare(last->String()) != 0) {
 			last = cur;
 			// there is name change! insert new master item with new name
-			item = new pbByNameListItem(c, 0, true);
+			item = new pbByNameListItem(c, gsm, 0, true);
 			list->AddItem(item);
 		}
 		// insert new secondary item
-		item = new pbByNameListItem(c, 1, false);
+		item = new pbByNameListItem(c, gsm, 1, false);
 		list->AddItem(item);
 	}
 }
@@ -113,7 +113,7 @@ void pbByNameView::fullListRefresh(void) {
 	progress->Update(0, _("Reading phonebooks..."));
 
 	int j = gsm->listMemSlotPB->CountItems();
-	
+
 	struct pbSlot *sl;
 	BString pb;
 	// count number of PB slots first

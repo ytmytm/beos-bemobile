@@ -31,9 +31,10 @@ class pbByNameView : public mobileView {
 
 class pbByNameListItem : public CLVEasyItem {
 	public:
-		pbByNameListItem(struct pbNum *num, int level = 0, bool superitem = false) : CLVEasyItem(
+		pbByNameListItem(struct pbNum *num, GSM *g, int level = 0, bool superitem = false) : CLVEasyItem(
 			level, superitem, false, 20.0) {
 			fNum = num;
+			gsm = g;
 			RefreshData(superitem);
 		}
 		void RefreshData(bool superitem = false) {
@@ -43,16 +44,39 @@ class pbByNameListItem : public CLVEasyItem {
 				tmp = ((union pbVal*)fNum->attr->ItemAt(1))->text;
 				SetColumnContent(1, tmp->String());
 			} else {
-				// insert number and other attrs (if present!)
+				// insert number and other attrs
 				tmp = ((union pbVal*)fNum->attr->ItemAt(0))->text;
 				SetColumnContent(2, tmp->String());
-				// set type on column 1
-				SetColumnContent(1, fNum->slot.String());
+				// set memory slot name on column 1
+				SetColumnContent(1, gsm->getPBMemSlotName(fNum->slot.String()));
+				// set number type on column 1 (if present! overwrite)
+				struct pbSlot *sl = gsm->getPBSlot(fNum->slot.String());
+				if (sl->has_phtype) {
+					// XXX offset 2 -> motorola!
+					struct pbField *pf = (struct pbField*)sl->fields->ItemAt(2);
+					union pbVal* v = (union pbVal*)fNum->attr->ItemAt(2);
+					if ((pf)&&(v)) {
+						// XXX offset 4 -> motorola!
+						if ((pf->offset == 4)&&(pf->type == GSM::PF_COMBO)) {
+							// find combo value
+							int l = pf->cb->CountItems();
+							struct pbCombo *pc;
+							for (int k=0; k<l; k++) {
+								pc = (struct pbCombo*)pf->cb->ItemAt(k);
+								if (pc->v == v->v) {
+									SetColumnContent(1,pc->text.String());
+									break;
+								}
+							}							
+						}
+					}
+				}
 			}
 		}
 		struct pbNum *Num(void) { return fNum; };
 	private:
 		struct pbNum *fNum;
+		GSM *gsm;
 };
 
 #endif
