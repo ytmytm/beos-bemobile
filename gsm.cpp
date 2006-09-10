@@ -548,10 +548,8 @@ int GSM::changeSMSMemSlot(const char *slot) {
 }
 
 struct memSlotSMS *GSM::getSMSSlot(const char *slot) {
-	int i;
 	int j = listMemSlotSMS->CountItems();
-
-	for (i=0;i<j;i++) {
+	for (int i=0;i<j;i++) {
 		if (strcmp(slot,((struct memSlotSMS*)listMemSlotSMS->ItemAt(i))->sname.String()) == 0)
 			return ((struct memSlotSMS*)listMemSlotSMS->ItemAt(i));
 	}
@@ -559,14 +557,7 @@ struct memSlotSMS *GSM::getSMSSlot(const char *slot) {
 }
 
 bool GSM::hasSMSSlot(const char *slot) {
-	int i;
-	int j = listMemSlotSMS->CountItems();
-
-	for (i=0;i<j;i++) {
-		if (strcmp(slot,((struct memSlotSMS*)listMemSlotSMS->ItemAt(i))->sname.String()) == 0)
-			return true;
-	}
-	return false;
+	return (getSMSSlot(slot) != NULL);
 }
 
 int GSM::getSMSType(const char *type) {
@@ -961,21 +952,12 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 }
 
 bool GSM::hasPBSlot(const char *slot) {
-	int i;
-	int j = listMemSlotPB->CountItems();
-
-	for (i=0;i<j;i++) {
-		if (strcmp(slot,((struct pbSlot*)listMemSlotPB->ItemAt(i))->sname.String()) == 0)
-			return true;
-	}
-	return false;
+	return (getPBSlot(slot) != NULL);
 }
 
 struct pbSlot *GSM::getPBSlot(const char *slot) {
-	int i;
 	int j = listMemSlotPB->CountItems();
-
-	for (i=0;i<j;i++) {
+	for (int i=0;i<j;i++) {
 		if (strcmp(slot,((struct pbSlot*)listMemSlotPB->ItemAt(i))->sname.String()) == 0)
 			return ((struct pbSlot*)listMemSlotPB->ItemAt(i));
 	}
@@ -1045,8 +1027,8 @@ void GSM::getPBList(const char *slot) {
 			num->attr = new BList;
 			union pbVal *v;
 			struct pbField *pf;
-			int j = sl->fields->CountItems();
 			int offset;
+			int j = sl->fields->CountItems();
 			for (int i=0; i<j; i++) {
 				pf = (struct pbField*)sl->fields->ItemAt(i);
 				v = new pbVal;
@@ -1109,16 +1091,16 @@ struct pbNum *GSM::matchNumFromNum(const char *num) {
 	BString crnum = stripLeadNum(num);
 
 	// search in all Phonebook slots
-	int k, l = listMemSlotPB->CountItems();
 	struct pbSlot *pb;
-	for (k=0;k<l;k++) {
+	int l = listMemSlotPB->CountItems();
+	for (int k=0;k<l;k++) {
 		pb = (struct pbSlot*)listMemSlotPB->ItemAt(k);
 		// don't search in callreg, just phonebooks
 		if (!pb->callreg) {
 		// search in all items
-			int m, n = pb->pb->CountItems();
 			struct pbNum *pn;
-			for (m=0;m<n;m++) {
+			int n = pb->pb->CountItems();
+			for (int m=0;m<n;m++) {
 				pn = (struct pbNum*)pb->pb->ItemAt(m);
 				if (crnum.Compare(stripLeadNum(pn->number.String())) == 0) {
 					printf("%i:[%s]:[%s]\n",pn->id,pn->number.String(),crnum.String());
@@ -1323,9 +1305,8 @@ const char *GSM::decodeSMSText(const char *input) {
 		return decodeText(input);
 	// guess if input is hex encoded or raw UTF8
 	int nothex = 0;
-	int i, j;
-	j = strlen(input);
-	for (i=0;i<j;i++)
+	int j = strlen(input);
+	for (int i=0;i<j;i++)
 		if (input[i]>'F')
 			nothex++;
 	if (nothex > 0) {
