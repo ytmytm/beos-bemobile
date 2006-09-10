@@ -104,7 +104,7 @@ void pbView::fullListRefresh(void) {
 	progress->Update(0, _("Reading phonebooks..."));
 
 	int j = gsm->listMemSlotPB->CountItems();
-	
+
 	struct pbSlot *sl;
 	BString pb;
 	// count number of PB slots first
