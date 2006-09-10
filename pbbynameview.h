@@ -24,7 +24,7 @@ class pbByNameView : public mobileView {
 
 		ColumnListView *list;
 		BStatusBar *progress;
-		BButton *refresh;
+		BButton *refresh, *dial;
 
 		BList *byNameList;
 };

@@ -13,6 +13,7 @@
 const uint32	PBNLIST_INV	= 'PBN0';
 const uint32	PBNLIST_SEL	= 'PBN1';
 const uint32	PBNREFRESH	= 'PBN2';
+const uint32	PBNDIAL		= 'PBN3';
 
 pbByNameView::pbByNameView(BRect r) : mobileView(r, "pbByNameView") {
 	caption->SetText(_("Phonebook by name"));
@@ -39,7 +40,7 @@ pbByNameView::pbByNameView(BRect r) : mobileView(r, "pbByNameView") {
 	list->SetSortFunction(CLVEasyItem::CompareItems);
 	this->AddChild(containerView);
 	list->SetInvocationMessage(new BMessage(PBNLIST_INV));
-//	list->SetSelectionMessage(new BMessage(CALIST_SEL));
+	list->SetSelectionMessage(new BMessage(PBNLIST_SEL));
 
 	r = this->MyBounds();
 	r.InsetBy(10,15);
@@ -57,8 +58,8 @@ pbByNameView::pbByNameView(BRect r) : mobileView(r, "pbByNameView") {
 	float len = s.Width()/5;	
 	s.right = s.left + len - 10;
 	this->AddChild(refresh = new BButton(s, "pbnRefresh", _("Refresh"), new BMessage(PBNREFRESH), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
-//	s.OffsetBy(len*4,0);
-//	this->AddChild(refresh = new BButton(s, "pbExport", _("Export"), new BMessage(PBEXPORT), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
+	s.OffsetBy(len*4,0);
+	this->AddChild(dial = new BButton(s, "pbnDial", _("Dial"), new BMessage(PBNDIAL), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
 
 	byNameList = new BList;
 }
@@ -180,6 +181,20 @@ void pbByNameView::Show(void) {
 
 void pbByNameView::MessageReceived(BMessage *Message) {
 	switch (Message->what) {
+		case PBNDIAL:
+			{	int i = list->CurrentSelection(0);
+
+				if (i>=0) {
+					struct pbNum *p = ((pbByNameListItem*)list->ItemAt(i))->Num();
+					if ((p->type != GSM::PB_PHONE) && (p->type != GSM::PB_INTLPHONE)) {
+						BAlert *err = new BAlert(APP_NAME, _("Selected item is not a phone number"), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+						err->Go();
+					} else {
+						gsm->dial(p->number.String());
+					}
+				}
+				break;
+			}
 		case PBNREFRESH:
 			fullListRefresh();
 			fillList();

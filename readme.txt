@@ -28,9 +28,6 @@ LISTA SMS:
 		- edycja/zmiana numeru do centrum SMS? wybór z predef. listy?
 - PB:
 	- przy dzialaniu pomijac sloty MD i AT
-	- lista numerów: ikonki z typem (home/mobile/pager etc.) (wziąć z mobilePhoneTools)
-	- nowy slot wirtualny [All numbers]
-		- guziki jak w poszczególnych PB (dial, edit, itd. (???))
 
 TODO:
 - PB: zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)
@@ -42,6 +39,7 @@ TODO:
 - eksport smsów, eksport/import phonebooków
 - ikony uwaga: CVS nie przechowa atrybutów, tylko ZIP
 IDEA:
+- backup/restore slotów PB
 - eksport slotów PB do plików people (peeps)
 	- grupowanie zrobione dla pbbynameview zrobić gdzieś ogólniej do korzystania
 	- wykrywanie atrybutów (typ numeru) (towrite) zrobić ogólniej do korzystania - dopasowanie do people
