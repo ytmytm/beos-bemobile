@@ -22,7 +22,6 @@ OPCJE:
 	- włączenie [primary] działa, wyłączenie - nie bardzo, może usunąć z edycji?
 	- przy mailing list coś do wyboru numerów (warto...?) np. lista z wielokrotnym wyborem
 	- dlaczego trzeba zapisywać dwa razy na L6?
-	- czy SIM zachowuje kategorię? (jeśli tak - jak to rozwiązać?)
 
 LISTA SMS:
 	- superitem SMS - skrócić widok folderów o połowę, a niżej co?
@@ -31,7 +30,6 @@ LISTA SMS:
 	- przy dzialaniu pomijac sloty MD i AT
 	- lista numerów: ikonki z typem (home/mobile/pager etc.) (wziąć z mobilePhoneTools)
 	- nowy slot wirtualny [All numbers]
-		- do każdego rozwiniętego: atrybuty jak w poszczególnych
 		- guziki jak w poszczególnych PB (dial, edit, itd. (???))
 
 TODO:
@@ -47,6 +45,7 @@ IDEA:
 - eksport slotów PB do plików people (peeps)
 	- grupowanie zrobione dla pbbynameview zrobić gdzieś ogólniej do korzystania
 	- wykrywanie atrybutów (typ numeru) (towrite) zrobić ogólniej do korzystania - dopasowanie do people
+		(nie da sie ogólnie, jest zależne od motoroli)
 - j/w import/sync (jak dopasowywać? własny atrybut <slot>-<id>?)
 - eksport smsów do plików poczty (bemail, treść w plik, od/do/data w atrybuty, coś dziwnego z indeksami robi)
 

@@ -30,7 +30,7 @@ been already visited.
 CHANGES
 
 version 0.5
-- fixed phonebook listing for v220 (and possibly some other) broken in 0.4
+- fixed phonebook listing for v220 (and possibly some other models) broken in 0.4
 - new phonebook page with numbers grouped by name
 - phonebook summary displays number of unique entries (by name)
 - lists expand upon double-click
