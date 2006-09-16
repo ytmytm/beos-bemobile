@@ -1,5 +1,5 @@
 
-BeMobile 0.5
+BeMobile 0.6
 (c) Maciej Witkowiak <ytm@elysium.pl>, <mwitkowiak@gmail.com>
 http://members.elysium.pl/ytm/html/beos.html
 http://ytm.bossstation.dnsalias.org/html/beos.html
@@ -28,6 +28,8 @@ been already visited.
 
 
 CHANGES
+version 0.6
+-
 
 version 0.5
 - fixed phonebook listing for v220 (and possibly some other models) broken in 0.4
