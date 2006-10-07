@@ -48,6 +48,7 @@ IDEA:
 - eksport smsów do plików poczty (bemail, treść w plik, od/do/data w atrybuty, coś dziwnego z indeksami robi)
 
 IKONY
+- użyć nadesłanych
 - ikony typu numeru (telefon/email/dom/praca itd.) - 8-9
 - ikony typu smsa (nowy,przeczytany,nowyniewysłany,wysłany) - 4 koperty
 - ikona baterii/baterii krytycznej (użyć z resources, gdzie?)
