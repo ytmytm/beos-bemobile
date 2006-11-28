@@ -39,6 +39,7 @@ TODO:
 - eksport smsów, eksport/import phonebooków
 - ikony uwaga: CVS nie przechowa atrybutów, tylko ZIP
 IDEA:
+- przyjmowanie DROPów z plików people -> wywołanie dodania do aktualnego slotu
 - backup/restore slotów PB
 - eksport slotów PB do plików people (peeps)
 	- grupowanie zrobione dla pbbynameview zrobić gdzieś ogólniej do korzystania
