@@ -41,6 +41,8 @@ TODO:
 IDEA:
 - przyjmowanie DROPów z plików people -> wywołanie dodania do aktualnego slotu
 - backup/restore slotów PB
+- eksport do VCF
+	- tylko w pbbynameview korzystając ze zbudowanych list
 - eksport slotów PB do plików people (peeps)
 	- grupowanie zrobione dla pbbynameview zrobić gdzieś ogólniej do korzystania
 	- wykrywanie atrybutów (typ numeru) (towrite) zrobić ogólniej do korzystania - dopasowanie do people
