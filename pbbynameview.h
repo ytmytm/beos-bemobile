@@ -22,20 +22,24 @@ class pbByNameView : public mobileView {
 		void fillList(void);
 		void fullListRefresh(void);
 
+		void exportVCF(int i);
+
 		ColumnListView *list;
 		BStatusBar *progress;
-		BButton *refresh, *dial;
+		BButton *refresh, *exportvcf, *dial;
 
 		BList *byNameList;
 };
 
 class pbByNameListItem : public CLVEasyItem {
 	public:
-		pbByNameListItem(struct pbNum *num, GSM *g, int level = 0, bool superitem = false) : CLVEasyItem(
+		pbByNameListItem(int master, struct pbNum *num, GSM *g, int level = 0, bool superitem = false) : CLVEasyItem(
 			level, superitem, false, 20.0) {
 			fNum = num;
 			gsm = g;
 			RefreshData(superitem);
+			fSuperItem = superitem;
+			fMaster = master;
 		}
 		void RefreshData(bool superitem = false) {
 			BString *tmp;
@@ -67,16 +71,20 @@ class pbByNameListItem : public CLVEasyItem {
 									SetColumnContent(1,pc->text.String());
 									break;
 								}
-							}							
+							}
 						}
 					}
 				}
 			}
 		}
 		struct pbNum *Num(void) { return fNum; };
+		bool SuperItem(void) { return fSuperItem; };
+		int Master(void) { return fMaster; } ;
 	private:
 		struct pbNum *fNum;
 		GSM *gsm;
+		bool fSuperItem;
+		int fMaster;
 };
 
 #endif

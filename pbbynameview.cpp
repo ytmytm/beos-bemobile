@@ -1,4 +1,9 @@
 
+//
+// XXX:sprawdzić mapowanie adresów na vcard
+// XXX:mapowanie atrybutów telefonu na numery
+// XXX:rozpoznawanie typu atrybutu przez nazwę jest brzydkie
+
 #include <Alert.h>
 #include <Button.h>
 #include <Font.h>
@@ -9,11 +14,13 @@
 #include "pbbynameview.h"
 
 #include <stdio.h>
+#include <time.h>
 
 const uint32	PBNLIST_INV	= 'PBN0';
 const uint32	PBNLIST_SEL	= 'PBN1';
 const uint32	PBNREFRESH	= 'PBN2';
 const uint32	PBNDIAL		= 'PBN3';
+const uint32	PBNEXPORTVCF = 'PBN4';
 
 pbByNameView::pbByNameView(BRect r) : mobileView(r, "pbByNameView") {
 	caption->SetText(_("Phonebook by name"));
@@ -58,7 +65,9 @@ pbByNameView::pbByNameView(BRect r) : mobileView(r, "pbByNameView") {
 	float len = s.Width()/5;	
 	s.right = s.left + len - 10;
 	this->AddChild(refresh = new BButton(s, "pbnRefresh", _("Refresh"), new BMessage(PBNREFRESH), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
-	s.OffsetBy(len*4,0);
+	s.OffsetBy(len, 0);
+	this->AddChild(exportvcf = new BButton(s, "pbnExportVCF", _("Export VCF"), new BMessage(PBNEXPORTVCF), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
+	s.OffsetBy(len*3,0);
 	this->AddChild(dial = new BButton(s, "pbnDial", _("Dial"), new BMessage(PBNDIAL), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
 
 	byNameList = new BList;
@@ -86,8 +95,9 @@ void pbByNameView::fillList(void) {
 		return;
 	struct pbNum *c = (struct pbNum*)byNameList->ItemAt(0);
 	// add 1st item (master and secondary)
-	list->AddItem(new pbByNameListItem(c, gsm, 0, true));
-	list->AddItem(new pbByNameListItem(c, gsm, 1, false));
+	int master = 0;
+	list->AddItem(new pbByNameListItem(master, c, gsm, 0, true));
+	list->AddItem(new pbByNameListItem(master, c, gsm, 1, false));
 	BString *last = ((union pbVal*)c->attr->ItemAt(1))->text;
 	BString *cur;
 	// go through the list and insert new master on each change
@@ -96,12 +106,13 @@ void pbByNameView::fillList(void) {
 		cur = ((union pbVal*)c->attr->ItemAt(1))->text;
 		if (cur->Compare(last->String()) != 0) {
 			last = cur;
+			master = i;
 			// there is name change! insert new master item with new name
-			item = new pbByNameListItem(c, gsm, 0, true);
+			item = new pbByNameListItem(master, c, gsm, 0, true);
 			list->AddItem(item);
 		}
 		// insert new secondary item
-		item = new pbByNameListItem(c, gsm, 1, false);
+		item = new pbByNameListItem(master, c, gsm, 1, false);
 		list->AddItem(item);
 	}
 }
@@ -203,12 +214,160 @@ void pbByNameView::MessageReceived(BMessage *Message) {
 			{	int i = list->CurrentSelection(0);
 				if (i>=0)
 					list->Expand((pbByNameListItem*)list->ItemAt(i));
+				//
 			}
 			break;
 		case PBNLIST_SEL:
+			break;
+		case PBNEXPORTVCF:
+			{	int i = list->CurrentSelection(0);
+				if (i>=0) {
+					exportVCF(((pbByNameListItem*)list->ItemAt(i))->Master());
+				}
+			}
 			break;
 		default:
 			mobileView::MessageReceived(Message);
 			break;
 	}
+}
+
+const char *types[] = { "work", "home", "main", "cell", "fax", "pager", "email", "maillist" };
+
+void pbByNameView::exportVCF(int i) {
+	bool cont;
+	bool hadnick = false;
+	bool hadbday = false;
+	union pbVal *v;
+	pbNum *num = (pbNum*)byNameList->ItemAt(i);
+	pbSlot *sl;
+	BString tmp;
+
+	v = (pbVal*)num->attr->ItemAt(1);
+	BString name = v->text->String();
+
+	bool pref;
+	BString type;
+	BString categories;
+	BString nick;
+	BString bday;
+	BString vcard = "BEGIN:VCARD\nCLASS:PUBLIC\nVERSION:3.0\n";
+
+	printf("num=%i,[%s]",i,num->number.String());
+	vcard += "FN:"; vcard += name; vcard += "\n";
+
+	printf("%s\n",((pbVal*)((pbNum*)byNameList->ItemAt(i))->attr->ItemAt(1))->text->String());
+	// for each number
+	cont = true;
+	while ((i<=byNameList->CountItems()) && cont) {
+		// do stuff
+		// for each attr
+		type = "";
+		categories = "";
+		nick = "";
+		bday = "";
+		pref = false;
+
+		num = (pbNum*)byNameList->ItemAt(i);
+		sl = gsm->getPBSlot(num->slot.String());
+			//	// typ, adres/email, telefon
+			// ADR
+		//
+		printf("slot:%i\n",sl->fields->CountItems());
+		printf("attr:%i\n",num->attr->CountItems());
+		int k, l = sl->fields->CountItems();
+		pbField *f;
+		for (k=0;k<l;k++) {
+			f = (pbField*)sl->fields->ItemAt(k);
+			v = (pbVal*)num->attr->ItemAt(k);
+			printf("%i:typ=%i:name=%s\n",k,f->type,f->name.String());
+			if (f->name.Compare(_("Primary number")) == 0) {
+				pref = v->b;
+			} else
+			if (f->name.Compare(_("Type")) == 0) {
+				if ((v->v<0) || (v->v > GSM::PK_MAILLIST))
+					type = "";
+				else
+					type = types[v->v];
+			} else
+			if (f->name.Compare(_("Category")) == 0) {
+				if (categories.Length()>0)
+					categories += ",";
+				categories << v->v;	// translate into category name?
+			} else
+			if (f->name.Compare(_("Nick")) == 0) {
+				if (v->text->Length()>0) {
+					nick = "NICKNAME:"; nick += v->text->String(); nick += "\n";
+				}
+			} else
+			if (f->name.Compare(_("Birthday (MM-DD-YYYY)")) == 0) {
+				tmp = v->text->String();
+				if (tmp.Length()>0) {
+					bday = "BDAY:";
+					bday += tmp[6]; bday += tmp[7]; bday += tmp[8]; bday += tmp[9]; bday += "-";
+					bday += tmp[0]; bday += tmp[1]; bday += "-";
+					bday += tmp[3]; bday += tmp[4];
+					bday += "T00:00:00Z\n";
+				}
+			}
+			;
+			// rest of attributes
+		}
+		tmp = "";
+		if (type.Compare("email") == 0) {
+			// it's email
+			tmp = "EMAIL";
+			if (pref)
+				tmp += ";TYPE=PREF";
+		} else {
+			// it's phone
+			tmp = "TEL";
+			if (type.Length()>0) {
+				tmp += ";TYPE="; tmp += type;
+				if (pref)
+					tmp += ",PREF";
+			} else if (pref)
+					tmp += ";TYPE=PREF";
+		}
+		tmp += ":";
+		tmp += ((pbVal*)num->attr->ItemAt(0))->text->String();
+		vcard += tmp; vcard += "\n";
+		if (!hadnick && (nick.Length() > 0)) {
+			hadnick = true;
+			vcard += nick;
+		}
+		if (!hadbday && (bday.Length() > 0)) {
+			hadbday = true;
+			vcard += bday;
+		}
+		i++;
+		if (i>=byNameList->CountItems())
+			cont = false;
+		else
+			cont = name.Compare(((pbVal*)((pbNum*)byNameList->ItemAt(i))->attr->ItemAt(1))->text->String()) == 0;
+	}
+	printf("%i\n",--i);
+
+	if (categories.Length()>0) {
+		vcard += "CATEGORIES:"; vcard += categories; vcard += "\n";
+	}
+// rev!
+	// revision date
+	{
+		struct tm *tm;
+		time_t curtime;
+
+		curtime = time(NULL);
+		tm = localtime(&curtime);
+		tm->tm_year += 1900;
+		tm->tm_mon++;
+		tmp = "REV:"; tmp << tm->tm_year; tmp += "-"; tmp << tm->tm_mon; tmp += "-"; tmp << tm->tm_mday;
+		tmp += "T"; tmp << tm->tm_hour; tmp += ":"; tmp << tm->tm_min; tmp += ":"; tmp << tm->tm_sec;
+		tmp += "Z\n";
+
+		vcard += tmp;
+	}
+
+	vcard += "END:VCARD\n\n";
+	printf("%s",vcard.String());
 }
