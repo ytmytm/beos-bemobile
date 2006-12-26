@@ -41,14 +41,13 @@ TODO:
 IDEA:
 - przyjmowanie DROPów z plików people -> wywołanie dodania do aktualnego slotu
 - backup/restore slotów PB
-- eksport do VCF
-	- tylko w pbbynameview korzystając ze zbudowanych list
 - eksport slotów PB do plików people (peeps)
 	- grupowanie zrobione dla pbbynameview zrobić gdzieś ogólniej do korzystania
 	- wykrywanie atrybutów (typ numeru) (towrite) zrobić ogólniej do korzystania - dopasowanie do people
 		(nie da sie ogólnie, jest zależne od motoroli)
-- j/w import/sync (jak dopasowywać? własny atrybut <slot>-<id>?)
-- eksport smsów do plików poczty (bemail, treść w plik, od/do/data w atrybuty, coś dziwnego z indeksami robi)
+	- eksport jak do vcf (wykrywanie atrybutów brzydkie)
+- j/w import/sync - dopasowywanie wg vcf::uid?
+- eksport smsów do plików poczty (bemail: treść w pliku, od/do/data w atrybuty, coś dziwnego z indeksami robi)
 
 IKONY
 - użyć nadesłanych

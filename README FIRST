@@ -29,7 +29,7 @@ been already visited.
 
 CHANGES
 version 0.6
--
+- export selected contacts to vCard (VCF) files
 
 version 0.5
 - fixed phonebook listing for v220 (and possibly some other models) broken in 0.4
@@ -85,6 +85,9 @@ On my phones there seems no way to disable 'Primary number' flag.
 
 Note that categories are represented as numbers. There is no easy way to fetch category names from
 the phone.
+
+On the "All contacts by name" page you can export selected contacts to vCard format. The data will be
+appended to your /boot/home/people/people.vcf file.
 
 
 

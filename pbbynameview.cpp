@@ -1,11 +1,11 @@
 
 //
-// XXX:sprawdzić mapowanie adresów na vcard
-// XXX:mapowanie atrybutów telefonu na numery
-// XXX:rozpoznawanie typu atrybutu przez nazwę jest brzydkie
+// XXX:it is ugly to recognize attribute type by its label
+//
 
 #include <Alert.h>
 #include <Button.h>
+#include <File.h>
 #include <Font.h>
 #include <StatusBar.h>
 #include <StringView.h>
@@ -15,6 +15,9 @@
 
 #include <stdio.h>
 #include <time.h>
+
+#define VCFPATH "/boot/home/people/"
+#define VCFFILE "people.vcf"
 
 const uint32	PBNLIST_INV	= 'PBN0';
 const uint32	PBNLIST_SEL	= 'PBN1';
@@ -66,7 +69,7 @@ pbByNameView::pbByNameView(BRect r) : mobileView(r, "pbByNameView") {
 	s.right = s.left + len - 10;
 	this->AddChild(refresh = new BButton(s, "pbnRefresh", _("Refresh"), new BMessage(PBNREFRESH), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 	s.OffsetBy(len, 0);
-	this->AddChild(exportvcf = new BButton(s, "pbnExportVCF", _("Export VCF"), new BMessage(PBNEXPORTVCF), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
+	this->AddChild(exportvcf = new BButton(s, "pbnExportVCF", _("Export vCard"), new BMessage(PBNEXPORTVCF), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 	s.OffsetBy(len*3,0);
 	this->AddChild(dial = new BButton(s, "pbnDial", _("Dial"), new BMessage(PBNDIAL), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
 
@@ -232,12 +235,21 @@ void pbByNameView::MessageReceived(BMessage *Message) {
 	}
 }
 
-const char *types[] = { "work", "home", "main", "cell", "fax", "pager", "email", "maillist" };
+const char *types[] = { "WORK", "HOME", "VOICE", "CELL", "FAX", "PAGER", "EMAIL", "" };
 
 void pbByNameView::exportVCF(int i) {
 	bool cont;
-	bool hadnick = false;
 	bool hadbday = false;
+	bool haveadr = false;
+	bool pref = false;
+	int startidx = i;
+
+	BString type;
+	BString categories;
+	BString nick;
+	BString bday;
+	BString adr2, adr, city, state, zip, country;
+
 	union pbVal *v;
 	pbNum *num = (pbNum*)byNameList->ItemAt(i);
 	pbSlot *sl;
@@ -246,41 +258,32 @@ void pbByNameView::exportVCF(int i) {
 	v = (pbVal*)num->attr->ItemAt(1);
 	BString name = v->text->String();
 
-	bool pref;
-	BString type;
-	BString categories;
-	BString nick;
-	BString bday;
 	BString vcard = "BEGIN:VCARD\nCLASS:PUBLIC\nVERSION:3.0\n";
 
-	printf("num=%i,[%s]",i,num->number.String());
+	name.ReplaceAll(",","\\,");
+	name.ReplaceAll(";","\\;");
 	vcard += "FN:"; vcard += name; vcard += "\n";
+	vcard += "N:"; vcard += name; vcard += ";;;;\n";
 
-	printf("%s\n",((pbVal*)((pbNum*)byNameList->ItemAt(i))->attr->ItemAt(1))->text->String());
 	// for each number
 	cont = true;
-	while ((i<=byNameList->CountItems()) && cont) {
-		// do stuff
+	while (cont) {
 		// for each attr
 		type = "";
 		categories = "";
-		nick = "";
 		bday = "";
 		pref = false;
+		haveadr = false;
+		adr = ""; adr2 = ""; city = ""; state = ""; zip = ""; country = "";
 
 		num = (pbNum*)byNameList->ItemAt(i);
 		sl = gsm->getPBSlot(num->slot.String());
-			//	// typ, adres/email, telefon
-			// ADR
-		//
-		printf("slot:%i\n",sl->fields->CountItems());
-		printf("attr:%i\n",num->attr->CountItems());
+
 		int k, l = sl->fields->CountItems();
 		pbField *f;
 		for (k=0;k<l;k++) {
 			f = (pbField*)sl->fields->ItemAt(k);
 			v = (pbVal*)num->attr->ItemAt(k);
-			printf("%i:typ=%i:name=%s\n",k,f->type,f->name.String());
 			if (f->name.Compare(_("Primary number")) == 0) {
 				pref = v->b;
 			} else
@@ -293,11 +296,16 @@ void pbByNameView::exportVCF(int i) {
 			if (f->name.Compare(_("Category")) == 0) {
 				if (categories.Length()>0)
 					categories += ",";
-				categories << v->v;	// translate into category name?
+				categories << v->v;	// XXX translate into category name?
 			} else
 			if (f->name.Compare(_("Nick")) == 0) {
 				if (v->text->Length()>0) {
-					nick = "NICKNAME:"; nick += v->text->String(); nick += "\n";
+					if (nick.Length()>0)
+						nick += ",";
+					tmp = v->text->String();
+					tmp.ReplaceAll(",","\\,");
+					tmp.ReplaceAll(";","\\;");
+					nick += tmp;
 				}
 			} else
 			if (f->name.Compare(_("Birthday (MM-DD-YYYY)")) == 0) {
@@ -309,12 +317,46 @@ void pbByNameView::exportVCF(int i) {
 					bday += tmp[3]; bday += tmp[4];
 					bday += "T00:00:00Z\n";
 				}
-			}
-			;
-			// rest of attributes
+			} else
+			if (f->name.Compare(_("Address (2)")) == 0) {
+				haveadr = haveadr || (v->text->Length() > 0);
+				adr2 = v->text->String();
+				adr2.ReplaceAll(",","\\,");
+				adr2.ReplaceAll(";","\\;");
+			} else
+			if (f->name.Compare(_("Address")) == 0) {
+				haveadr = haveadr || (v->text->Length() > 0);
+				adr = v->text->String();
+				adr.ReplaceAll(",","\\,");
+				adr.ReplaceAll(";","\\;");
+			} else
+			if (f->name.Compare(_("City")) == 0) {
+				haveadr = haveadr || (v->text->Length() > 0);
+				city = v->text->String();
+				city.ReplaceAll(",","\\,");
+				city.ReplaceAll(";","\\;");
+			} else
+			if (f->name.Compare(_("State")) == 0) {
+				haveadr = haveadr || (v->text->Length() > 0);
+				state = v->text->String();
+				state.ReplaceAll(",","\\,");
+				state.ReplaceAll(";","\\;");
+			} else
+			if (f->name.Compare(_("Zip")) == 0) {
+				haveadr = haveadr || (v->text->Length() > 0);
+				zip = v->text->String();
+				zip.ReplaceAll(",","\\,");
+				zip.ReplaceAll(";","\\;");
+			} else
+			if (f->name.Compare(_("Country")) == 0) {
+				haveadr = haveadr || (v->text->Length() > 0);
+				country = v->text->String();
+				country.ReplaceAll(",","\\,");
+				country.ReplaceAll(";","\\;");			
+			};
 		}
 		tmp = "";
-		if (type.Compare("email") == 0) {
+		if (type.Compare("EMAIL") == 0) {
 			// it's email
 			tmp = "EMAIL";
 			if (pref)
@@ -332,27 +374,50 @@ void pbByNameView::exportVCF(int i) {
 		tmp += ":";
 		tmp += ((pbVal*)num->attr->ItemAt(0))->text->String();
 		vcard += tmp; vcard += "\n";
-		if (!hadnick && (nick.Length() > 0)) {
-			hadnick = true;
-			vcard += nick;
-		}
 		if (!hadbday && (bday.Length() > 0)) {
 			hadbday = true;
 			vcard += bday;
 		}
+		if (haveadr) {
+			BString tmp2;
+			tmp = "";
+			if (type.Compare("HOME") == 0)
+				tmp += ";TYPE=HOME";
+			else if (type.Compare("WORK") == 0)
+				tmp += ";TYPE=WORK";
+			if (pref) {
+				if (tmp.Length()>0)
+					tmp += ",PREF";
+				else
+					tmp += ";TYPE=PREF";
+			}
+			tmp2 = "ADR"; tmp2 += tmp;
+			tmp = tmp2;
+			tmp += ";";							// p.o. box
+			tmp += adr2; tmp += ";";			// extended address
+			tmp += adr;	tmp += ";";				// street address
+			tmp += city; tmp += ";";			// locality
+			tmp += state; tmp += ";";			// region
+			tmp += zip; tmp += ";";				// postal code
+			tmp += country;						// country
+			tmp += "\n";
+			vcard += tmp;
+		}
+		//
 		i++;
-		if (i>=byNameList->CountItems())
+		if (i == byNameList->CountItems())
 			cont = false;
 		else
 			cont = name.Compare(((pbVal*)((pbNum*)byNameList->ItemAt(i))->attr->ItemAt(1))->text->String()) == 0;
 	}
-	printf("%i\n",--i);
-
+	if (nick.Length() > 0) {
+		vcard += "NICKNAME:";
+		vcard += nick;
+		vcard += "\n";
+	}
 	if (categories.Length()>0) {
 		vcard += "CATEGORIES:"; vcard += categories; vcard += "\n";
 	}
-// rev!
-	// revision date
 	{
 		struct tm *tm;
 		time_t curtime;
@@ -362,12 +427,28 @@ void pbByNameView::exportVCF(int i) {
 		tm->tm_year += 1900;
 		tm->tm_mon++;
 		tmp = "REV:"; tmp << tm->tm_year; tmp += "-"; tmp << tm->tm_mon; tmp += "-"; tmp << tm->tm_mday;
-		tmp += "T"; tmp << tm->tm_hour; tmp += ":"; tmp << tm->tm_min; tmp += ":"; tmp << tm->tm_sec;
-		tmp += "Z\n";
-
+		tmp += "\n";
 		vcard += tmp;
 	}
-
+	{
+		tmp = "UID:";
+		tmp += gsm->getIMEI();
+		num = (pbNum*)byNameList->ItemAt(startidx);
+		tmp += "-"; tmp += num->slot.String();
+		tmp += "-"; tmp << num->id;
+		tmp += "\n";
+		vcard += tmp;
+	}
 	vcard += "END:VCARD\n\n";
 	printf("%s",vcard.String());
+
+	// append to file
+	BFile f;
+	if (f.SetTo(VCFPATH VCFFILE, B_WRITE_ONLY|B_CREATE_FILE|B_OPEN_AT_END) != B_OK) {
+		// XXX alert w/ error
+		printf("error!\n");
+		return;
+	}
+	f.Write(vcard.String(), vcard.Length());
+	f.Unset();
 }
