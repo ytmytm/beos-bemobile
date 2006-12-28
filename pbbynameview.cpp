@@ -445,10 +445,20 @@ void pbByNameView::exportVCF(int i) {
 	// append to file
 	BFile f;
 	if (f.SetTo(VCFPATH VCFFILE, B_WRITE_ONLY|B_CREATE_FILE|B_OPEN_AT_END) != B_OK) {
-		// XXX alert w/ error
+		tmp = _("There was error and vCard file was not saved.");
+		tmp += "\n";
+		tmp += VCFPATH;
+		tmp += VCFFILE;
+		BAlert *err = new BAlert(APP_NAME, tmp.String(), _("OK"), NULL, NULL, B_WIDTH_AS_USUAL, B_INFO_ALERT);
+		err->Go();
 		printf("error!\n");
 		return;
 	}
 	f.Write(vcard.String(), vcard.Length());
 	f.Unset();
+	tmp = _("Contact data has been added to vCard file");
+	tmp += "\n";
+	tmp += VCFPATH; tmp += VCFFILE;
+	BAlert *a = new BAlert(APP_NAME, tmp.String(), _("OK"), NULL, NULL, B_WIDTH_AS_USUAL, B_INFO_ALERT);
+	a->Go();
 }
