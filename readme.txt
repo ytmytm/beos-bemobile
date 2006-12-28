@@ -46,8 +46,12 @@ IDEA:
 	- wykrywanie atrybutów (typ numeru) (towrite) zrobić ogólniej do korzystania - dopasowanie do people
 		(nie da sie ogólnie, jest zależne od motoroli)
 	- eksport jak do vcf (wykrywanie atrybutów brzydkie)
+		- encoding qp,utf8!
+		- zmiana na vcard v2.1? (jak eksport z motoroli i obsługiwane przez mail-it/vcard2people etc.?)
 - j/w import/sync - dopasowywanie wg vcf::uid?
 - eksport smsów do plików poczty (bemail: treść w pliku, od/do/data w atrybuty, coś dziwnego z indeksami robi)
+- zamiana pbVal na Message, wszystkie atrybuty kodowane z/na standardowe nazwy -> łatwo znaleźć lub
+  stwierdzić nieistnienie, można zapisywać faktyczne wartości
 
 IKONY
 - użyć nadesłanych
