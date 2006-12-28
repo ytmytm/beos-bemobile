@@ -29,7 +29,8 @@ been already visited.
 
 CHANGES
 version 0.6
-- export selected contacts to vCard (VCF) files
+- export selected contacts to vCard (VCF) files, needs more testing
+- new set of BeOS-style icons (thank you, maui & Ralf Schulke!)
 
 version 0.5
 - fixed phonebook listing for v220 (and possibly some other models) broken in 0.4
