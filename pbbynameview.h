@@ -23,10 +23,11 @@ class pbByNameView : public mobileView {
 		void fullListRefresh(void);
 
 		void exportVCF(int i);
+		void exportPeople(int i);
 
 		ColumnListView *list;
 		BStatusBar *progress;
-		BButton *refresh, *exportvcf, *dial;
+		BButton *refresh, *exportvcf, *exportppl, *dial;
 
 		BList *byNameList;
 };
@@ -85,6 +86,19 @@ class pbByNameListItem : public CLVEasyItem {
 		GSM *gsm;
 		bool fSuperItem;
 		int fMaster;
+};
+
+class PeopleFile {
+	public:
+		PeopleFile(BMessage *p);
+		~PeopleFile();
+		int Save(const char *path, bool setHomeNumber = false);
+	private:
+		BMessage *person;
+		const char *getMsgItem(const char *item);
+// name, address, city, state, zip, country, hphone, wphone;
+// fax, group, nickname, email, title, address2, cell, birthday;
+// pager, waddress, waddress2, wcity, wcountry, wcphone, wfax, wstate, wzip;
 };
 
 #endif

@@ -4,7 +4,7 @@ BeMobile 0.6
 http://members.elysium.pl/ytm/html/beos.html
 http://ytm.bossstation.dnsalias.org/html/beos.html
 
-BeMobile is a simple program to manage contacts and messages stored on your mobile phone.
+BeMobile is a program to manage contacts and messages stored on your mobile phone.
 It has been developed for Motorola C550 and L6 models but should work with any phone that
 supports AT command set.
 
@@ -13,11 +13,13 @@ supports AT command set.
 COMPATIBILITY
 
 BeMobile works only with phones that can be driven with AT commands. It has been developed
-and tested ONLY on Motorola C550 and L6. It has been reported to work with RAZR V3 and V220.
+and tested ONLY on Motorola C550 and L6. It has been reported to work with Motorolas: SLVR L7,
+RAZR V3, V220 and Nokia Vertu.
 It should also work with phones from other vendors, like Siemens, Ericsson and some Nokia phones.
 
 To make a long story short - if SerialConnect can talk with your phone via infra-red link,
-RS232 or USB cable, then BeMobile should work too.
+RS232 or USB cable, then BeMobile should work too. In case of IR and RS232 you will have to find out
+correct parameteres of connection (speed, data bits, etc.).
 
 Phone numbers from SMS and Call Register lists are matched against Phone Books, but you have to
 read (open the list) them first. Just 9 last digits are matched, without international prefixes madness
@@ -29,8 +31,9 @@ been already visited.
 
 CHANGES
 version 0.6
-- export selected contacts to vCard (VCF) files, needs more testing
-- new set of BeOS-style icons (thank you, maui & Ralf Schulke!)
+- export selected contacts from 'All contacts by name' to vCard (VCF) files, needs more testing
+- export selected contacts from 'All contacts by name' to People files
+- new set of nice, clean BeOS-style icons (thank you, maui & Ralf Schulke!)
 
 version 0.5
 - fixed phonebook listing for v220 (and possibly some other models) broken in 0.4
@@ -87,8 +90,20 @@ On my phones there seems no way to disable 'Primary number' flag.
 Note that categories are represented as numbers. There is no easy way to fetch category names from
 the phone.
 
+
+
+EXPORTING CONTACTS
+
 On the "All contacts by name" page you can export selected contacts to vCard format. The data will be
 appended to your /boot/home/people/people.vcf file.
+
+You can also select a contact and export it to People file. It will be saved under
+/boot/home/people/BeMobile/ to prevent any damage to your address book. Currently only Motorola phones
+extended attributes (nickname, birthday, address, etc.) are saved. Please use MrPeeps instead of People to
+browse People files because it handles more attributes (separate home/work address, more phone types,
+birthday).
+Categories from phone are saved as groups. Currently they are only numerical because there is no easy way
+to fetch category names from the phone.
 
 
 

@@ -17,4 +17,5 @@
 
 	// shared messages
 	#define MSG_INITMSG		'BMGS'
+	#define MSG_PERSON		'BMPE'
 #endif

@@ -1,12 +1,19 @@
 
 //
 // XXX:it is ugly to recognize attribute type by its label
-//
+//		- add 'type' constant to slot-fields (temporary)
+//		- replace pbNum w/ bmessage and attribute list
+// XXX:update people-save so:
+//	- home phone must be updated with 1st phone number when empty 
+//	- work/non-work address must be updated
 
 #include <Alert.h>
 #include <Button.h>
+#include <Directory.h>
 #include <File.h>
 #include <Font.h>
+#include <Node.h>
+#include <NodeInfo.h>
 #include <StatusBar.h>
 #include <StringView.h>
 #include "ColumnListView.h"
@@ -16,6 +23,8 @@
 #include <stdio.h>
 #include <time.h>
 
+char *people_path = "/boot/home/people/BeMobile/";
+
 #define VCFPATH "/boot/home/people/"
 #define VCFFILE "people.vcf"
 
@@ -24,6 +33,8 @@ const uint32	PBNLIST_SEL	= 'PBN1';
 const uint32	PBNREFRESH	= 'PBN2';
 const uint32	PBNDIAL		= 'PBN3';
 const uint32	PBNEXPORTVCF = 'PBN4';
+const uint32	PBNEXPORTPPL = 'PBN5';
+
 
 pbByNameView::pbByNameView(BRect r) : mobileView(r, "pbByNameView") {
 	caption->SetText(_("Phonebook by name"));
@@ -69,8 +80,10 @@ pbByNameView::pbByNameView(BRect r) : mobileView(r, "pbByNameView") {
 	s.right = s.left + len - 10;
 	this->AddChild(refresh = new BButton(s, "pbnRefresh", _("Refresh"), new BMessage(PBNREFRESH), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 	s.OffsetBy(len, 0);
-	this->AddChild(exportvcf = new BButton(s, "pbnExportVCF", _("Export vCard"), new BMessage(PBNEXPORTVCF), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
-	s.OffsetBy(len*3,0);
+	this->AddChild(exportvcf = new BButton(s, "pbnExportVCF", _("Export to vCard"), new BMessage(PBNEXPORTVCF), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
+	s.OffsetBy(len, 0);
+	this->AddChild(exportppl = new BButton(s, "pbnExportPpl", _("Export to People"), new BMessage(PBNEXPORTPPL), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
+	s.OffsetBy(len*2,0);
 	this->AddChild(dial = new BButton(s, "pbnDial", _("Dial"), new BMessage(PBNDIAL), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
 
 	byNameList = new BList;
@@ -223,9 +236,13 @@ void pbByNameView::MessageReceived(BMessage *Message) {
 		case PBNLIST_SEL:
 			break;
 		case PBNEXPORTVCF:
+		case PBNEXPORTPPL:
 			{	int i = list->CurrentSelection(0);
 				if (i>=0) {
-					exportVCF(((pbByNameListItem*)list->ItemAt(i))->Master());
+					if (Message->what == PBNEXPORTVCF)
+						exportVCF(((pbByNameListItem*)list->ItemAt(i))->Master());
+					else
+						exportPeople(((pbByNameListItem*)list->ItemAt(i))->Master());
 				}
 			}
 			break;
@@ -461,4 +478,257 @@ void pbByNameView::exportVCF(int i) {
 	tmp += VCFPATH; tmp += VCFFILE;
 	BAlert *a = new BAlert(APP_NAME, tmp.String(), _("OK"), NULL, NULL, B_WIDTH_AS_USUAL, B_INFO_ALERT);
 	a->Go();
+}
+
+/// this is from mrpeeps
+//file attributes
+#define PERSON_FILE_TYPE	"application/x-person"
+
+#define PERSON_NAME			"META:name"
+#define PERSON_FIRSTNAME	"META:firstname"
+#define PERSON_LASTNAME		"META:lastname"
+#define PERSON_TITLE		"META:title"
+#define PERSON_NICKNAME		"META:nickname"
+#define PERSON_EMAIL		"META:email"
+#define PERSON_URL			"META:url"
+#define PERSON_HOME_PHONE	"META:hphone"
+#define PERSON_WORK_PHONE	"META:wphone"
+#define PERSON_CELL_PHONE	"META:cell"
+#define PERSON_FAX			"META:fax"
+#define PERSON_ADDRESS		"META:address"
+#define PERSON_ADDRESS2		"META:address2"
+#define PERSON_CITY			"META:city"
+#define PERSON_STATE		"META:state"
+#define PERSON_ZIP			"META:zip"
+#define PERSON_COUNTRY		"META:country"
+#define PERSON_BIRTHDAY		"META:birthday"
+#define PERSON_ANNIVERSARY	"META:anniversary"
+#define PERSON_GROUP		"META:group"
+#define PERSON_SPOUSE		"META:spouse"
+#define PERSON_CHILDREN		"META:children"
+#define PERSON_ASSISTANT	"META:assist"
+#define PERSON_ASSISTANT_PHONE	"META:assistphone"
+#define PERSON_MSN			"META:msn"
+#define PERSON_JABBER		"META:jabber"
+#define PERSON_ICQ			"META:icq"
+#define PERSON_ICQ_UIN		"META:icquin"
+#define PERSON_YAHOO		"META:yahoo"
+#define PERSON_AIM			"META:aim"
+#define PERSON_EMAIL3		"META:email3"
+#define PERSON_EMAIL4		"META:email4"
+#define PERSON_EMAIL5		"META:email5"
+
+#define PERSON_OTHER_URL	"META:url3"
+#define PERSON_NOTES		"META:notes"
+
+#define PERSON_WORK_EMAIL	"META:email2"
+#define PERSON_WORK_CELL	"META:wcphone"
+#define PERSON_WORK_COUNTRY	"META:wcountry"
+#define PERSON_WORK_CITY	"META:wcity"
+#define PERSON_WORK_ADDRESS	"META:waddress"
+#define PERSON_WORK_URL		"META:url2"
+#define PERSON_PAGER		"META:pager"
+#define PERSON_WORK_FAX		"META:wfax"
+#define PERSON_WORK_ZIP		"META:wzip"
+#define PERSON_WORK_STATE	"META:wstate"
+#define PERSON_WORK_ADDRESS2	"META:waddress2"
+#define PERSON_POSITION		"META:position"
+#define PERSON_COMPANY		"META:company"
+#define PERSON_PHOTO		"META:photo"
+
+PeopleFile::PeopleFile(BMessage *p) {
+	if (p->what == MSG_PERSON)
+		person = p;
+	else
+		person = NULL;
+}
+
+PeopleFile::~PeopleFile() {
+
+}
+
+int PeopleFile::Save(const char *path, bool setHomeNumber = false) {
+	BString tmp;
+	BString fname(path);
+	fname += "/";
+
+	if (!person)
+		return -1;	// invalid
+
+	if (create_directory(path, 0777) != B_OK) {
+	// XXX alert
+		printf("can't create requested directory\n");
+		return -1;
+	}
+
+	tmp = getMsgItem("name");
+	if (tmp.Length()<1) {
+	// XXX alert
+		printf("name is required, can't create file\n");
+		return -1;
+	}
+	fname += tmp;
+
+	// create file
+	BFile f(fname.String(),B_WRITE_ONLY|B_CREATE_FILE);
+	BNodeInfo ninfo(&f);
+	ninfo.SetType(PERSON_FILE_TYPE);
+
+	// save attributes
+	tmp = getMsgItem("name"); if (tmp.Length() > 0)
+	f.WriteAttr(PERSON_NAME, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+	tmp = getMsgItem("nickname"); if (tmp.Length() > 0)
+	f.WriteAttr(PERSON_NICKNAME, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+	tmp = getMsgItem("birthday"); if (tmp.Length() > 0)
+	f.WriteAttr(PERSON_BIRTHDAY, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+
+// split for work address!
+	tmp = getMsgItem("address"); if (tmp.Length() > 0)
+	f.WriteAttr(PERSON_ADDRESS, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+	tmp = getMsgItem("address2"); if (tmp.Length() > 0)	// peeps attr
+	f.WriteAttr(PERSON_ADDRESS2, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+	tmp = getMsgItem("city"); if (tmp.Length() > 0)
+	f.WriteAttr(PERSON_CITY, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+	tmp = getMsgItem("state"); if (tmp.Length() > 0)
+	f.WriteAttr(PERSON_STATE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+	tmp = getMsgItem("zip"); if (tmp.Length() > 0)
+	f.WriteAttr(PERSON_ZIP, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+	tmp = getMsgItem("country"); if (tmp.Length() > 0)
+	f.WriteAttr(PERSON_COUNTRY, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+	tmp = getMsgItem("category"); if (tmp.Length() > 0)
+	f.WriteAttr(PERSON_GROUP, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+
+	tmp = getMsgItem("number");
+	if (tmp.Length() > 0) {
+
+//	XXX if current type is absent or not email & there is no 'home' phone - save number to home too	
+//		if (setHomeNumber)
+//			f.WriteAttr(PERSON_HOME_PHONE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);	
+		
+		int32 t;
+		if (person->FindInt32("num_type",&t) == B_OK) {
+			switch (t) {
+				case GSM::PK_WORK:
+					f.WriteAttr(PERSON_WORK_PHONE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+					break;
+				case GSM::PK_MOBILE:
+					f.WriteAttr(PERSON_CELL_PHONE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+					break;
+				case GSM::PK_MAIN:
+				case GSM::PK_HOME:
+					f.WriteAttr(PERSON_HOME_PHONE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+					break;
+				case GSM::PK_FAX:
+					f.WriteAttr(PERSON_FAX, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+					break;
+				case GSM::PK_PAGER:
+					f.WriteAttr(PERSON_PAGER, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+					break;
+				case GSM::PK_EMAIL:
+					f.WriteAttr(PERSON_EMAIL, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+					break;
+				default:
+//					printf("Unknown type:%i for %s\n", t, tmp.String());
+					break;
+			}
+		} else {
+			// no type information -- must be phone
+			f.WriteAttr(PERSON_HOME_PHONE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);	
+		}
+	}
+	f.Unset();
+
+	return B_OK;
+}
+
+const char *PeopleFile::getMsgItem(const char *item) {
+	static const char *s;
+	if (person->FindString(item, &s) != B_OK)
+		return NULL;
+	else
+		return s;
+}
+
+void pbByNameView::exportPeople(int i) {
+	bool cont = false;
+
+	// pass msg for each one so it will overwrite/update itself
+	PeopleFile *p;
+	BMessage *msg;
+
+	pbSlot *sl;
+	pbNum *num = (pbNum*)byNameList->ItemAt(i);
+	union pbVal *v = (pbVal*)num->attr->ItemAt(1);
+	BString name = v->text->String();
+	BString tmp, bday;
+
+	// for each number
+	cont = true;
+	while (cont) {
+		num = (pbNum*)byNameList->ItemAt(i);
+		sl = gsm->getPBSlot(num->slot.String());
+
+		// actual stuff
+		msg = new BMessage(MSG_PERSON);
+		msg->AddString("name", name.String());
+		msg->AddString("number", ((pbVal*)num->attr->ItemAt(0))->text->String());
+
+		int k, l = sl->fields->CountItems();
+		pbField *f;
+		for (k=0;k<l;k++) {
+			f = (pbField*)sl->fields->ItemAt(k);
+			v = (pbVal*)num->attr->ItemAt(k);
+			if (f->name.Compare(_("Type")) == 0) {
+				msg->AddInt32("num_type", v->v);
+			} else if (f->name.Compare(_("Category")) == 0) {
+				tmp = ""; tmp << v->v;
+				msg->AddString("category", tmp.String());
+			} else if (f->name.Compare(_("Nick")) == 0) {
+				if (v->text->Length() > 0)
+					msg->AddString("nickname", v->text->String());
+			} else if (f->name.Compare(_("Birthday (MM-DD-YYYY)")) == 0) {
+				tmp = v->text->String();
+				if (tmp.Length() == 10) {
+					bday = tmp[6]; bday += tmp[7]; bday += tmp[8]; bday += tmp[9]; bday += "-";
+					bday += tmp[0]; bday += tmp[1]; bday += "-";
+					bday += tmp[3]; bday += tmp[4];
+					msg->AddString("birthday", bday.String());
+				}
+			} else if (f->name.Compare(_("Country")) == 0) {
+				if (v->text->Length() > 0)
+					msg->AddString("country", v->text->String());
+			} else if (f->name.Compare(_("Zip")) == 0) {
+				if (v->text->Length() > 0)
+					msg->AddString("zip", v->text->String());
+			} else if (f->name.Compare(_("State")) == 0) {
+				if (v->text->Length() > 0)
+					msg->AddString("state", v->text->String());
+			} else if (f->name.Compare(_("City")) == 0) {
+				if (v->text->Length() > 0)
+					msg->AddString("city", v->text->String());
+			} else if (f->name.Compare(_("Address")) == 0) {
+				if (v->text->Length() > 0)
+					msg->AddString("address", v->text->String());
+			} else if (f->name.Compare(_("Address (2)")) == 0) {
+				if (v->text->Length() > 0)
+					msg->AddString("address2", v->text->String());
+			}
+		}
+		msg->PrintToStream();
+		p = new PeopleFile(msg);
+		if (p->Save(people_path) != B_OK) {
+			// XXX error
+			printf("error\n");
+			delete p;
+			delete msg;
+			return;
+		}
+		delete p;
+		delete msg;
+		i++;
+		if (i == byNameList->CountItems())
+			cont = false;
+		else
+			cont = name.Compare(((pbVal*)((pbNum*)byNameList->ItemAt(i))->attr->ItemAt(1))->text->String()) == 0;
+	}
 }
