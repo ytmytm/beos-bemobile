@@ -1,11 +1,9 @@
 
 //
 // XXX:it is ugly to recognize attribute type by its label
+//		(here and hardcoded offsets in refresh for listitem)
 //		- add 'type' constant to slot-fields (temporary)
 //		- replace pbNum w/ bmessage and attribute list
-// XXX:update people-save so:
-//	- home phone must be updated with 1st phone number when empty 
-//	- work/non-work address must be updated
 
 #include <Alert.h>
 #include <Button.h>
@@ -53,7 +51,7 @@ pbByNameView::pbByNameView(BRect r) : mobileView(r, "pbByNameView") {
 		B_FANCY_BORDER);
 	totalw = 20;
 	list->AddColumn(new CLVColumn(NULL,20,CLV_EXPANDER|CLV_LOCK_AT_BEGINNING|CLV_NOT_MOVABLE));
-	maxw = font.StringWidth(_("M"))*17+20; totalw += maxw;
+	maxw = font.StringWidth("M")*17+20; totalw += maxw;
 	list->AddColumn(new CLVColumn(_("Name"), maxw, CLV_LOCK_AT_BEGINNING|CLV_NOT_MOVABLE|CLV_PUSH_PASS|CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE));
 //	maxw = font.StringWidth(_("9"))*12+20; totalw += maxw;
 //	list->AddColumn(new CLVColumn(_("Number"), maxw, CLV_TELL_ITEMS_WIDTH|CLV_HEADER_TRUNCATE|CLV_SORT_KEYABLE));
@@ -547,24 +545,28 @@ PeopleFile::~PeopleFile() {
 
 }
 
-int PeopleFile::Save(const char *path, bool setHomeNumber = false) {
-	BString tmp;
-	BString fname(path);
-	fname += "/";
+int PeopleFile::Save(const char *path) {
 
 	if (!person)
 		return -1;	// invalid
 
+	BString tmp;
+	BString fname(path);
+	fname += "/";
+
 	if (create_directory(path, 0777) != B_OK) {
-	// XXX alert
-		printf("can't create requested directory\n");
+		tmp = _("Can't create directory for People files export");
+		tmp += "\n"; tmp += path;
+		BAlert *a = new BAlert(APP_NAME, tmp.String(), _("OK"), NULL, NULL, B_WIDTH_AS_USUAL, B_INFO_ALERT);
+		a->Go();
 		return -1;
 	}
 
 	tmp = getMsgItem("name");
 	if (tmp.Length()<1) {
-	// XXX alert
-		printf("name is required, can't create file\n");
+		tmp = _("You can't export record without a name");
+		BAlert *a = new BAlert(APP_NAME, tmp.String(), _("OK"), NULL, NULL, B_WIDTH_AS_USUAL, B_INFO_ALERT);
+		a->Go();
 		return -1;
 	}
 	fname += tmp;
@@ -581,32 +583,51 @@ int PeopleFile::Save(const char *path, bool setHomeNumber = false) {
 	f.WriteAttr(PERSON_NICKNAME, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
 	tmp = getMsgItem("birthday"); if (tmp.Length() > 0)
 	f.WriteAttr(PERSON_BIRTHDAY, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
-
-// split for work address!
-	tmp = getMsgItem("address"); if (tmp.Length() > 0)
-	f.WriteAttr(PERSON_ADDRESS, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
-	tmp = getMsgItem("address2"); if (tmp.Length() > 0)	// peeps attr
-	f.WriteAttr(PERSON_ADDRESS2, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
-	tmp = getMsgItem("city"); if (tmp.Length() > 0)
-	f.WriteAttr(PERSON_CITY, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
-	tmp = getMsgItem("state"); if (tmp.Length() > 0)
-	f.WriteAttr(PERSON_STATE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
-	tmp = getMsgItem("zip"); if (tmp.Length() > 0)
-	f.WriteAttr(PERSON_ZIP, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
-	tmp = getMsgItem("country"); if (tmp.Length() > 0)
-	f.WriteAttr(PERSON_COUNTRY, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
 	tmp = getMsgItem("category"); if (tmp.Length() > 0)
 	f.WriteAttr(PERSON_GROUP, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
 
+	int32 t = -1;
+	// save address - either work or any other
+	if ((person->FindInt32("num_type",&t) == B_OK) && (t == GSM::PK_WORK)) {
+		tmp = getMsgItem("address"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_WORK_ADDRESS, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		tmp = getMsgItem("address2"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_WORK_ADDRESS2, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		tmp = getMsgItem("city"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_WORK_CITY, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		tmp = getMsgItem("state"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_WORK_STATE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		tmp = getMsgItem("zip"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_WORK_ZIP, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		tmp = getMsgItem("country"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_WORK_COUNTRY, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+	} else {
+		tmp = getMsgItem("address"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_ADDRESS, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		tmp = getMsgItem("address2"); if (tmp.Length() > 0)	// peeps attr
+		f.WriteAttr(PERSON_ADDRESS2, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		tmp = getMsgItem("city"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_CITY, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		tmp = getMsgItem("state"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_STATE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		tmp = getMsgItem("zip"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_ZIP, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		tmp = getMsgItem("country"); if (tmp.Length() > 0)
+		f.WriteAttr(PERSON_COUNTRY, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+	}
+
 	tmp = getMsgItem("number");
 	if (tmp.Length() > 0) {
-
-//	XXX if current type is absent or not email & there is no 'home' phone - save number to home too	
-//		if (setHomeNumber)
-//			f.WriteAttr(PERSON_HOME_PHONE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);	
-		
-		int32 t;
-		if (person->FindInt32("num_type",&t) == B_OK) {
+		int32 t = -1;
+		char buf[100];
+		int state = person->FindInt32("num_type", &t);
+		// only save the first found phone if it was not present, and current type is not email or there is no type
+		if ((state != B_OK) || ((state == B_OK) && (t != GSM::PK_EMAIL)) &&
+			(f.ReadAttr(PERSON_HOME_PHONE, B_STRING_TYPE, 0, buf, 10) == B_ENTRY_NOT_FOUND)) {
+			printf("no home set, not email or no type, writing default");
+			f.WriteAttr(PERSON_HOME_PHONE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);	
+		}
+		if (state == B_OK) {
 			switch (t) {
 				case GSM::PK_WORK:
 					f.WriteAttr(PERSON_WORK_PHONE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
@@ -632,7 +653,7 @@ int PeopleFile::Save(const char *path, bool setHomeNumber = false) {
 					break;
 			}
 		} else {
-			// no type information -- must be phone
+			// no type information -- must be phone (home)
 			f.WriteAttr(PERSON_HOME_PHONE, B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);	
 		}
 	}
@@ -717,8 +738,6 @@ void pbByNameView::exportPeople(int i) {
 		msg->PrintToStream();
 		p = new PeopleFile(msg);
 		if (p->Save(people_path) != B_OK) {
-			// XXX error
-			printf("error\n");
 			delete p;
 			delete msg;
 			return;
