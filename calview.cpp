@@ -7,12 +7,15 @@
 #include "ColumnListView.h"
 #include "globals.h"
 #include "calview.h"
+#include "dialcalevent.h"
 
 #include <stdio.h>
 
 const uint32	CALIST_INV	= 'CL00';
 const uint32	CALIST_SEL	= 'CL01';
 const uint32	CAREFRESH	= 'CA00';
+const uint32	CAEDIT		= 'CA01';
+const uint32	CANEW		= 'CA02';
 
 calView::calView(BRect r) : mobileView(r, "calView") {
 	caption->SetText(_("Calendar events"));
@@ -61,6 +64,10 @@ calView::calView(BRect r) : mobileView(r, "calView") {
 	float len = s.Width()/5;	
 	s.right = s.left + len - 10;
 	this->AddChild(refresh = new BButton(s, "caRefresh", _("Refresh"), new BMessage(CAREFRESH), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
+	s.OffsetBy(len,0);
+	this->AddChild(newevent = new BButton(s, "caNew", _("New"), new BMessage(CANEW), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
+	s.OffsetBy(len,0);
+	this->AddChild(edit = new BButton(s, "caEdit", _("Edit"), new BMessage(CAEDIT), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
 //	s.OffsetBy(len*4,0);
 //	this->AddChild(refresh = new BButton(s, "pbExport", _("Export"), new BMessage(PBEXPORT), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
 }
@@ -112,7 +119,17 @@ void calView::MessageReceived(BMessage *Message) {
 			fullListRefresh();
 			fillList();
 			break;
+		case CANEW:
+			dnev = new dialNewEvent(gsm);
+			break;
 		case CALIST_INV:
+		case CAEDIT:
+			{	int i = list->CurrentSelection(0);
+				if (i>=0) {
+					dnev = new dialNewEvent(gsm, ((calListItem*)list->ItemAt(i))->Event());
+				}
+				break;
+			}
 		case CALIST_SEL:
 			break;
 		default:

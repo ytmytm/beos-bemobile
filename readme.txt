@@ -34,20 +34,16 @@ TODO:
 - PB: poprawić wykrywanie features (liczenie przecinków może być za głupie)
 - informacje o SMSC, własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)
 - powiadamianie o przychodzących: at+cnmi (doczytać co i jak)
-- zapisywanie/odczyt parametrów z initWindow
+- zapisywanie/odczyt parametrów z initWindow jako konfiguracji programu
 - sms PDU mode (odczytywanie wszystkich informacji)
 - eksport smsów, eksport/import phonebooków
 - ikony uwaga: CVS nie przechowa atrybutów, tylko ZIP
 IDEA:
 - przyjmowanie DROPów z plików people -> wywołanie dodania do aktualnego slotu
 - backup/restore slotów PB
-- eksport slotów PB do plików people (peeps)
-	- grupowanie zrobione dla pbbynameview zrobić gdzieś ogólniej do korzystania
-	- wykrywanie atrybutów (typ numeru) (towrite) zrobić ogólniej do korzystania - dopasowanie do people
-		(nie da sie ogólnie, jest zależne od motoroli)
-	- eksport jak do vcf (wykrywanie atrybutów brzydkie)
-		- encoding qp,utf8!
-		- zmiana na vcard v2.1? (jak eksport z motoroli i obsługiwane przez mail-it/vcard2people etc.?)
+- eksport do vcf
+	- encoding qp,utf8!
+	- zmiana na vcard v2.1? (jak eksport z motoroli i obsługiwane przez mail-it/vcard2people etc.?)
 - j/w import/sync - dopasowywanie wg vcf::uid?
 - eksport smsów do plików poczty (bemail: treść w pliku, od/do/data w atrybuty, coś dziwnego z indeksami robi)
 - zamiana pbVal na Message, wszystkie atrybuty kodowane z/na standardowe nazwy -> łatwo znaleźć lub

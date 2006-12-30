@@ -9,6 +9,7 @@
 class BButton;
 class BStatusBar;
 class ColumnListView;
+class dialNewEvent;
 
 class calView : public mobileView {
 	public:
@@ -23,7 +24,8 @@ class calView : public mobileView {
 
 		ColumnListView *list;
 		BStatusBar *progress;
-		BButton *refresh;
+		BButton *refresh, *newevent, *edit;
+		dialNewEvent *dnev;
 };
 
 class calListItem : public CLVEasyItem {

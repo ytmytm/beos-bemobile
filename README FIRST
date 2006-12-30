@@ -31,8 +31,9 @@ been already visited.
 
 CHANGES
 version 0.6
+- new dialog to edit/enter calendar events
 - export selected contacts from 'All contacts by name' to vCard (VCF) files, needs more testing
-- export selected contacts from 'All contacts by name' to People files
+- export selected contacts from 'All contacts by name' to People files (best used with MrPeeps)
 - new set of nice, clean BeOS-style icons (thank you, maui & Ralf Schulke!)
 
 version 0.5
