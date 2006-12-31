@@ -18,4 +18,7 @@
 	// shared messages
 	#define MSG_INITMSG		'BMGS'
 	#define MSG_PERSON		'BMPE'
+
+	// shared functions
+	extern int toint(const char *input);
 #endif

@@ -161,6 +161,7 @@ class GSM {
 		void getCalendarInfo(void);
 		int getCalendarEvents(void);
 		int getCalendarFreeId(void);
+		int storeCalendarEvent(struct calEvent *ev);
 		struct calInfo calSlot;
 		BList *listCalEvent;
 

@@ -1480,6 +1480,40 @@ int GSM::getCalendarFreeId(void) {
 	return -2;
 }
 
+// returns sendCommand status code
+int GSM::storeCalendarEvent(struct calEvent *ev) {
+	BString out;
+	int ret, i;
+
+	out = "AT+MDBW=";
+	if (ev->id<0) {
+		ev->id = getCalendarFreeId();
+		if (ev->id<0)
+			return -10;	// no free slot
+	}
+	out << ev->id; out += ",";
+	ev->title.Truncate(calSlot.title_len);
+	out += "\""; out += ev->title; out += "\",";
+	i = ev->timed ? 1 : 0; out << i; out += ",";
+	i = ev->alarm ? 1 : 0; out << i; out += ",";
+	out += "\""; out += ev->start_time; out += "\",";
+	out += "\""; out += ev->start_date; out += "\",";
+	out << ev->dur; out += ",";
+	out += "\""; out += ev->alarm_time; out += "\",";
+	out += "\""; out += ev->alarm_date; out += "\",";
+	out << ev->repeat;
+
+	// lock datebook
+	if ((ret = sendCommand("AT+MDBL=1")) != COM_OK)
+		goto finish2;	// something wrong, release the lock
+
+	ret = sendCommand(out.String(), NULL, true);
+finish2:
+	// release the lock
+	sendCommand("AT+MDBL=0");
+	return ret;
+}
+
 // compare names from two struct pbNum items
 int pbNumCompareByName(const void *a, const void *b) {
 	struct pbNum *ll, *rr;

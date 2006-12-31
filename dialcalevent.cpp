@@ -1,10 +1,13 @@
 //
-// TODO: (inspiration in callistitem)
+// TODO:
+// - alarm if set, must be earlier than event!
+// - duration units in menu (decoded)
+// - repeat units in menu (decoded)
+// - encode/decode date (present to user in YYYY/MM/DD format only)
 // - input validation (time, date, duration(number))
-// - alarm must be before event time
-// - duration units in menu (encoded/decoded)
-// - repeat units in menu (encoded/decoded)
-//
+// - event w/o time must last exactly 1 day
+// -- NOTE
+// when adding new event, there is no hint as to date/time format!
 
 #include <Alert.h>
 #include <Box.h>
@@ -32,6 +35,8 @@ const uint32 CBTIMED	= 'CV05';
 const uint32 CBALARMED	= 'CV06';
 const uint32 TCADATE	= 'CV07';
 const uint32 TCATIME	= 'CV08';
+const uint32 MENU_DUR	= 'CV09';
+const uint32 MENU_REPEAT	= 'CV10';
 
 dialNewEvent::dialNewEvent(GSM *g, struct calEvent *event) : BWindow(
 	BRect(400,300,650,690),
@@ -132,9 +137,40 @@ dialNewEvent::dialNewEvent(GSM *g, struct calEvent *event) : BWindow(
 	duration->SetDivider(font.StringWidth(tmp.String())+10);
 	view->AddChild(duration);
 
+	BMessage *msg;
+	r.left = r.right+5;
+	r.right = r.right+80;
 	// menu units for duration
-
+	durUnit = new BPopUpMenu("");
+	msg = new BMessage(MENU_DUR); msg->AddInt32("unit",0);
+	durUnit->AddItem(units[0] = new BMenuItem(_("min"), msg));
+	msg = new BMessage(MENU_DUR); msg->AddInt32("unit",1);
+	durUnit->AddItem(units[1] = new BMenuItem(_("h"), msg));
+	msg = new BMessage(MENU_DUR); msg->AddInt32("unit",2);
+	durUnit->AddItem(units[2] = new BMenuItem(_("d"), msg));
+	msg = new BMessage(MENU_DUR); msg->AddInt32("unit",3);
+	durUnit->AddItem(units[3] = new BMenuItem(_("w"), msg));
+	view->AddChild(new BMenuField(r,"durMenuf",NULL,durUnit));
 	// menu with repeats
+	r.OffsetBy(0,30); r.left = view->Bounds().left+20; r.right = view->Bounds().right-20;
+	repeat = new BPopUpMenu("");
+// XXX warning - the order of items must be the same as CAL_* in gsm.h
+	msg = new BMessage(MENU_REPEAT); msg->AddInt32("repeat",GSM::CAL_NONE);
+	repeat->AddItem(reps[0] = new BMenuItem(_("none"), msg));
+	msg = new BMessage(MENU_REPEAT); msg->AddInt32("repeat",GSM::CAL_DAILY);
+	repeat->AddItem(reps[1] = new BMenuItem(_("daily"), msg));
+	msg = new BMessage(MENU_REPEAT); msg->AddInt32("repeat",GSM::CAL_WEEKLY);
+	repeat->AddItem(reps[2] = new BMenuItem(_("weekly"), msg));
+	msg = new BMessage(MENU_REPEAT); msg->AddInt32("repeat",GSM::CAL_MONTH_ON_DATE);
+	repeat->AddItem(reps[3] = new BMenuItem(_("monthly on date"), msg));
+	msg = new BMessage(MENU_REPEAT); msg->AddInt32("repeat",GSM::CAL_MONTH_ON_DAY);
+	repeat->AddItem(reps[4] = new BMenuItem(_("monthly on day"), msg));
+	msg = new BMessage(MENU_REPEAT); msg->AddInt32("repeat",GSM::CAL_YEARLY);
+	repeat->AddItem(reps[5] = new BMenuItem(_("yearly"), msg));
+	tmp = _("Repeat");
+	BMenuField *mf = new BMenuField(r,"repMenuf",tmp.String(),repeat);
+	mf->SetDivider(font.StringWidth(tmp.String())+5);
+	view->AddChild(mf);
 
 	r = view->Bounds();
 	r.InsetBy(20,20);
@@ -159,19 +195,94 @@ void dialNewEvent::SetData(void) {
 
 	title->SetText(ev->title.String());
 	sDate->SetText(ev->start_date.String());
-	sTime->SetText(ev->start_time.String());
+	if (ev->timed)
+		sTime->SetText(ev->start_time.String());
+	else
+		sTime->SetText("");
 	sTime->SetEnabled(ev->timed);
 	timed->SetValue(ev->timed ? B_CONTROL_ON : B_CONTROL_OFF);
-	aDate->SetText(ev->alarm_date.String());
-	aTime->SetText(ev->alarm_time.String());
+	if (ev->alarm) {
+		aDate->SetText(ev->alarm_date.String());
+		aTime->SetText(ev->alarm_time.String());
+	} else {
+		aDate->SetText("");
+		aTime->SetText("");
+	}
 	alarmed->SetValue(ev->alarm);
 	aDate->SetEnabled(ev->alarm);
 	aTime->SetEnabled(ev->alarm);
 
-	tmp = ""; tmp << ev->dur;
-	// duration/durmenu - set like in the list
+	tmp = ""; tmp << durToUnitValue(ev->dur);
 	duration->SetText(tmp.String());
-	// menu repeat
+	curDurationUnit = durToUnit(ev->dur);
+	units[curDurationUnit]->SetMarked(true);
+
+	reps[ev->repeat]->SetMarked(true);
+	curRepeat = ev->repeat;
+}
+
+// XXX validate user input before calling this!
+int dialNewEvent::GetData(void) {
+	// fetch data from widgets into calEvent struct
+	ev->title = title->Text();
+	ev->timed = (timed->Value() == B_CONTROL_ON);
+	ev->alarm = (alarmed->Value() == B_CONTROL_ON);
+	ev->start_date = sDate->Text();	// XXX encode!
+	if (ev->timed)
+		ev->start_time = sTime->Text();
+	else
+		ev->start_time = "00:00";
+	if (ev->alarm) {
+		ev->alarm_date = aDate->Text();	// XXX encode!
+		ev->alarm_time = aTime->Text();
+	} else {
+		ev->alarm_date = "00-00-2000";
+		ev->alarm_time = "00:00";
+	}
+	ev->dur = durToMinutes(toint(duration->Text()), curDurationUnit);
+	ev->repeat = curRepeat;
+
+	return 0;	//XXX if format/data invalid - return error
+}
+
+int dialNewEvent::durToUnitValue(int duration) {
+	if (duration>=10080)
+		return duration / 10080;
+	else if (duration>=1440)
+		return duration / 1440;
+	else if (duration>=60)
+		return duration / 60;
+	else
+		return duration;
+}
+
+int dialNewEvent::durToUnit(int duration) {
+	if (duration>=10080)		// week
+		return 3;
+	else if (duration>=1440)	// day
+		return 2;
+	else if (duration>=60)		// hour
+		return 1;
+	else
+		return 0;				// minute
+}
+
+int dialNewEvent::durToMinutes(int duration, int unit) {
+	int min = duration;
+	switch (unit) {
+		case 3:
+			min *= 10080;
+			break;
+		case 2:
+			min *= 1440;
+			break;
+		case 1:
+			min *= 60;
+			break;
+		case 0:
+			break;
+	}
+	return min;
 }
 
 void dialNewEvent::MessageReceived(BMessage *Message) {
@@ -184,6 +295,34 @@ void dialNewEvent::MessageReceived(BMessage *Message) {
 				aDate->SetEnabled(b);
 				aTime->SetEnabled(b);
 				break;
-			}			
+			}
+		case MENU_DUR:
+			{	int32 i;
+				if (Message->FindInt32("unit",&i) == B_OK)
+					curDurationUnit = i;
+				break;
+			}
+		case MENU_REPEAT:
+			{	int32 i;
+				if (Message->FindInt32("repeat",&i) == B_OK)
+					curRepeat = i;
+				break;
+			}
+		case BUT_SAVE:
+			{
+				BString tmp;
+				//if (validateData())...
+				if (GetData()<0) {
+					printf("input format error\n");
+				} else {
+					printf("%s\n",tmp.String());
+					if (gsm->storeCalendarEvent(ev) < 0) {
+						// XXX error!
+						printf("error!\n");
+					} else
+						Quit();
+				}
+				break;
+			}
 	}
 }
