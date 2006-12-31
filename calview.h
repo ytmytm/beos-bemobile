@@ -80,9 +80,14 @@ class calListItem : public CLVEasyItem {
 		// return duration in minutes in human format
 		const char *durationName(int minutes) {
 			static BString out;
-			int days = 0, hours = 0;
+			int weeks = 0, days = 0, hours = 0;
 		
 			out = "";
+			if (minutes >= 10080) {
+				weeks = minutes / 10080;
+				minutes = minutes % 10080;
+				out << weeks; out += _(" w");
+			}
 			if (minutes >= 1440) {
 				days = minutes / 1440;
 				minutes = minutes % 1440;
