@@ -40,10 +40,10 @@ class calListItem : public CLVEasyItem {
 			SetColumnContent(0, tmp.String());
 			SetColumnContent(1, fEvent->title.String());
 			tmp = fEvent->timed ? fEvent->start_time.String() : "";
-			SetColumnContent(2, fixDate(fEvent->start_date.String(),tmp.String()));
+			SetColumnContent(2, formatDateTime(fEvent->start_date.String(),tmp.String()));
 			SetColumnContent(3, durationName(fEvent->dur));
 			if (fEvent->alarm)
-				SetColumnContent(4, fixDate(fEvent->alarm_date.String(),fEvent->alarm_time.String()));
+				SetColumnContent(4, formatDateTime(fEvent->alarm_date.String(),fEvent->alarm_time.String()));
 			else
 				SetColumnContent(4, _("(no alarm set)"));
 			switch (fEvent->repeat) {
@@ -67,14 +67,9 @@ class calListItem : public CLVEasyItem {
 	private:
 		struct calEvent *fEvent;
 		// convert to YYYY/MM/DD HH:MM
-		const char *fixDate(const char *date, const char *time) {
+		const char *formatDateTime(const char *date, const char *time) {
 			static BString dn;
-			BString d = date;
-			dn = "";
-			d.CopyInto(dn,6,4);
-			dn += "/"; dn += d[0]; dn+= d[1];
-			dn += "/"; dn += d[3]; dn+= d[4];
-			dn += " "; dn += time;
+			dn = date; dn += " "; dn += time;
 			return dn.String();
 		};
 		// return duration in minutes in human format

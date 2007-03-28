@@ -4,6 +4,7 @@
 //		(here and hardcoded offsets in refresh for listitem)
 //		- add 'type' constant to slot-fields (temporary)
 //		- replace pbNum w/ bmessage and attribute list
+// XXX:VCF export probably needs QP-encoding!
 
 #include <Alert.h>
 #include <Button.h>
@@ -323,13 +324,12 @@ void pbByNameView::exportVCF(int i) {
 					nick += tmp;
 				}
 			} else
-			if (f->name.Compare(_("Birthday (MM-DD-YYYY)")) == 0) {
+			if (f->name.Compare(_("Birthday (YYYY/MM/DD)")) == 0) {
 				tmp = v->text->String();
 				if (tmp.Length()>0) {
 					bday = "BDAY:";
-					bday += tmp[6]; bday += tmp[7]; bday += tmp[8]; bday += tmp[9]; bday += "-";
-					bday += tmp[0]; bday += tmp[1]; bday += "-";
-					bday += tmp[3]; bday += tmp[4];
+					tmp.ReplaceAll("/","-");
+					bday += tmp;
 					bday += "T00:00:00Z\n";
 				}
 			} else
@@ -681,7 +681,7 @@ void pbByNameView::exportPeople(int i) {
 	pbNum *num = (pbNum*)byNameList->ItemAt(i);
 	union pbVal *v = (pbVal*)num->attr->ItemAt(1);
 	BString name = v->text->String();
-	BString tmp, bday;
+	BString tmp;
 
 	// for each number
 	cont = true;
@@ -707,13 +707,11 @@ void pbByNameView::exportPeople(int i) {
 			} else if (f->name.Compare(_("Nick")) == 0) {
 				if (v->text->Length() > 0)
 					msg->AddString("nickname", v->text->String());
-			} else if (f->name.Compare(_("Birthday (MM-DD-YYYY)")) == 0) {
+			} else if (f->name.Compare(_("Birthday (YYYY/MM/DD)")) == 0) {
 				tmp = v->text->String();
 				if (tmp.Length() == 10) {
-					bday = tmp[6]; bday += tmp[7]; bday += tmp[8]; bday += tmp[9]; bday += "-";
-					bday += tmp[0]; bday += tmp[1]; bday += "-";
-					bday += tmp[3]; bday += tmp[4];
-					msg->AddString("birthday", bday.String());
+					tmp.ReplaceAll("/","-");
+					msg->AddString("birthday", tmp.String());
 				}
 			} else if (f->name.Compare(_("Country")) == 0) {
 				if (v->text->Length() > 0)

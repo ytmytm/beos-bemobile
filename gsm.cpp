@@ -8,6 +8,7 @@
 // przepisać pbNum jako klasę (jakie korzyści?) (?)
 // przepisać pbSlot jako klasę (jakie korzyści?) (?)
 // zrobić prawdziwą detekcję własności telefonu
+// callback na RINNNG!
 
 #include <Application.h>
 #include <File.h>
@@ -34,6 +35,34 @@ int toint(const char *input) {
 		return strtol(input, NULL, 10);
 	else
 		return 0;
+}
+
+BString *dateFromAmerican(BString *date) {
+	BString d("",11), dn("",11);
+	if (date->Length() == 10) { // proper date
+		d = date->String();
+		dn = "";
+		d.CopyInto(dn,6,4);
+		dn += "/"; dn += d[0]; dn+= d[1];
+		dn += "/"; dn += d[3]; dn+= d[4];
+//printf("dateFromAmerican:[%s]->[%s]\n",d.String(),dn.String());
+		date->SetTo(dn);
+	}
+	return date;
+}
+
+BString *dateToAmerican(BString *date) {
+	BString d("",11), dn("",11);
+	if (date->Length() == 10) {	// proper date
+		d = date->String();
+		dn = "";
+		d.CopyInto(dn,5,5);
+		dn += "/"; dn += d[0]; dn += d[1]; dn += d[2]; dn += d[3];
+		dn.ReplaceAll("/","-");
+//printf("dateToAmerican:[%s]->[%s]\n",d.String(),dn.String());
+		date->SetTo(dn);
+	}
+	return date;
 }
 
 #define TERMLOG_WINDOWNAME "Terminal log"
@@ -943,7 +972,7 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Nick");
 			pf->max = 24; pf->offset = 22;
 			sl->fields->AddItem(pf);
-			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Birthday (MM-DD-YYYY)");
+			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Birthday (YYYY/MM/DD)");
 			pf->max = 10; pf->offset = 23;
 			sl->fields->AddItem(pf);
 		}
@@ -993,7 +1022,7 @@ void GSM::getPBList(const char *slot) {
 			if (sl->has_phtype)
 			// 5phtype,6voicetag,7alerttone,8backlight,9primary,10categorynum
 				pat += ",(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)";
-			// 11,12,13-??,14iconpath,15-16??,17adres2,18adres1,19miasto,20stan,21kod,22kraj,23pseudo,24bday(mm-dd-yyyy),25??
+			// 11,12,13-??,14iconpath,15-16??,17adres2,18adres1,19city,20state,21zip,22country,23pseudo,24bday(mm-dd-yyyy),25??
 			if (sl->has_address)
 				pat += ",(\\d+),(\\d+),(\\d+),([^,\r\n]*),(\\d+),(\\d+),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*),([^,\r\n]*)";
 		}
@@ -1048,6 +1077,9 @@ void GSM::getPBList(const char *slot) {
 								tmp.CopyInto(tmp2,1,tmp.Length()-2);
 								v->text = new BString(tmp2);
 							}
+							// XXX special case for BDAY!
+							if (pf->offset == 23)
+								dateFromAmerican(v->text);
 						}
 						break;
 					case PF_BOOL:
@@ -1214,6 +1246,9 @@ int GSM::storePBItem(struct pbNum *num = NULL) {
 			case PF_TEXT:
 				cmd += ",";
 				if (rawUTF8) cmd += "\"";
+				if (pf->offset == 23) {	// XXX special case for BDAY!
+					dateToAmerican(v->text);
+				}
 				cmd += encodeText(v->text->String());
 				if (rawUTF8) cmd += "\"";
 				break;
@@ -1443,10 +1478,13 @@ int GSM::getCalendarEvents(void) {
 		ce->timed = toint(mCalendar->getGroup(3).c_str());
 		ce->alarm = toint(mCalendar->getGroup(4).c_str());
 		ce->start_time = mCalendar->getGroup(5).c_str();
-		ce->start_date = mCalendar->getGroup(6).c_str();
+		BString tmp;
+		tmp = mCalendar->getGroup(6).c_str();
+		ce->start_date = (dateFromAmerican(&tmp))->String();
 		ce->dur = toint(mCalendar->getGroup(7).c_str());
 		ce->alarm_time = mCalendar->getGroup(8).c_str();
-		ce->alarm_date = mCalendar->getGroup(9).c_str();
+		tmp = mCalendar->getGroup(9).c_str();
+		ce->alarm_date = (dateFromAmerican(&tmp))->String();
 		ce->repeat = toint(mCalendar->getGroup(10).c_str());
 		printf("%i,%i,%i,%s,%s,%i,%s,%s,%i\n",ce->id,ce->timed,ce->alarm,ce->start_time.String(),ce->start_date.String(),ce->dur,ce->alarm_time.String(),ce->alarm_date.String(),ce->repeat);
 		// add to list
@@ -1482,7 +1520,7 @@ int GSM::getCalendarFreeId(void) {
 
 // returns sendCommand status code
 int GSM::storeCalendarEvent(struct calEvent *ev) {
-	BString out;
+	BString out, tmp;
 	int ret, i;
 
 	out = "AT+MDBW=";
@@ -1497,10 +1535,12 @@ int GSM::storeCalendarEvent(struct calEvent *ev) {
 	i = ev->timed ? 1 : 0; out << i; out += ",";
 	i = ev->alarm ? 1 : 0; out << i; out += ",";
 	out += "\""; out += ev->start_time; out += "\",";
-	out += "\""; out += ev->start_date; out += "\",";
+	tmp = ev->start_date;
+	out += "\""; out += dateToAmerican(&tmp)->String(); out += "\",";
 	out << ev->dur; out += ",";
 	out += "\""; out += ev->alarm_time; out += "\",";
-	out += "\""; out += ev->alarm_date; out += "\",";
+	tmp = ev->alarm_date;
+	out += "\""; out += dateToAmerican(&tmp)->String(); out += "\",";
 	out << ev->repeat;
 
 	// lock datebook

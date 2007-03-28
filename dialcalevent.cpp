@@ -1,17 +1,11 @@
 //
 // TODO:
 // - alarm if set, must be earlier than event!
-// - duration units in menu (decoded)
-// - repeat units in menu (decoded)
-// - encode/decode date (present to user in YYYY/MM/DD format only)
-//		- only in GSM driver; we use YYYY[-/]MM[-/]DD here only
-//		- THE SAME APPLIES FOR BDAY dates! (note pbedit/export)
+//		- XXX check this
 // - input validation (time, date, duration(number))
-//		- XXX date validation; pass to calendardialog today if string invalid/empty
+//		- XXX date validation
 // - event w/o time must last exactly 1 day
-// -- NOTE
-// when adding new event, there is no hint as to date/time format!
-//		- paste today
+//		- XXX check this!
 
 #include <Alert.h>
 #include <Box.h>
@@ -255,7 +249,7 @@ int dialNewEvent::GetData(void) {
 		ev->alarm_date = aDate->Text();	// XXX encode!
 		ev->alarm_time = aTime->Text();
 	} else {
-		ev->alarm_date = "00-00-2000";
+		ev->alarm_date = "2000/00/00";
 		ev->alarm_time = "00:00";
 	}
 	ev->dur = durToMinutes(toint(duration->Text()), curDurationUnit);

@@ -10,10 +10,10 @@ struct calEvent {
 	bool timed;
 	bool alarm;
 	BString start_time;
-	BString start_date;
+	BString start_date;		// YYYY/MM/DD
 	int dur;
 	BString alarm_time;
-	BString alarm_date;
+	BString alarm_date;		// YYYY/MM/DD
 	int repeat;
 };
 //
