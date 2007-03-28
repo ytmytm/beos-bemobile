@@ -30,6 +30,9 @@ LISTA SMS:
 	- przy dzialaniu pomijac sloty MD i AT
 
 TODO:
+- kalendarz: TODAY jako domyślne; walidacja wpisanej daty; używanie wszędzie YYYY-MM-DD, dopiero
+  przy zapisie konwertowane przez GSM::; to dotyczy też BDAY (sprawdzić edycje/import/eksport)
+- dodać guzik kalendarza do BDAY
 - PB: zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)
 - PB: poprawić wykrywanie features (liczenie przecinków może być za głupie)
 - informacje o SMSC, własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)

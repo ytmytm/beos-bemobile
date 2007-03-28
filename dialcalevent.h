@@ -5,6 +5,7 @@
 #include <Window.h>
 
 class BBox;
+class BButton;
 class BCheckBox;
 class BPopUpMenu;
 class BTextControl;
@@ -34,6 +35,7 @@ class dialNewEvent : public BWindow {
 		BTextControl *title, *sDate, *sTime, *aDate, *aTime, *duration;
 		BCheckBox *timed, *alarmed;
 		BBox *sBox, *aBox;
+		BButton *aDateBut;
 };
 
 #endif

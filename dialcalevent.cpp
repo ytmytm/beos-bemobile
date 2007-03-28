@@ -4,10 +4,14 @@
 // - duration units in menu (decoded)
 // - repeat units in menu (decoded)
 // - encode/decode date (present to user in YYYY/MM/DD format only)
+//		- only in GSM driver; we use YYYY[-/]MM[-/]DD here only
+//		- THE SAME APPLIES FOR BDAY dates! (note pbedit/export)
 // - input validation (time, date, duration(number))
+//		- XXX date validation; pass to calendardialog today if string invalid/empty
 // - event w/o time must last exactly 1 day
 // -- NOTE
 // when adding new event, there is no hint as to date/time format!
+//		- paste today
 
 #include <Alert.h>
 #include <Box.h>
@@ -22,6 +26,7 @@
 
 #include "globals.h"
 #include "dialcalevent.h"
+#include "dialcalendar.h"
 #include "gsm.h"
 
 #include <stdio.h>
@@ -37,6 +42,8 @@ const uint32 TCADATE	= 'CV07';
 const uint32 TCATIME	= 'CV08';
 const uint32 MENU_DUR	= 'CV09';
 const uint32 MENU_REPEAT	= 'CV10';
+const uint32 BCSDATE	= 'CV11';
+const uint32 BCADATE	= 'CV12';
 
 dialNewEvent::dialNewEvent(GSM *g, struct calEvent *event) : BWindow(
 	BRect(400,300,650,690),
@@ -87,12 +94,19 @@ dialNewEvent::dialNewEvent(GSM *g, struct calEvent *event) : BWindow(
 	view->AddChild(sBox);
 
 	float maxw;
+	BMessage *msg;
+
 	// sbox contents
 	{
 	BRect s = sBox->Bounds();
 	s.InsetBy(10,15);
 	s.bottom = s.top + 20;
-	sDate = new BTextControl(s, "calSDate", _("Date"), NULL, new BMessage(TCSDATE));
+	BRect s2(s); s2.right -= 30; 
+	sDate = new BTextControl(s2, "calSDate", _("Date"), NULL, new BMessage(TCSDATE));
+	s2.left = s2.right+4; s2.right = s.right;
+	msg = new BMessage(BCSDATE);
+	msg->AddPointer("_datefield", sDate);
+	sBox->AddChild(new BButton(s2, "calBDate", "+", msg));
 	s.OffsetBy(0,30);
 	timed = new BCheckBox(s, "calTimed", _("Timed"), new BMessage(CBTIMED));
 	s.OffsetBy(0,30);
@@ -119,7 +133,12 @@ dialNewEvent::dialNewEvent(GSM *g, struct calEvent *event) : BWindow(
 	s.bottom = s.top + 20;
 	alarmed = new BCheckBox(s, "calAlarmed", _("Alarm enabled"), new BMessage(CBALARMED));
 	s.OffsetBy(0,30);
-	aDate = new BTextControl(s, "calADate", _("Date"), NULL, new BMessage(TCADATE));
+	BRect s2(s); s2.right -= 30; 
+	aDate = new BTextControl(s2, "calADate", _("Date"), NULL, new BMessage(TCADATE));
+	s2.left = s2.right+4; s2.right = s.right;
+	msg = new BMessage(BCADATE);
+	msg->AddPointer("_datefield", aDate);
+	aBox->AddChild(aDateBut = new BButton(s2, "calADate", "+", msg));
 	s.OffsetBy(0,30);
 	aTime = new BTextControl(s, "calATime", _("Time"), NULL, new BMessage(TCATIME));
 	aDate->SetDivider(maxw);
@@ -137,7 +156,6 @@ dialNewEvent::dialNewEvent(GSM *g, struct calEvent *event) : BWindow(
 	duration->SetDivider(font.StringWidth(tmp.String())+10);
 	view->AddChild(duration);
 
-	BMessage *msg;
 	r.left = r.right+5;
 	r.right = r.right+80;
 	// menu units for duration
@@ -211,6 +229,7 @@ void dialNewEvent::SetData(void) {
 	alarmed->SetValue(ev->alarm);
 	aDate->SetEnabled(ev->alarm);
 	aTime->SetEnabled(ev->alarm);
+	aDateBut->SetEnabled(ev->alarm);
 
 	tmp = ""; tmp << durToUnitValue(ev->dur);
 	duration->SetText(tmp.String());
@@ -287,6 +306,25 @@ int dialNewEvent::durToMinutes(int duration, int unit) {
 
 void dialNewEvent::MessageReceived(BMessage *Message) {
 	switch (Message->what) {
+		case BCSDATE:
+		case BCADATE:
+			{	void *ptr;
+				BTextControl *dateField;
+				BString curDate;
+				if (Message->FindPointer("_datefield", &ptr) == B_OK) {
+					dateField = static_cast<BTextControl*>(ptr);
+//	XXX				curDate = validateDate(dateField->Text());
+					curDate = dateField->Text();
+					uint32 msgint;
+					if (Message->what == BCADATE)
+						msgint = TCSDATE;
+					else
+						msgint = TCADATE;
+					dialCalendar *calendarDialog = new dialCalendar(curDate.String(), dateField, msgint, this);
+					calendarDialog->Show();
+				}
+				break;
+			}
 		case CBTIMED:
 			sTime->SetEnabled(timed->Value() == B_CONTROL_ON);
 			break;
@@ -294,6 +332,7 @@ void dialNewEvent::MessageReceived(BMessage *Message) {
 			{ 	bool b = alarmed->Value() == B_CONTROL_ON;
 				aDate->SetEnabled(b);
 				aTime->SetEnabled(b);
+				aDateBut->SetEnabled(b);
 				break;
 			}
 		case MENU_DUR:
