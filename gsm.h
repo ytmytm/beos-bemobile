@@ -229,6 +229,7 @@ int guessPBType(const char *num);
 		//
 };
 
+BString *validateDate(BString *date);
 int pbNumCompareByName(const void *a, const void *b);
 
 #endif

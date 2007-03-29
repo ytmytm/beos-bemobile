@@ -2,10 +2,6 @@
 // TODO:
 // - alarm if set, must be earlier than event!
 //		- XXX check this
-// - input validation (time, date, duration(number))
-//		- XXX date validation
-// - event w/o time must last exactly 1 day
-//		- XXX check this!
 
 #include <Alert.h>
 #include <Box.h>
@@ -234,28 +230,68 @@ void dialNewEvent::SetData(void) {
 	curRepeat = ev->repeat;
 }
 
-// XXX validate user input before calling this!
+BString  *dialNewEvent::validateTime(BString *input) {
+	BString tmp;
+	char hbuf[3];
+	char mbuf[3];
+	char timebuf[6];
+
+	tmp.SetTo(input->String());
+	int l = tmp.Length();
+
+	if ((tmp[2] == ':') && (l == 5)) {
+		hbuf[0] = tmp[0];
+		hbuf[1] = tmp[1]; hbuf[2] = '\0';
+		mbuf[0] = tmp[3];
+		mbuf[1] = tmp[4]; mbuf[2] = '\0';
+	} else {
+		if ((tmp[1] == ':') && ((l == 3) || (l == 4))) {
+			hbuf[0] = tmp[0]; hbuf[1] = '\0';
+			mbuf[0] = tmp[2];
+			mbuf[1] = tmp[3]; mbuf[2] = '\0';
+		} else
+			input->SetTo("00:00");
+	}
+	if ((toint(hbuf)<0) || (toint(hbuf)>23) || (toint(mbuf)<0) || (toint(mbuf)>59)) {
+		input->SetTo("00:00");
+	} else {
+		snprintf(timebuf,sizeof(timebuf),"%02u:%02u",toint(hbuf),toint(mbuf));
+		input->SetTo(timebuf);
+	}
+	return input;
+}
+
 int dialNewEvent::GetData(void) {
+	BString tmp;
+
 	// fetch data from widgets into calEvent struct
 	ev->title = title->Text();
 	ev->timed = (timed->Value() == B_CONTROL_ON);
 	ev->alarm = (alarmed->Value() == B_CONTROL_ON);
-	ev->start_date = sDate->Text();	// XXX encode!
-	if (ev->timed)
-		ev->start_time = sTime->Text();
-	else
+	ev->dur = durToMinutes(toint(duration->Text()), curDurationUnit);
+	ev->start_date = sDate->Text();
+	if (ev->timed) {
+		tmp = sTime->Text();
+		ev->start_time = validateTime(&tmp)->String();
+	} else {
+		if (ev->dur != 60*24) {
+			BAlert *err = new BAlert(APP_NAME, _("Untimed event must last exactly one day"), "OK", NULL, NULL, B_WIDTH_AS_USUAL, B_STOP_ALERT);
+			err->Go();
+			return -1;
+		}
 		ev->start_time = "00:00";
+	}
 	if (ev->alarm) {
-		ev->alarm_date = aDate->Text();	// XXX encode!
-		ev->alarm_time = aTime->Text();
+		ev->alarm_date = aDate->Text();
+		tmp = aTime->Text();
+		ev->alarm_time = validateTime(&tmp)->String();
 	} else {
 		ev->alarm_date = "2000/00/00";
 		ev->alarm_time = "00:00";
 	}
-	ev->dur = durToMinutes(toint(duration->Text()), curDurationUnit);
 	ev->repeat = curRepeat;
 
-	return 0;	//XXX if format/data invalid - return error
+	return 0;
 }
 
 int dialNewEvent::durToUnitValue(int duration) {
@@ -307,7 +343,6 @@ void dialNewEvent::MessageReceived(BMessage *Message) {
 				BString curDate;
 				if (Message->FindPointer("_datefield", &ptr) == B_OK) {
 					dateField = static_cast<BTextControl*>(ptr);
-//	XXX				curDate = validateDate(dateField->Text());
 					curDate = dateField->Text();
 					uint32 msgint;
 					if (Message->what == BCADATE)
@@ -343,14 +378,10 @@ void dialNewEvent::MessageReceived(BMessage *Message) {
 			}
 		case BUT_SAVE:
 			{
-				BString tmp;
-				//if (validateData())...
 				if (GetData()<0) {
 					printf("input format error\n");
 				} else {
-					printf("%s\n",tmp.String());
 					if (gsm->storeCalendarEvent(ev) < 0) {
-						// XXX error!
 						printf("error!\n");
 					} else
 						Quit();

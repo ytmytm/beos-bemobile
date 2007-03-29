@@ -22,6 +22,7 @@ class dialNewEvent : public BWindow {
 		int durToUnitValue(int duration);
 		int durToUnit(int duration);
 		int durToMinutes(int duration, int unit);
+		BString  *validateTime(BString *input);
 
 		GSM *gsm;
 		struct calEvent *ev;

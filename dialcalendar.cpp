@@ -7,8 +7,10 @@
 
 #include "globals.h"
 #include "dialcalendar.h"
+// validateDate
+#include "gsm.h"
+
 #include <stdio.h>
-#include <time.h>
 
 const uint32 BUT_OK		= 'CBOK';
 const uint32 BUT_CAL	= 'CBCA';
@@ -31,25 +33,17 @@ dialCalendar::dialCalendar(const char *inidate, BTextControl *ptr, int32 msg, BH
 	handler = hr;
 
 	// split inidate into y/m/d
-	BString tmp;
-	tmp = inidate;
-	if (tmp.Length() < 10) {
-		// use TODAY's date
-		struct tm *tm;
-		time_t curtime;
-		curtime = time(NULL);
-		tm = localtime(&curtime);
-		year = tm->tm_year + 1900;
-		month = tm->tm_mon + 1;
-		day = tm->tm_mday;
-	} else {
+	BString tmp(inidate);
+	validateDate(&tmp);
+	if (tmp.Length() == 10) {
+		BString tmp2(tmp);
 		tmp.Remove(4,tmp.Length()-4);
 		year = toint(tmp.String());
-		tmp = inidate;
+		tmp = tmp2;
 		tmp.Remove(0,5);
 		tmp.Remove(2,tmp.Length()-2);
 		month = toint(tmp.String());
-		tmp = inidate;
+		tmp = tmp2;
 		tmp.Remove(0,8);
 		day = toint(tmp.String());
 	}

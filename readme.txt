@@ -31,8 +31,9 @@ LISTA SMS:
 
 TODO:
 - siła sygnału/baterii - raw numbers lub interpolowane wzorem z kmobiletools?
-- kalendarz i BDAY: walidacja wpisanej daty
 - dodać guzik kalendarza do BDAY (lub nowy typ PF_DATE)
+- BDAY: walidacja wpisanej daty
+- kalendarz: alarm musi być PRZED eventem
 - PB: zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)
 - PB: poprawić wykrywanie features (liczenie przecinków może być za głupie)
 - informacje o SMSC, własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)
@@ -53,7 +54,6 @@ IDEA:
   stwierdzić nieistnienie, można zapisywać faktyczne wartości
 
 IKONY
-- użyć nadesłanych
 - ikony typu numeru (telefon/email/dom/praca itd.) - 8-9
 - ikony typu smsa (nowy,przeczytany,nowyniewysłany,wysłany) - 4 koperty
 - ikona baterii/baterii krytycznej (użyć z resources, gdzie?)

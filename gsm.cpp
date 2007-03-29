@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <parsedate.h>
 
 // regexp
 #include "Pattern.h"
@@ -52,6 +53,7 @@ BString *dateFromAmerican(BString *date) {
 }
 
 BString *dateToAmerican(BString *date) {
+	validateDate(date);
 	BString d("",11), dn("",11);
 	if (date->Length() == 10) {	// proper date
 		d = date->String();
@@ -59,9 +61,23 @@ BString *dateToAmerican(BString *date) {
 		d.CopyInto(dn,5,5);
 		dn += "/"; dn += d[0]; dn += d[1]; dn += d[2]; dn += d[3];
 		dn.ReplaceAll("/","-");
-//printf("dateToAmerican:[%s]->[%s]\n",d.String(),dn.String());
+printf("dateToAmerican:[%s]->[%s]\n",d.String(),dn.String());
 		date->SetTo(dn);
 	}
+	return date;
+}
+
+BString *validateDate(BString *date) {
+	char result[11];
+	struct tm t;
+
+	time_t tt = parsedate(date->String(),-1);
+	if (tt<0) {
+		tt = time(NULL);	// use TODAY
+	}
+	localtime_r(&tt,&t);
+	strftime(result,sizeof(result),"%F",&t);
+	date->SetTo(result);
 	return date;
 }
 
