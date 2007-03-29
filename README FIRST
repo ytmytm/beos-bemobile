@@ -33,9 +33,9 @@ CHANGES
 version 0.6
 - new dialog to edit/enter calendar events
 - common ISO date format everywhere (YYYY/MM/DD)
-- export selected contacts from 'All contacts by name' to vCard (VCF) files, needs more testing
 - export selected contacts from 'All contacts by name' to People files (best used with MrPeeps)
-- new set of nice, clean BeOS-style icons (thank you, maui & Ralf Schulke!)
+- export selected contacts from 'All contacts by name' to vCard (VCF) files, probably needs more testing
+- new set of nice, clean BeOS-style icons (thank you, maui team & Ralf Schulke!)
 
 version 0.5
 - fixed phonebook listing for v220 (and possibly some other models) broken in 0.4
@@ -133,9 +133,7 @@ HELP/SUPPORT
 Do you want to help? I'll be more than happy to receive any donations and reports (both success
 and failure).
 Do you want to donate? Please use http://www.moneybookers.com service and <mw4096@gmail.com>
-(that is my not-often checked email address) as receiver. Why not Paypal? The reason is that
-Paypal doesn't allow withdrawing money by residents of my country.
-
+(that is my not-often checked email address) as receiver. If you really care, I could cosider opening PayPal account too.
 
 
 LICENSE
