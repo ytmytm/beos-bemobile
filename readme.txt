@@ -1,3 +1,13 @@
+plan na wersję 0.7:
+	- refaktoryzacja kodu: podział GSM, przepisanie struktur pb* na BMessage, przepisanie list na klasy
+	- edycja nazwanych kategorii
+	- eksport SMS do plików poczty
+	- akceptacja vcf/people przeciąganych DnD
+	- na głównej stronie SMS pola do wyboru SMSC
+	- kalendarz: alarm PRZED eventem!
+	- typ PF_DATE dla BDAY
+	- BMessage zwrotny po edycji SMS/pbItem dla odświeżenia listy w oknie
+
 OPCJE:
 	BUTTONS:
 	[REFRESH] [NEW] [SEND/EDIT] [DELETE] [DIAL]
@@ -25,7 +35,7 @@ OPCJE:
 
 LISTA SMS:
 	- superitem SMS - skrócić widok folderów o połowę, a niżej co?
-		- edycja/zmiana numeru do centrum SMS? wybór z predef. listy?
+		- edycja/zmiana numeru do centrum SMS? wybór z predef. listy? (hinty w rozwijanym menu)
 - PB:
 	- przy dzialaniu pomijac sloty MD i AT
 
@@ -38,6 +48,7 @@ TODO:
 - PB: poprawić wykrywanie features (liczenie przecinków może być za głupie)
 - informacje o SMSC, własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)
 - powiadamianie o przychodzących: at+cnmi (doczytać co i jak)
+- replikant(?) w deskbarze do reagowania na incoming message, call, tooltip ze statusem
 - zapisywanie/odczyt parametrów z initWindow jako konfiguracji programu
 - sms PDU mode (odczytywanie wszystkich informacji)
 - eksport smsów, eksport/import phonebooków
@@ -59,7 +70,7 @@ IKONY
 - ikona baterii/baterii krytycznej (użyć z resources, gdzie?)
 - ikona z wieżą nadawczą (do siły sygnału)
 
-MODULARYZACJA
+MODULARYZACJA / REFAKTORYZACJA
 - wydzielic z klasy GSM klase Engine (wirtualna)
 	- Engine: wysylanie komend, odczytywanie statusu itp
 	- GSM: manipulacja listami, wyszukiwanie
