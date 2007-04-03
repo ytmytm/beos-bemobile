@@ -1,4 +1,5 @@
 plan na wersję 0.7:
+	- calendar: pusty <time> w ALARM -> segfault; alarm przed wydarzeniem, alarm tylko dla timed event!
 	- refaktoryzacja kodu: podział GSM, przepisanie struktur pb* na BMessage, przepisanie list na klasy
 	- edycja nazwanych kategorii
 	- eksport SMS do plików poczty
