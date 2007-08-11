@@ -781,6 +781,29 @@ int GSM::sendSMSFromStorage(const char *slot, int id) {
 	return -1;
 }
 
+const char *GSM::getSMSC(void) {
+	BString out;
+	fSMSC = "";
+	int ret = sendCommand("AT+CSCA?", &out);
+	if (ret == COM_OK) {
+		Pattern *pSMSC = Pattern::compile("^\\+CSCA: \"([^\"]+)\"", Pattern::MULTILINE_MATCHING);
+		Matcher *mSMSC = pSMSC->createMatcher("");
+		mSMSC->setString(out.String());
+		if (mSMSC->findNextMatch()) {
+			fSMSC = mSMSC->getGroup(1).c_str();
+		}
+	}
+	return fSMSC.String();
+}
+
+int GSM::setSMSC(const char *number) {
+	BString cmd = "AT+CSCA=\""; cmd << number; cmd << "\"";
+	int ret = sendCommand(cmd.String(),NULL,true);
+	if (ret == COM_OK)
+		fSMSC = number;
+	return ret;
+}
+
 const char *GSM::getPBMemSlotName(const char *slot) {
 	static BString s;
 	s = slot;

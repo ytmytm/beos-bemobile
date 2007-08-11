@@ -130,6 +130,9 @@ class GSM {
 		void updateSMSInfo(void);
 		BList *listMemSlotSMS;
 
+		const char *getSMSC(void);
+		int setSMSC(const char *number);
+
 		void getSMSContent(SMS *sms = NULL);
 		void getSMSList(const char *slot);
 		int removeSMS(SMS *sms = NULL);
@@ -219,7 +222,7 @@ int guessPBType(const char *num);
 		BString fManuf, fModel, fGSMVer, fIMEI, fSoftwareVer, fIMSI;
 		int fYear, fMonth, fDay, fHour, fMinute, fSecond, fTimezone;
 		BString fDateTime;
-		BString fSMSInfo;
+		BString fSMSInfo, fSMSC;
 		//
 		BFile *logFile;
 		BWindow *logWindow;
