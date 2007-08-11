@@ -2,6 +2,7 @@
 #include <Button.h>
 #include <Font.h>
 #include <StatusBar.h>
+#include <TextControl.h>
 #include <StringView.h>
 #include "ColumnListView.h"
 #include "globals.h"
@@ -12,6 +13,7 @@
 const uint32	SMSLIST_INV	= 'SL00';
 const uint32	SMSLIST_SEL = 'SL01';
 const uint32	SMSREFRESH	= 'SB00';
+const uint32	SMSCBUTSET	= 'SB01';
 
 smsView::smsView(BRect r) : mobileView(r, "smsView") {
 	caption->SetText(_("SMS summary"));
@@ -21,7 +23,7 @@ smsView::smsView(BRect r) : mobileView(r, "smsView") {
 	BRect r = this->MyBounds();
 	r.InsetBy(10,15);
 	r.right -= B_V_SCROLL_BAR_WIDTH;
-	r.bottom -= 100;
+	r.bottom -= 100 + font.Size()*2 + 30;
 
 	// add column list
 	CLVContainerView *containerView;
@@ -40,6 +42,13 @@ smsView::smsView(BRect r) : mobileView(r, "smsView") {
 	this->AddChild(containerView);
 	list->SetInvocationMessage(new BMessage(SMSLIST_INV));
 	list->SetSelectionMessage(new BMessage(SMSLIST_SEL));
+
+	r.top = r.bottom+font.Size()*2+10; r.bottom = r.top + font.Size()*2;
+	r.right = r.left + font.StringWidth(_("SMS Centre")) + font.StringWidth("XXXXXXXXXXXXXXXX");
+	this->AddChild(smsc = new BTextControl(r,"smsSMSC",_("SMS Centre number"),NULL,NULL,B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
+	smsc->SetDivider(font.StringWidth(_("SMS Centre number"))+5);
+	r.left = r.right + 30; r.right = r.left + font.StringWidth(_("Set")) + 30;
+	this->AddChild(setsmsc = new BButton(r, "smsSetSMSC", _("Set"), new BMessage(SMSCBUTSET), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));	
 
 	r = this->MyBounds();
 	r.InsetBy(10,15);
@@ -99,7 +108,7 @@ void smsView::fillList(void) {
 }
 
 void smsView::fullListRefresh(void) {
-	struct memSlotSMS *sl, *mt;
+	struct memSlotSMS *sl, *mt, *me;
 	struct SMS *sms;
 	BString right;
 	float delta;
@@ -110,6 +119,7 @@ void smsView::fullListRefresh(void) {
 	progress->Update(0, _("Checking number of messages..."));
 	int msgnum = gsm->changeSMSMemSlot("MT");
 	mt = gsm->getSMSSlot("MT");
+	me = gsm->getSMSSlot("ME");
 
 	delta = (msgnum > 0) ? 100/msgnum : 0;
 	right = ""; right << msgnum;
@@ -125,7 +135,10 @@ void smsView::fullListRefresh(void) {
 			for (int l=0;l<k;l++) {
 				sms = (struct SMS*)sl->msg->ItemAt(l);
 				gsm->getSMSContent(sms);
-				progress->Update(delta, sl->name.String(), right.String());
+				if (sl != me)	// don't update for phone memory slot, it's virtual
+					progress->Update(delta, sl->name.String(), right.String());
+				else
+					progress->Update(0, sl->name.String(),NULL);
 			}
 		}
 	}
@@ -133,19 +146,35 @@ void smsView::fullListRefresh(void) {
 	gsm->changeSMSMemSlot("MT");	// XXX configurable?
 }
 
+void smsView::smscRefresh(void) {
+	smsc->SetText(gsm->getSMSC());
+}
+
+void smsView::smscSet(void) {
+	BString tmp;
+	tmp = smsc->Text();
+	tmp.RemoveSet(" (),-.\t");
+	if (tmp.Length()>0)
+		gsm->setSMSC(tmp.String());
+}
+
 void smsView::Show(void) {
 	BView::Show();
 	BView::Flush();
 	BView::Sync();
 	fillList();
+	smscRefresh();
 }
 
 void smsView::MessageReceived(BMessage *Message) {
 	switch (Message->what) {
 		case SMSREFRESH:
+			smscRefresh();
 			fullListRefresh();
 			fillList();
 			break;
+		case SMSCBUTSET:
+			smscSet();
 		case SMSLIST_INV:
 		case SMSLIST_SEL:
 			break;

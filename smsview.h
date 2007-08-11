@@ -8,7 +8,7 @@
 
 class BButton;
 class BStatusBar;
-class BTextView;
+class BTextControl;
 class ColumnListView;
 
 enum { SMS_ALLBOXEN = 0, SMS_INBOX = 1, SMS_OUTBOX = 2 };
@@ -24,10 +24,13 @@ class smsView : public mobileView {
 		void clearList(void);
 		void fillList(void);
 		void fullListRefresh(void);
+		void smscRefresh(void);
+		void smscSet(void);
 
 		ColumnListView *list;
+		BTextControl *smsc;
 		BStatusBar *progress;
-		BButton *refresh, *del, *newsms;
+		BButton *refresh, *del, *setsmsc;
 };
 
 class smsListItem : public CLVEasyItem {
