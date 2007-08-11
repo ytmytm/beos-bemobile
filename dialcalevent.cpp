@@ -1,7 +1,5 @@
 //
-// TODO:
-// - alarm if set, must be earlier than event!
-//		- XXX check this
+//
 
 #include <Alert.h>
 #include <Box.h>
@@ -13,6 +11,7 @@
 #include <Message.h>
 #include <PopUpMenu.h>
 #include <TextControl.h>
+#include <parsedate.h>
 
 #include "globals.h"
 #include "dialcalevent.h"
@@ -238,25 +237,28 @@ BString  *dialNewEvent::validateTime(BString *input) {
 
 	tmp.SetTo(input->String());
 	int l = tmp.Length();
-
-	if ((tmp[2] == ':') && (l == 5)) {
-		hbuf[0] = tmp[0];
-		hbuf[1] = tmp[1]; hbuf[2] = '\0';
-		mbuf[0] = tmp[3];
-		mbuf[1] = tmp[4]; mbuf[2] = '\0';
-	} else {
-		if ((tmp[1] == ':') && ((l == 3) || (l == 4))) {
-			hbuf[0] = tmp[0]; hbuf[1] = '\0';
-			mbuf[0] = tmp[2];
-			mbuf[1] = tmp[3]; mbuf[2] = '\0';
-		} else
-			input->SetTo("00:00");
-	}
-	if ((toint(hbuf)<0) || (toint(hbuf)>23) || (toint(mbuf)<0) || (toint(mbuf)>59)) {
+	if (l<3) {
 		input->SetTo("00:00");
 	} else {
-		snprintf(timebuf,sizeof(timebuf),"%02u:%02u",toint(hbuf),toint(mbuf));
-		input->SetTo(timebuf);
+		if ((tmp[2] == ':') && (l == 5)) {
+			hbuf[0] = tmp[0];
+			hbuf[1] = tmp[1]; hbuf[2] = '\0';
+			mbuf[0] = tmp[3];
+			mbuf[1] = tmp[4]; mbuf[2] = '\0';
+		} else {
+			if ((tmp[1] == ':') && ((l == 3) || (l == 4))) {
+				hbuf[0] = tmp[0]; hbuf[1] = '\0';
+				mbuf[0] = tmp[2];
+				mbuf[1] = tmp[3]; mbuf[2] = '\0';
+			} else
+				input->SetTo("00:00");
+		}
+		if ((toint(hbuf)<0) || (toint(hbuf)>23) || (toint(mbuf)<0) || (toint(mbuf)>59)) {
+			input->SetTo("00:00");
+		} else {
+			snprintf(timebuf,sizeof(timebuf),"%02u:%02u",toint(hbuf),toint(mbuf));
+			input->SetTo(timebuf);
+		}
 	}
 	return input;
 }
@@ -266,6 +268,11 @@ int dialNewEvent::GetData(void) {
 
 	// fetch data from widgets into calEvent struct
 	ev->title = title->Text();
+	if (ev->title.Length() == 0) {
+		BAlert *err = new BAlert(APP_NAME, _("Please enter the name of the event"), "OK", NULL, NULL, B_WIDTH_AS_USUAL, B_STOP_ALERT);
+		err->Go();
+		return -1;
+	}
 	ev->timed = (timed->Value() == B_CONTROL_ON);
 	ev->alarm = (alarmed->Value() == B_CONTROL_ON);
 	ev->dur = durToMinutes(toint(duration->Text()), curDurationUnit);
@@ -282,9 +289,31 @@ int dialNewEvent::GetData(void) {
 		ev->start_time = "00:00";
 	}
 	if (ev->alarm) {
+		if (! ev->timed) {
+			BAlert *err = new BAlert(APP_NAME, _("Alarm can be set only for timed events!"), "OK", NULL, NULL, B_WIDTH_AS_USUAL, B_STOP_ALERT);
+			err->Go();
+			return -1;
+		}
 		ev->alarm_date = aDate->Text();
 		tmp = aTime->Text();
 		ev->alarm_time = validateTime(&tmp)->String();
+		//
+		time_t t1 = parsedate(ev->start_date.String(),-1);
+		time_t t2 = parsedate(ev->alarm_date.String(),-1);
+		t1 += ev->start_time[0]*10*60*60;
+		t1 += ev->start_time[1]*60*60;
+		t1 += ev->start_time[3]*10*60;
+		t1 += ev->start_time[4]*60;
+		t2 += ev->alarm_time[0]*10*60*60;
+		t2 += ev->alarm_time[1]*60*60;
+		t2 += ev->alarm_time[3]*10*60;
+		t2 += ev->alarm_time[4]*60;
+		if (t2>=t1) {
+			BAlert *err = new BAlert(APP_NAME, _("Alarm must be set before the event!"), "OK", NULL, NULL, B_WIDTH_AS_USUAL, B_STOP_ALERT);
+			err->Go();
+			return -1;		
+		}
+		//
 	} else {
 		ev->alarm_date = "2000/00/00";
 		ev->alarm_time = "00:00";
