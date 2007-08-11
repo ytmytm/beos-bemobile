@@ -1,13 +1,10 @@
 plan na wersję 0.7:
-	- calendar: pusty <time> w ALARM -> segfault; alarm przed wydarzeniem, alarm tylko dla timed event!
 	- refaktoryzacja kodu: podział GSM, przepisanie struktur pb* na BMessage, przepisanie list na klasy
 	- edycja nazwanych kategorii
 	- eksport SMS do plików poczty
 	- akceptacja vcf/people przeciąganych DnD
-	- na głównej stronie SMS pola do wyboru SMSC
-	- kalendarz: alarm PRZED eventem!
 	- typ PF_DATE dla BDAY
-	- BMessage zwrotny po edycji SMS/pbItem dla odświeżenia listy w oknie
+	- BMessage zwrotny po edycji SMS/pbItem/calItem dla odświeżenia listy w oknie
 
 OPCJE:
 	BUTTONS:
@@ -34,9 +31,6 @@ OPCJE:
 	- przy mailing list coś do wyboru numerów (warto...?) np. lista z wielokrotnym wyborem
 	- dlaczego trzeba zapisywać dwa razy na L6?
 
-LISTA SMS:
-	- superitem SMS - skrócić widok folderów o połowę, a niżej co?
-		- edycja/zmiana numeru do centrum SMS? wybór z predef. listy? (hinty w rozwijanym menu)
 - PB:
 	- przy dzialaniu pomijac sloty MD i AT
 
@@ -44,10 +38,9 @@ TODO:
 - siła sygnału/baterii - raw numbers lub interpolowane wzorem z kmobiletools?
 - dodać guzik kalendarza do BDAY (lub nowy typ PF_DATE)
 - BDAY: walidacja wpisanej daty
-- kalendarz: alarm musi być PRZED eventem
 - PB: zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)
 - PB: poprawić wykrywanie features (liczenie przecinków może być za głupie)
-- informacje o SMSC, własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)
+- informacje o własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)
 - powiadamianie o przychodzących: at+cnmi (doczytać co i jak)
 - replikant(?) w deskbarze do reagowania na incoming message, call, tooltip ze statusem
 - zapisywanie/odczyt parametrów z initWindow jako konfiguracji programu
