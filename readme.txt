@@ -1,11 +1,12 @@
 plan na wersję 0.7:
+	- eksport SMS do plików poczty
+	- typ PF_DATE dla BDAY, walidacja, guzik z kalendarzem
+	- akceptacja vcf/people przeciąganych DnD
 	- refaktoryzacja kodu: podział GSM, przepisanie struktur pb* na BMessage, przepisanie list na klasy
 	- edycja nazwanych kategorii
-	- eksport SMS do plików poczty
-	- akceptacja vcf/people przeciąganych DnD
-	- typ PF_DATE dla BDAY
 	- BMessage zwrotny po edycji SMS/pbItem/calItem dla odświeżenia listy w oknie
-
+potem:
+	- unsolicited messages (incoming message, call), ikonka do deskbara
 OPCJE:
 	BUTTONS:
 	[REFRESH] [NEW] [SEND/EDIT] [DELETE] [DIAL]
@@ -35,7 +36,6 @@ OPCJE:
 	- przy dzialaniu pomijac sloty MD i AT
 
 TODO:
-- siła sygnału/baterii - raw numbers lub interpolowane wzorem z kmobiletools?
 - dodać guzik kalendarza do BDAY (lub nowy typ PF_DATE)
 - BDAY: walidacja wpisanej daty
 - PB: zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)

@@ -203,7 +203,7 @@ int guessPBType(const char *num);
 		//
 		sem_id sem;
 		bool active;
-		bool log, term;
+		bool logger, term;
 		// serial config
 		int32 parity, databits, stopbits, flowcontrol, baudrate;
 		bool dtr, rts;

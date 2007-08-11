@@ -21,6 +21,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
 #include <parsedate.h>
 
@@ -141,7 +142,7 @@ bool GSM::initDevice(BMessage *msg) {
 	if (! msg)
 		return false;
 	msg->FindString("_dev", &dev);
-	msg->FindBool("_log", &log);
+	msg->FindBool("_log", &logger);
 	msg->FindBool("_term", &term);
 	msg->FindInt32("_parity", &parity);
 	msg->FindInt32("_databits", &databits);
@@ -152,15 +153,15 @@ bool GSM::initDevice(BMessage *msg) {
 	msg->FindBool("_rts", &rts);
 	msg->FindString("_initstring", &ini);
 	initString = ini;
-	return initDevice(dev, log, term);
+	return initDevice(dev, logger, term);
 }
 
 bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
 	BString tmp;
 
-	log = l;
+	logger = l;
 	term = t;
-	if (log) {
+	if (logger) {
 		logFile->SetTo("/boot/home/bemobile.log",B_ERASE_FILE|B_CREATE_FILE|B_WRITE_ONLY);
 	}
 	if (term) {
@@ -169,7 +170,7 @@ bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
 		logWindow->Unlock();
 		logWindow->Show();
 	}
-	if (log || term) {
+	if (logger || term) {
 		tmp = "opening device:["; tmp += device; tmp += "] ";
 		tmp += "dr:"; tmp << baudrate; tmp += " db:"; tmp << databits; tmp += " sb:"; tmp << stopbits;
 		tmp += " pr:"; tmp << parity; tmp += " fl:"; tmp << flowcontrol;
@@ -181,7 +182,7 @@ bool GSM::initDevice(const char *device, bool l = false, bool t = false) {
 		return false;
 	port->SetFlowControl(flowcontrol);
 	if (port->Open(device) <= 0) {
-		if (log || term) {
+		if (logger || term) {
 			tmp = "can't open bserialport\n";
 			logWrite(tmp.String());
 		}
@@ -208,7 +209,7 @@ void GSM::doneDevice(void) {
 }
 
 void GSM::logWrite(const char *t) {
-	if (log) {
+	if (logger) {
 		logFile->Write(t,strlen(t));
 	}
 	if (term) {
@@ -237,13 +238,13 @@ int GSM::sendCommand(const char *cmd, BString *out = NULL, bool debug = false) {
 	int status = 0;
 	int tmout = 0;
 
-	if (log || term) {
+	if (logger || term) {
 		lll = "<--["; lll += cmd; lll += "]\n"; WLOG;
 	}
 
 	if (!active) {
 if (debug) printf("port not open\n");
-		if (log || term) {
+		if (logger || term) {
 			lll = "ERR: port not open\n"; WLOG;
 		}
 		buffer[0] = '\0';
@@ -255,7 +256,7 @@ if (debug) printf("sending:[%s]\n",cmd);
 	memset(buffer,0,sizeof(buffer));
 
 	if (acquire_sem(sem) != B_NO_ERROR) {
-		if (log || term) {
+		if (logger || term) {
 			lll = "ERR: can't acquire semaphore to serial port\n"; WLOG;
 		}
 		return COM_SEMERROR;
@@ -271,7 +272,7 @@ if (debug) printf("sending:[%s]\n",cmd);
 if (debug) printf("wfi:%i\n",r);
 		if (r>0) {
 			r = port->Read(buffer,r);
-			if (log || term || (out != NULL))		// preserve output only if needed
+			if (logger || term || (out != NULL))		// preserve output only if needed
 				tmp.Append(buffer,r);
 if (debug) printf("got:[%s]\n",buffer);
 			if (strstr(buffer,"RING")) {
@@ -300,7 +301,7 @@ if (debug) printf("error!\n");
 			tmout++;
 	}
 	// copy out data while locked
-	if (log || term) {
+	if (logger || term) {
 		lll = "-->["; lll += tmp; lll += "]\n"; WLOG;
 	}
 	if (out!=NULL)
@@ -309,7 +310,7 @@ if (debug) printf("error!\n");
 	if (tmout>0)
 		printf("tmout=%i, cmd=[%s]\n",tmout,cmd);
 	if (tmout == THRSTMOUT) {
-		if (log || term) {
+		if (logger || term) {
 			lll = "ERR: timeout\n"; WLOG;
 		}
 		status = COM_TIMEOUT;
@@ -445,6 +446,16 @@ void GSM::getPhoneStatus(void) {
 		fACPower = ((i==1) || (i==2));
 		fBatPower = ((i==0) || (i==1));
 		fCharge = toint(mPower->getGroup(2).c_str());
+	}
+	// this is from kmobiletools
+	if (isMotorola) {
+		if (fBatPower) {
+			if( log(fCharge/1.4)/log(1.038) > 30 ) 
+				fCharge=(int) (log((double) fCharge/1.4)/log(1.038));
+		} else
+		if (fACPower) {
+			fCharge= (int) ((int) pow( (double) (fCharge-6), (4.0/6.0) ) * 5.2) +2;
+		}
 	}
 
 	// signal power
@@ -783,22 +794,29 @@ int GSM::sendSMSFromStorage(const char *slot, int id) {
 
 const char *GSM::getSMSC(void) {
 	BString out;
+	BString tmp;
 	fSMSC = "";
 	int ret = sendCommand("AT+CSCA?", &out);
 	if (ret == COM_OK) {
-		Pattern *pSMSC = Pattern::compile("^\\+CSCA: \"([^\"]+)\"", Pattern::MULTILINE_MATCHING);
+		Pattern *pSMSC = Pattern::compile("^\\+CSCA: ([^,]+),", Pattern::MULTILINE_MATCHING);
 		Matcher *mSMSC = pSMSC->createMatcher("");
 		mSMSC->setString(out.String());
 		if (mSMSC->findNextMatch()) {
-			fSMSC = mSMSC->getGroup(1).c_str();
+			tmp = mSMSC->getGroup(1).c_str();
+			if (rawUTF8) {	// for L6 just strip quotes
+				tmp.CopyInto(fSMSC,1,tmp.Length()-2);
+			} else {
+				BString tmp2(decodeText(mSMSC->getGroup(1).c_str()));
+				fSMSC = tmp2;
+			}
 		}
 	}
 	return fSMSC.String();
 }
 
 int GSM::setSMSC(const char *number) {
-	BString cmd = "AT+CSCA=\""; cmd << number; cmd << "\"";
-	int ret = sendCommand(cmd.String(),NULL,true);
+	BString cmd = "AT+CSCA="; cmd << "\"" << encodeText(number) << "\"";
+	int ret = sendCommand(cmd.String(),NULL);
 	if (ret == COM_OK)
 		fSMSC = number;
 	return ret;
