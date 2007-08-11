@@ -1455,6 +1455,7 @@ int GSM::getCalendarEvents(void) {
 	static Matcher *mCalendar = pCalendar->createMatcher("");
 	struct calEvent *ce;
 	BString cmd, out;
+	BString tmp, tmp2;
 
 	// we only know how to read Motorola calendar
 	if (!fHasCalendar)
@@ -1479,22 +1480,22 @@ int GSM::getCalendarEvents(void) {
 
 	// parse returned data, add to the listCalEvents
 	mCalendar->setString(out.String());
+
+
 	while (mCalendar->findNextMatch()) {
 		ce = new calEvent;
 		ce->id = toint(mCalendar->getGroup(1).c_str());
 		if (mCalendar->getGroup(2).c_str()[0] != '"') {
-			BString tmp(decodeText(mCalendar->getGroup(2).c_str()));
+			tmp = decodeText(mCalendar->getGroup(2).c_str());
 			ce->title = tmp;
 		} else {
-			BString tmp2;
-			BString tmp(mCalendar->getGroup(2).c_str());
+			tmp = mCalendar->getGroup(2).c_str();
 			tmp.CopyInto(tmp2,1,tmp.Length()-2);
 			ce->title = tmp2;
 		}
 		ce->timed = toint(mCalendar->getGroup(3).c_str());
 		ce->alarm = toint(mCalendar->getGroup(4).c_str());
 		ce->start_time = mCalendar->getGroup(5).c_str();
-		BString tmp;
 		tmp = mCalendar->getGroup(6).c_str();
 		ce->start_date = (dateFromAmerican(&tmp))->String();
 		ce->dur = toint(mCalendar->getGroup(7).c_str());
