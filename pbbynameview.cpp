@@ -1,5 +1,5 @@
 
-//
+// XXX:should use find_directory instead of hardcoded paths
 // XXX:it is ugly to recognize attribute type by its label
 //		(here and hardcoded offsets in refresh for listitem)
 //		- add 'type' constant to slot-fields (temporary)
