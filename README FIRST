@@ -34,7 +34,7 @@ version 0.7
 - battery level should be displayed correctly for Motorola
 - new option: setting SMS centre number on main SMS view
 - better input validation in calendar events editor
-- export selected SMS slots to BeMail-like files
+- export selected SMS slots to BeMail-like files into $HOME/mail/SMS/ 
 
 version 0.6
 - new dialog to edit/enter calendar events
