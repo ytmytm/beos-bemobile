@@ -1,5 +1,5 @@
 plan na wersję 0.7:
-	- eksport SMS do plików poczty
+	- poprawić eksport do vcf/people: pobieranie ścieżek w koszerny sposób
 	- typ PF_DATE dla BDAY, walidacja, guzik z kalendarzem
 	- akceptacja vcf/people przeciąganych DnD
 	- refaktoryzacja kodu: podział GSM, przepisanie struktur pb* na BMessage, przepisanie list na klasy
@@ -45,7 +45,7 @@ TODO:
 - replikant(?) w deskbarze do reagowania na incoming message, call, tooltip ze statusem
 - zapisywanie/odczyt parametrów z initWindow jako konfiguracji programu
 - sms PDU mode (odczytywanie wszystkich informacji)
-- eksport smsów, eksport/import phonebooków
+- eksport/import phonebooków
 - ikony uwaga: CVS nie przechowa atrybutów, tylko ZIP
 IDEA:
 - przyjmowanie DROPów z plików people -> wywołanie dodania do aktualnego slotu
@@ -54,7 +54,6 @@ IDEA:
 	- encoding qp,utf8!
 	- zmiana na vcard v2.1? (jak eksport z motoroli i obsługiwane przez mail-it/vcard2people etc.?)
 - j/w import/sync - dopasowywanie wg vcf::uid?
-- eksport smsów do plików poczty (bemail: treść w pliku, od/do/data w atrybuty, coś dziwnego z indeksami robi)
 - zamiana pbVal na Message, wszystkie atrybuty kodowane z/na standardowe nazwy -> łatwo znaleźć lub
   stwierdzić nieistnienie, można zapisywać faktyczne wartości
 

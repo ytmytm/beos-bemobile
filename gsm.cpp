@@ -792,6 +792,38 @@ int GSM::sendSMSFromStorage(const char *slot, int id) {
 	return -1;
 }
 
+const char *GSM::smsNumberTextContent(struct SMS *sms = NULL) {
+	static BString tmp;
+	bool first;
+	first = true;
+
+	if (!sms) {
+		tmp = "";
+		return tmp.String();
+	}
+//printf("[%s]->[%i]\n",sms->number.String(),sms->pbnumbers.CountItems());
+	if (sms->pbnumbers.CountItems()>0) {
+		struct pbNum *anItem;
+		BString *number, *name;
+		for (int i=0; (anItem=(struct pbNum*)sms->pbnumbers.ItemAt(i)); i++) {
+			if (first)
+				tmp = "";
+			else
+				tmp += ", ";
+			number = ((union pbVal*)anItem->attr->ItemAt(0))->text;
+			name = ((union pbVal*)anItem->attr->ItemAt(1))->text;
+			if (name->Length()>0) {
+				tmp += name->String();
+				tmp += " ("; tmp += number->String(); tmp += ")";
+			} else {
+				tmp += number->String();
+			}
+			first = false;
+		}
+	}
+	return tmp.String();
+}
+
 const char *GSM::getSMSC(void) {
 	BString out;
 	BString tmp;
@@ -1224,6 +1256,14 @@ void GSM::matchNumFromSMS(struct SMS *sms) {
 	Pattern *pNum = Pattern::compile("([^ ]+)", Pattern::MULTILINE_MATCHING);
 	Matcher *mNum = pNum->createMatcher("");
 	struct pbNum *pb, *newpb;
+	// clear pbnumbers list
+	if (sms->pbnumbers.CountItems()>0) {
+		pbNum *anItem;
+		for (int i=0; (anItem=(pbNum*)sms->pbnumbers.ItemAt(i)); i++)
+			delete anItem;
+		if (!sms->pbnumbers.IsEmpty())
+			sms->pbnumbers.MakeEmpty();
+	}
 	// break down by spaces
 	mNum->setString(sms->number.String());
 	while (mNum->findNextMatch()) {

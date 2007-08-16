@@ -1,4 +1,5 @@
 
+#include <Alert.h>
 #include <Button.h>
 #include <Font.h>
 #include <StatusBar.h>
@@ -10,10 +11,13 @@
 
 #include <stdio.h>
 
+#define SMS_MAIL_PATH "mail/SMS"
+
 const uint32	SMSLIST_INV	= 'SL00';
 const uint32	SMSLIST_SEL = 'SL01';
 const uint32	SMSREFRESH	= 'SB00';
 const uint32	SMSCBUTSET	= 'SB01';
+const uint32	SMSEXPORTSLOT = 'SB02';
 
 smsView::smsView(BRect r) : mobileView(r, "smsView") {
 	caption->SetText(_("SMS summary"));
@@ -59,13 +63,13 @@ smsView::smsView(BRect r) : mobileView(r, "smsView") {
 	progress->SetMaxValue(100);
 	progress->Hide();
 
-	BRect s;
+	BRect s, t;
 	r = this->MyBounds();
 	r.InsetBy(20,20);
 	s = r; s.top = s.bottom - font.Size()*2; s.right = s.left + font.StringWidth("MMMMMMMMMM")+40;
 	this->AddChild(refresh = new BButton(s, "smsRefresh", _("Refresh"), new BMessage(SMSREFRESH), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
-//	t = r; t.top = s.top; t.bottom = s.bottom; t.right = r.right; t.left = t.right - (font.StringWidth("MMMMMMMMMM")+40);
-//	this->AddChild(del = new BButton(t, "smsDelete", _("Delete"), new BMessage(SMSDELETE), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
+	t = s; t.right = r.right; t.left = t.right - (font.StringWidth("MMMMMMMMMM")+40);
+	this->AddChild(exportslot = new BButton(t, "smsExport", _("Export"), new BMessage(SMSEXPORTSLOT), B_FOLLOW_RIGHT|B_FOLLOW_BOTTOM));
 }
 
 void smsView::clearList(void) {
@@ -158,6 +162,110 @@ void smsView::smscSet(void) {
 		gsm->setSMSC(tmp.String());
 }
 
+#include <Path.h>
+#include <Directory.h>
+#include <File.h>
+#include <FindDirectory.h>
+#include <NodeInfo.h>
+
+void smsView::smsExportSlot(struct memSlotSMS *slot) {
+	if (slot->msg->CountItems() == 0) {
+		gsm->getSMSList(slot->sname.String());
+	}
+	if (slot->msg->CountItems() == 0) {
+		BAlert *err = new BAlert(APP_NAME, _("There are no messages to export."), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+		err->Go();
+		return;
+	}
+
+	// create directories for output
+	BPath path;
+	BDirectory dir;
+	BFile file;
+	status_t status;
+
+	if ((status = find_directory(B_USER_DIRECTORY, &path)) != B_OK)
+		return;	// no user directory? XXX
+
+	// append relative path to slot export list
+	path.Append(SMS_MAIL_PATH);
+	status = dir.SetTo(path.Path());
+	switch (status) {
+		case B_ENTRY_NOT_FOUND:
+			if ((status = dir.CreateDirectory(path.Path(), &dir)) != B_OK)
+				return;		// couldn't be created? XXX
+		case B_OK:
+			break;
+		default:
+			return;
+	}
+	path.Append(slot->name.String());
+	status = dir.SetTo(path.Path());
+	switch (status) {
+		case B_ENTRY_NOT_FOUND:
+			if ((status = dir.CreateDirectory(path.Path(), &dir)) != B_OK)
+				return;		// couldn't be created? XXX
+		case B_OK:
+			break;
+		default:
+			return;	// other error
+	}
+
+	// for each message in slot...
+	// put a file w/ attributes & mimetype for each message
+	BString fname, fname2, tmp, mime;
+	uint32 flags;
+	struct SMS *sms;
+	bool draft = (slot->sname.Compare("DM") == 0);
+	int k = slot->msg->CountItems();
+	for (int l=0;l<k;l++) {
+		// get SMS...
+		sms = (struct SMS*)slot->msg->ItemAt(l);
+		gsm->getSMSContent(sms);
+		// create the file, if the name exists, find unique one
+		flags = B_WRITE_ONLY | B_CREATE_FILE | B_FAIL_IF_EXISTS;
+		// clear date
+		tmp = sms->date.String();
+		tmp.ReplaceAll("/",".");
+		fname = sms->number.String(); fname << "_" << tmp.String() << "_" << sms->id;
+		fname2 = BString(fname.String());
+		for (int i=1; (status = file.SetTo(&dir, fname2.String(), flags)) != B_OK; i++) {
+			if (status != B_FILE_EXISTS)
+				return;	// other error
+			else {
+				fname2 = fname.String();
+				fname2 << "_" << i;
+			}
+		}
+		file.Write(sms->msg.String(), sms->msg.Length());
+		// add attributes
+		if (draft) {
+			uint32 draftAttr = draft;
+			file.WriteAttr("MAIL:draft",B_INT32_TYPE, 0, &draftAttr, sizeof(uint32));
+		}
+		tmp = gsm->smsNumberTextContent(sms);
+		if (tmp.Length()>0) {
+			// only for inbox
+			if (slot->sname.Compare("IM") == 0) {
+				file.WriteAttr("MAIL:from",B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+			}
+			file.WriteAttr("MAIL:to",B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+			file.WriteAttr("MAIL:name",B_STRING_TYPE, 0, tmp.String(), tmp.Length()+1);
+		}
+		// mimetype
+//		mime = draft ? "text/x-vnd.Be-MailDraft" : "text/x-email";
+		mime = "text/x-vnd.Be-MailDraft";
+		BNodeInfo info(&file);
+		info.SetType(mime.String());
+	}
+
+	tmp = _("Messages from this box have been exported to:");
+	tmp << "\n" << path.Path();
+
+	BAlert *nfo = new BAlert(APP_NAME, tmp.String(), _("Ok"), NULL, NULL, B_WIDTH_AS_USUAL, B_WARNING_ALERT);
+	nfo->Go();
+}
+
 void smsView::Show(void) {
 	BView::Show();
 	BView::Flush();
@@ -178,6 +286,13 @@ void smsView::MessageReceived(BMessage *Message) {
 		case SMSLIST_INV:
 		case SMSLIST_SEL:
 			break;
+		case SMSEXPORTSLOT:
+			{	int i = list->CurrentSelection(0);
+				if (i>=0) {
+					smsExportSlot(((smsListItem*)list->ItemAt(i))->Slot());
+				}
+				break;
+			}
 		default:
 			mobileView::MessageReceived(Message);
 			break;

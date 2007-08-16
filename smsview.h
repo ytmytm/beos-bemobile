@@ -26,11 +26,12 @@ class smsView : public mobileView {
 		void fullListRefresh(void);
 		void smscRefresh(void);
 		void smscSet(void);
+		void smsExportSlot(struct memSlotSMS *slot);
 
 		ColumnListView *list;
 		BTextControl *smsc;
 		BStatusBar *progress;
-		BButton *refresh, *del, *setsmsc;
+		BButton *refresh, *setsmsc, *exportslot;
 };
 
 class smsListItem : public CLVEasyItem {

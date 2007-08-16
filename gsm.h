@@ -154,6 +154,8 @@ class GSM {
 		struct pbNum *matchNumFromPB(struct pbNum *num);
 		struct pbNum *matchNumFromNum(const char *num);
 		void matchNumFromSMS(struct SMS *sms);
+		//
+		const char *smsNumberTextContent(struct SMS *sms = NULL);
 
 		int removePBItem(struct pbNum *num = NULL);
 		int storePBItem(struct pbNum *num = NULL);
