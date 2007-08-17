@@ -1,12 +1,11 @@
 plan na wersję 0.7:
-	- poprawić eksport do vcf/people: pobieranie ścieżek w koszerny sposób
 	- typ PF_DATE dla BDAY, walidacja, guzik z kalendarzem
 	- akceptacja vcf/people przeciąganych DnD
 	- refaktoryzacja kodu: podział GSM, przepisanie struktur pb* na BMessage, przepisanie list na klasy
 	- edycja nazwanych kategorii
 	- BMessage zwrotny po edycji SMS/pbItem/calItem dla odświeżenia listy w oknie
 potem:
-	- unsolicited messages (incoming message, call), ikonka do deskbara
+	- unsolicited messages (incoming message, call), ikonka do deskbara (JAK współdzielić port szeregowy?)
 OPCJE:
 	BUTTONS:
 	[REFRESH] [NEW] [SEND/EDIT] [DELETE] [DIAL]

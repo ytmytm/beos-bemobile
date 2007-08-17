@@ -1,5 +1,4 @@
 
-// XXX:should use find_directory instead of hardcoded paths
 // XXX:it is ugly to recognize attribute type by its label
 //		(here and hardcoded offsets in refresh for listitem)
 //		- add 'type' constant to slot-fields (temporary)
@@ -10,9 +9,11 @@
 #include <Button.h>
 #include <Directory.h>
 #include <File.h>
+#include <FindDirectory.h>
 #include <Font.h>
 #include <Node.h>
 #include <NodeInfo.h>
+#include <Path.h>
 #include <StatusBar.h>
 #include <StringView.h>
 #include "ColumnListView.h"
@@ -22,9 +23,8 @@
 #include <stdio.h>
 #include <time.h>
 
-char *people_path = "/boot/home/people/BeMobile/";
-
-#define VCFPATH "/boot/home/people/"
+#define	PEOPLE_PATH				"people"
+#define BEMOBILE_PEOPLE_PATH	"BeMobile"
 #define VCFFILE "people.vcf"
 
 const uint32	PBNLIST_INV	= 'PBN0';
@@ -316,7 +316,7 @@ void pbByNameView::exportVCF(int i) {
 			} else
 			if (f->name.Compare(_("Nick")) == 0) {
 				if (v->text->Length()>0) {
-					if (nick.Length()>0)
+					if (nick.Length()>0)	// XXX add many nicks?
 						nick += ",";
 					tmp = v->text->String();
 					tmp.ReplaceAll(",","\\,");
@@ -457,12 +457,33 @@ void pbByNameView::exportVCF(int i) {
 	vcard += "END:VCARD\n\n";
 	printf("%s",vcard.String());
 
+	// create path & dir
+	BPath path;
+	BDirectory dir;
+	status_t status;
+
+	if ((status = find_directory(B_USER_DIRECTORY, &path)) != B_OK)
+		return;	// no user directory? XXX
+	// append relative path to slot export list
+	path.Append(PEOPLE_PATH);
+	status = dir.SetTo(path.Path());
+	switch (status) {
+		case B_ENTRY_NOT_FOUND:
+			if ((status = dir.CreateDirectory(path.Path(), &dir)) != B_OK)
+				return;		// couldn't be created? XXX
+		case B_OK:
+			break;
+		default:
+			return;
+	}
+
 	// append to file
 	BFile f;
-	if (f.SetTo(VCFPATH VCFFILE, B_WRITE_ONLY|B_CREATE_FILE|B_OPEN_AT_END) != B_OK) {
+	if (f.SetTo(&dir, VCFFILE, B_WRITE_ONLY|B_CREATE_FILE|B_OPEN_AT_END) != B_OK) {
 		tmp = _("There was error and vCard file was not saved.");
 		tmp += "\n";
-		tmp += VCFPATH;
+		tmp += path.Path();
+		tmp += "\\";
 		tmp += VCFFILE;
 		BAlert *err = new BAlert(APP_NAME, tmp.String(), _("OK"), NULL, NULL, B_WIDTH_AS_USUAL, B_INFO_ALERT);
 		err->Go();
@@ -473,7 +494,7 @@ void pbByNameView::exportVCF(int i) {
 	f.Unset();
 	tmp = _("Contact data has been added to vCard file");
 	tmp += "\n";
-	tmp += VCFPATH; tmp += VCFFILE;
+	tmp += path.Path(); tmp += "\\"; tmp += VCFFILE;
 	BAlert *a = new BAlert(APP_NAME, tmp.String(), _("OK"), NULL, NULL, B_WIDTH_AS_USUAL, B_INFO_ALERT);
 	a->Go();
 }
@@ -735,7 +756,15 @@ void pbByNameView::exportPeople(int i) {
 		}
 		msg->PrintToStream();
 		p = new PeopleFile(msg);
-		if (p->Save(people_path) != B_OK) {
+		BPath path;
+		if (find_directory(B_USER_DIRECTORY, &path) != B_OK) {
+			delete p;
+			delete msg;
+			return;	// no user directory? XXX
+		}
+		path.Append(PEOPLE_PATH);
+		path.Append(BEMOBILE_PEOPLE_PATH);
+		if (p->Save(path.Path()) != B_OK) {
 			delete p;
 			delete msg;
 			return;
