@@ -1,4 +1,4 @@
-plan na wersję 0.7:
+plan na wersję 0.8:
 	- typ PF_DATE dla BDAY, walidacja, guzik z kalendarzem
 	- akceptacja vcf/people przeciąganych DnD
 	- refaktoryzacja kodu: podział GSM, przepisanie struktur pb* na BMessage, przepisanie list na klasy

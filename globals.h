@@ -4,7 +4,7 @@
 	// application signature
 	#define APP_NAME "BeMobile"
 	// bump it on every release
-	#define APP_VERSION "0.7"
+	#define APP_VERSION "0.8"
 	#define APP_SIGNATURE "application/x-vnd.generic-BeMobile"
 	extern int AppReturnValue;
 	// general max() function

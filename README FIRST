@@ -1,5 +1,5 @@
 
-BeMobile 0.7
+BeMobile 0.8
 (c) Maciej Witkowiak <ytm@elysium.pl>, <mwitkowiak@gmail.com>
 http://members.elysium.pl/ytm/html/beos.html
 http://ytm.bossstation.dnsalias.org/html/beos.html
@@ -30,6 +30,9 @@ been already visited.
 
 
 CHANGES
+varsion 0.8
+- ?
+
 version 0.7
 - battery level should be displayed correctly for Motorola
 - new option: setting SMS centre number on main SMS view
