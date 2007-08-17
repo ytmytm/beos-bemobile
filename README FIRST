@@ -116,6 +116,13 @@ to fetch category names from the phone.
 
 
 
+EXPORTING MESSAGES
+
+On the main SMS slots view you can select a slot and export all its contents to BeMail files. The data will be
+saved in your /boot/home/mail/SMS/<name of the slot> folder, each message in a separate file.
+
+
+
 NOKIA
 
 I expect that this will come often - NO, MOST LIKELY IT WILL NOT RUN WITH YOUR NOKIA (YET).
