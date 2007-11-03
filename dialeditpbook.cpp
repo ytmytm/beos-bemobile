@@ -13,6 +13,7 @@
 
 #include "globals.h"
 #include "dialeditpbook.h"
+#include "dialcalendar.h"
 #include "gsm.h"
 
 #include <stdio.h>
@@ -22,6 +23,7 @@ const uint32 MENU_SLOT	= 'DP01';
 const uint32 MENU_FIELD	= 'DP02';
 const uint32 BUT_REVERT = 'DP03';
 const uint32 BUT_SAVE	= 'DP04';
+const uint32 DATE_BUT	= 'DP05';
 
 dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow(
 	BRect(350,250,650,250+85),
@@ -94,6 +96,7 @@ dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow
 				case GSM::PF_PHONE:
 				case GSM::PF_PHONEEMAIL:
 				case GSM::PF_TEXT:
+				case GSM::PF_DATE:
 					v->text = new BString("");
 					break;
 				case GSM::PF_BOOL:
@@ -135,6 +138,19 @@ dialEditPB::dialEditPB(const char *sl, GSM *g, struct pbNum *p = NULL) : BWindow
 			case GSM::PF_TEXT:
 				c = new BTextControl(BRect(r),id.String(),pf->name.String(),NULL,new BMessage(NC));
 				break;
+			case GSM::PF_DATE:
+				{
+				BRect s = r;
+				s.right = s.right - 30;
+				c = new BTextControl(BRect(s),id.String(),pf->name.String(),NULL,new BMessage(NC));
+				s.left = s.right+5;
+				s.right = r.right;
+				s.bottom = s.top+15;
+				msg = new BMessage(DATE_BUT);
+				msg->AddPointer("_datefield",c);
+				view->AddChild(new BButton(BRect(s),"date","+",msg));
+				break;
+				}
 			case GSM::PF_BOOL:
 				c = new BCheckBox(BRect(r),id.String(),pf->name.String(),new BMessage(NC));
 				break;
@@ -207,6 +223,7 @@ void dialEditPB::revertData(void) {
 			case GSM::PF_PHONEEMAIL:
 			case GSM::PF_PHONE:
 			case GSM::PF_TEXT:
+			case GSM::PF_DATE:
 				((BTextControl*)c)->SetText(v->text->String());
 				break;
 			case GSM::PF_BOOL:
@@ -249,6 +266,12 @@ void dialEditPB::validateData(void) {
 				tmp = ((BTextControl*)c)->Text();
 				// XXX validate contents (phnumbers vs email vs text)
 				tmp.Truncate(pf->max);
+				((BTextControl*)c)->SetText(tmp.String());
+				break;
+			case GSM::PF_DATE:
+				tmp = ((BTextControl*)c)->Text();
+				validateDate(&tmp);
+				tmp.ReplaceAll("-","/");
 				((BTextControl*)c)->SetText(tmp.String());
 				break;
 			default:
@@ -300,6 +323,7 @@ bool dialEditPB::saveData(void) {
 			case GSM::PF_PHONEEMAIL:
 			case GSM::PF_PHONE:
 			case GSM::PF_TEXT:
+			case GSM::PF_DATE:
 				nv->text = new BString(((BTextControl*)c)->Text());
 				break;
 			case GSM::PF_BOOL:
@@ -345,6 +369,20 @@ void dialEditPB::MessageReceived(BMessage *Message) {
 				Message->FindInt32("_id",&id);
 				Message->FindInt32("_value",&value);
 				((union pbVal*)attr->ItemAt(id))->v = value;
+				break;
+			}
+		case DATE_BUT:
+			{	void *ptr;
+				BTextControl *dateField;
+				BString curDate;
+				if (Message->FindPointer("_datefield", &ptr) == B_OK) {
+					dateField = static_cast<BTextControl*>(ptr);
+					curDate = dateField->Text();
+					uint32 msgint;
+					msgint = NC;
+					dialCalendar *calendarDialog = new dialCalendar(curDate.String(), dateField, msgint, this);
+					calendarDialog->Show();
+				}
 				break;
 			}
 		default:

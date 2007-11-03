@@ -61,6 +61,9 @@ phoneListView::phoneListView(BRect r, const char *slot, const char *name, GSM *g
 			case GSM::PF_TEXT:
 				maxw = font.StringWidth("M")*(pf->max)+20;
 				break;
+			case GSM::PF_DATE:
+				maxw = font.StringWidth("MM/MM/MMM");
+				break;
 			case GSM::PF_COMBO:
 				maxw = font.StringWidth("MMMMMMM")+20;
 				break;
@@ -234,6 +237,7 @@ phoneSlotListItem::phoneSlotListItem(struct pbNum *num, GSM *gsm) : CLVEasyItem(
 			case GSM::PF_PHONEEMAIL:
 			case GSM::PF_PHONE:
 			case GSM::PF_TEXT:
+			case GSM::PF_DATE:
 				SetColumnContent(i+1,v->text->String());
 				break;
 			case GSM::PF_BOOL:

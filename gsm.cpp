@@ -1061,7 +1061,7 @@ bool GSM::checkPBMemSlot(struct pbSlot *sl = NULL) {
 			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Nick");
 			pf->max = 24; pf->offset = 22;
 			sl->fields->AddItem(pf);
-			pf = new pbField; pf->type = PF_TEXT; pf->name = _("Birthday (YYYY/MM/DD)");
+			pf = new pbField; pf->type = PF_DATE; pf->name = _("Birthday (YYYY/MM/DD)");
 			pf->max = 10; pf->offset = 23;
 			sl->fields->AddItem(pf);
 		}
@@ -1157,19 +1157,18 @@ void GSM::getPBList(const char *slot) {
 						v->text = new BString(mNum->getGroup(offset).c_str());
 						break;
 					case PF_TEXT:
-						{	if (mNum->getGroup(offset).c_str()[0] != '"') {
-								BString tmp(decodeText(mNum->getGroup(offset).c_str()));
-								v->text = new BString(tmp);
-							} else {
-								BString tmp2;
-								BString tmp(mNum->getGroup(offset).c_str());
-								tmp.CopyInto(tmp2,1,tmp.Length()-2);
-								v->text = new BString(tmp2);
-							}
-							// XXX special case for BDAY!
-							if (pf->offset == 23)
-								dateFromAmerican(v->text);
+					case PF_DATE:
+						if (mNum->getGroup(offset).c_str()[0] != '"') {
+							BString tmp(decodeText(mNum->getGroup(offset).c_str()));
+							v->text = new BString(tmp);
+						} else {
+							BString tmp2;
+							BString tmp(mNum->getGroup(offset).c_str());
+							tmp.CopyInto(tmp2,1,tmp.Length()-2);
+							v->text = new BString(tmp2);
 						}
+						if (pf->type == PF_DATE)
+							dateFromAmerican(v->text);
 						break;
 					case PF_BOOL:
 						v->b = (toint(mNum->getGroup(offset).c_str()) != 0);
@@ -1341,11 +1340,12 @@ int GSM::storePBItem(struct pbNum *num = NULL) {
 				cmd += ",\""; cmd += v->text->String(); cmd += "\"";
 				break;
 			case PF_TEXT:
+			case PF_DATE:
 				cmd += ",";
-				if (rawUTF8) cmd += "\"";
-				if (pf->offset == 23) {	// XXX special case for BDAY!
+				if (pf->type == PF_DATE) {
 					dateToAmerican(v->text);
 				}
+				if (rawUTF8) cmd += "\"";
 				cmd += encodeText(v->text->String());
 				if (rawUTF8) cmd += "\"";
 				break;
@@ -1629,7 +1629,13 @@ int GSM::storeCalendarEvent(struct calEvent *ev) {
 	}
 	out << ev->id; out += ",";
 	ev->title.Truncate(calSlot.title_len);
-	out += "\""; out += ev->title; out += "\",";
+//	out += "\""; out += ev->title; out += "\",";
+	if (rawUTF8)
+		out += "\"";
+	out += encodeText(ev->title.String());
+	if (rawUTF8)
+		out +="\"";
+	out += ",";
 	i = ev->timed ? 1 : 0; out << i; out += ",";
 	i = ev->alarm ? 1 : 0; out << i; out += ",";
 	out += "\""; out += ev->start_time; out += "\",";

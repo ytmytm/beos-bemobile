@@ -1,9 +1,9 @@
-plan na wersję 0.8:
-	- typ PF_DATE dla BDAY, walidacja, guzik z kalendarzem
-	- akceptacja vcf/people przeciąganych DnD
+plan na wersję 0.9:
+	- akceptacja vcf/people przeciąganych DnD (równoważne [NEW] na pbview)
 	- refaktoryzacja kodu: podział GSM, przepisanie struktur pb* na BMessage, przepisanie list na klasy
 	- edycja nazwanych kategorii
-	- BMessage zwrotny po edycji SMS/pbItem/calItem dla odświeżenia listy w oknie
+		- odczyt/zapis przez konfigurację (razem z ustawieniami serialportu?)
+	- BMessage zwrotny zakończonej sukcesem edycji SMS/pbItem/calItem dla odświeżenia listy w oknie
 potem:
 	- unsolicited messages (incoming message, call), ikonka do deskbara (JAK współdzielić port szeregowy?)
 OPCJE:
@@ -35,8 +35,7 @@ OPCJE:
 	- przy dzialaniu pomijac sloty MD i AT
 
 TODO:
-- dodać guzik kalendarza do BDAY (lub nowy typ PF_DATE)
-- BDAY: walidacja wpisanej daty
+- jakoś przetworzyć stronę ze statusem, żeby ikona baterii trafiła gdzie trzeba, co jeszcze tam wstawić?
 - PB: zrobić dopasowywanie jako fallbacks (nawet jeśli zgadujemy że features są obsługiwane)
 - PB: poprawić wykrywanie features (liczenie przecinków może być za głupie)
 - informacje o własnym numerze, sieci (at+cops?); wyszukiwanie sieci (b. dlugo! at+cops=?)
@@ -59,7 +58,6 @@ IDEA:
 IKONY
 - ikony typu numeru (telefon/email/dom/praca itd.) - 8-9
 - ikony typu smsa (nowy,przeczytany,nowyniewysłany,wysłany) - 4 koperty
-- ikona baterii/baterii krytycznej (użyć z resources, gdzie?)
 - ikona z wieżą nadawczą (do siły sygnału)
 
 MODULARYZACJA / REFAKTORYZACJA
