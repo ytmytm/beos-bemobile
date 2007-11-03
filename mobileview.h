@@ -7,6 +7,8 @@
 class BStringView;
 class GSM;
 
+BBitmap *getIconFromResources(const char *icon_resname);
+
 class mobileView : public BView {
 	public:
 		mobileView(BRect r, const char *name, GSM *g = NULL);

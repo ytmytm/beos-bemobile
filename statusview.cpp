@@ -1,4 +1,5 @@
 
+#include <Bitmap.h>
 #include <Box.h>
 #include <Button.h>
 #include <CheckBox.h>
@@ -16,6 +17,11 @@ const uint32 MSG_BABUT	= 'M002';
 const uint32 BUT_SETDATETIME = 'M003';
 
 statusView::statusView(BRect r) : mobileView(r, "statusView") {
+
+	// bitmap stuff
+	batOk = getIconFromResources("Img:Battery");
+	batCaution = getIconFromResources("Img:BatteryCaution");
+
 	// initialize widgets
 	BStringView *tmp;
 	BRect r;
@@ -105,9 +111,11 @@ statusView::statusView(BRect r) : mobileView(r, "statusView") {
 	}
 	// other
 	r.OffsetBy(0,r.Height()+15);
-	BRect s = r; s.bottom = s.top + font.Size() + 5;
+	BRect s = r; s.bottom = s.top + font.Size() + 5; s.left = s.right - 200;
 	this->AddChild(dateTime = new BStringView(s, "dateTime", NULL, B_FOLLOW_LEFT_RIGHT|B_FOLLOW_TOP));
 	dateTime->SetAlignment(B_ALIGN_RIGHT);
+	//
+	batIconPos = BPoint(r.left,r.top);
 	//
 	signalBar->SetMaxValue(100);
 	batteryBar->SetMaxValue(100);
@@ -116,6 +124,32 @@ statusView::statusView(BRect r) : mobileView(r, "statusView") {
 	r.InsetBy(20,20);
 	s = r; s.top = s.bottom - font.Size()*2; s.right = s.left + font.StringWidth("MMMMMMMMMM")+40;
 	this->AddChild(new BButton(s, "butSetDateTime", _("Set date and time"), new BMessage(BUT_SETDATETIME), B_FOLLOW_LEFT|B_FOLLOW_BOTTOM));
+}
+
+statusView::~statusView() {
+	delete batOk;
+	delete batCaution;
+}
+
+void statusView::Draw(BRect updateRect) {
+	static BBitmap *lastBattery = batOk;
+	BBitmap *battery;
+
+	BRect s = lastBattery->Bounds();
+	BRect r(batIconPos.x,batIconPos.y,batIconPos.x+s.Width(),batIconPos.y+s.Height());
+
+	if (r.Intersects(updateRect)) {
+		if (gsm->getCharge() < 10)
+			battery = batCaution;
+		else
+			battery = batOk;
+		if (battery != lastBattery) {
+			lastBattery = battery;
+			Invalidate(r);
+		}
+		SetDrawingMode(B_OP_OVER);
+		DrawBitmap(lastBattery, batIconPos);
+	}
 }
 
 void statusView::RefreshStatus(void) {

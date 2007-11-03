@@ -6,12 +6,12 @@
 #include <Bitmap.h>
 #include <stdio.h>
 #include <View.h>
+#include "mobileview.h"
 #include "CLVEasyItem.h"
 
 class BStringView;
 class ColumnListView;
 class GSM;
-class mobileView;
 
 class workView : public BView {
 	public:
@@ -45,24 +45,9 @@ class infoItem : public CLVEasyItem {
 			fId = id;
 			fSlot = NULL;
 			if (icon_resname) {
-				BResources *res = be_app->AppResources();
-				printf("search for res:%s\n",icon_resname);
-				if (res->HasResource('BBMP',icon_resname)) {
-					printf("has it\n");
-					BBitmap *bmp;
-					BMessage msg;
-					size_t len;
-					char *buf;
-					buf = (char *)res->LoadResource('BBMP', icon_resname, &len);
-//					printf("loaded,len=%i\n",len);
-					msg.Unflatten(buf);
-//					printf("unflatten\n");
-					bmp = new BBitmap(&msg);
-//					printf("new bmp\n");
+				BBitmap *bmp = getIconFromResources(icon_resname);
+				if (bmp)
 					SetColumnContent(1,bmp);
-//					printf("col set\n");
-					delete [] buf;
-				}
 			}
 			SetColumnContent(2,text);
 		}

@@ -1,8 +1,10 @@
 #ifndef _STATUSVIEW_H
 #define _STATUSVIEW_H
 
+#include <Point.h>
 #include "mobileview.h"
 
+class BBitmap;
 class BBox;
 class BCheckBox;
 class BStatusBar;
@@ -11,7 +13,8 @@ class BStringView;
 class statusView : public mobileView {
 	public:
 		statusView(BRect r);
-		~statusView() { };
+		~statusView();
+		void Draw(BRect updateRect);
 		void MessageReceived(BMessage *Message);
 		void Pulse(void);
 		//
@@ -24,6 +27,9 @@ class statusView : public mobileView {
 		BStringView *smsStatus, *dateTime;
 		BStatusBar *signalBar, *batteryBar;
 		BCheckBox *acPowerBut, *batPowerBut;
+
+		BPoint batIconPos;
+		BBitmap *batOk, *batCaution;
 };
 
 #endif
