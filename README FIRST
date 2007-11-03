@@ -1,5 +1,5 @@
 
-BeMobile 0.8
+BeMobile 0.9
 (c) Maciej Witkowiak <ytm@elysium.pl>, <mwitkowiak@gmail.com>
 http://members.elysium.pl/ytm/html/beos.html
 http://ytm.bossstation.dnsalias.org/html/beos.html
@@ -30,7 +30,10 @@ been already visited.
 
 
 CHANGES
-varsion 0.8
+version 0.9
+- ?
+
+version 0.8
 - corrected calendar editing for some phones (like C550)
 - date validation and selector for birthday field
 - battery ok/critical icon on main status view (this should be redesigned...)
