@@ -1,3 +1,10 @@
+SE K800i (i pewnie inne)
+- "UTF-8" zamiast "UTF8" w CSCS
+- nie wszystkie komendy wracają jako "+CXX: (odp)"
+- po przecinkach może być spacja
+- problem z przecinkami w nazwach kontaktów
+- typ kontaktu zachowany jako "/M"=mobile, "/H"=home, itd.
+
 plan na wersję 0.9:
 	- akceptacja vcf/people przeciąganych DnD (równoważne [NEW] na pbview)
 	- refaktoryzacja kodu: podział GSM, przepisanie struktur pb* na BMessage, przepisanie list na klasy

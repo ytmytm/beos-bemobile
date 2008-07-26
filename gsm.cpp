@@ -406,10 +406,12 @@ void GSM::getPhoneData(void) {
 	// enable native UTF8 message format, fallback to Unicode and GSM
 	fEncoding = ENC_UTF8;
 	if (sendCommand("AT+CSCS=\"UTF8\"") != COM_OK) {
-		fEncoding = ENC_UCS2;
-		if (sendCommand("AT+CSCS=\"UCS2\"") != COM_OK) {
-			fEncoding = ENC_GSM;
-			sendCommand("AT+CSCS=\"GSM\"");
+		if (sendCommand("AT+CSCS=\"UTF-8\"") != COM_OK) {
+			fEncoding = ENC_UCS2;
+			if (sendCommand("AT+CSCS=\"UCS2\"") != COM_OK) {
+				fEncoding = ENC_GSM;
+				sendCommand("AT+CSCS=\"GSM\"");
+			}
 		}
 	}
 	// possibly do it later using configuration, and now only query for encodings
