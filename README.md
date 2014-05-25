@@ -174,4 +174,4 @@ Do you want to donate? Please use http://www.moneybookers.com service and <mw409
 
 #LICENSE
 
-You are free to use and distribute this software provided that the archive is not altered in any way.
+This code is licensed under permissive MIT License.
