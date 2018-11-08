@@ -10,10 +10,7 @@ resource app_version {
 	internal = 0,
 
 	short_info = "Mobile phone manager",
-	long_info = #'CSTR' array {
-		"This program helps to manage contacts stored on a mobile phone a"
-		"nd send/receive SMS messages."
-	}
+	long_info = "This program helps to manage contacts stored on a mobile phone and send/receive SMS messages."
 };
 
 resource(2, "Img:Inbox") #'BBMP' archive BBitmap {
@@ -1135,8 +1132,6 @@ resource mini_icon array {
 	$"FF878D8C8DB38C8CFFFFFFFFFFFFFFFF"
 	$"FF0B27FFFFFFFFFFFFFFFFFFFFFFFFFF"
 };
-
-resource app_signature "application/x-vnd.generic-BeMobile";
 
 resource app_signature "application/x-vnd.generic-BeMobile";
 
