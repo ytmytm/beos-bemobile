@@ -29,38 +29,38 @@ APP_MIME_SIG =
 #	same name (source.c or source.cpp) are included from different directories.
 #	Also note that spaces in folder names do not work well with this Makefile.
 SRCS =  \
-         Pattern.cpp \
-	 Matcher.cpp \
-	 santa/BetterScrollView/BetterScrollView.cpp \
-	 santa/ColumnListView/CLVColumnLabelView.cpp \
-	 santa/ColumnListView/CLVEasyItem.cpp \
-	 santa/ColumnListView/CLVListItem.cpp \
-	 santa/ColumnListView/ColumnListView.cpp \
-	 santa/Cursors/Cursors.cpp \
-	 santa/NewStrings/NewStrings.cpp \
-	 santa/PrefilledBitmap/PrefilledBitmap.cpp \
-	 santa/ScrollViewCorner/ScrollViewCorner.cpp \
-	 phonelist.cpp \
-	 callregslotview.cpp \
-	 phonelistslotview.cpp \
-	 bemobile.cpp \
-	 dialabout.cpp \
-	 dialeditpbook.cpp \
-	 dialnewsms.cpp \
-	 dialcalevent.cpp \
-	 dialcalendar.cpp \
-	 gsm.cpp \
-	 main.cpp \
-	 mainwindow.cpp \
-	 workview.cpp \
-	 calview.cpp \
-	 pbbynameview.cpp \
-	 pbview.cpp \
-	 smsview.cpp \
-	 smsboxview.cpp \
-	 smsinboxview.cpp \
-	 statusview.cpp \
-	 mobileview.cpp \
+         Pattern.cpp	\
+	 Matcher.cpp	\
+	 santa/BetterScrollView/BetterScrollView.cpp	\
+	 santa/ColumnListView/CLVColumnLabelView.cpp	\
+	 santa/ColumnListView/CLVEasyItem.cpp	\
+	 santa/ColumnListView/CLVListItem.cpp	\
+	 santa/ColumnListView/ColumnListView.cpp	\
+	 santa/Cursors/Cursors.cpp	\
+	 santa/NewStrings/NewStrings.cpp	\
+	 santa/PrefilledBitmap/PrefilledBitmap.cpp	\
+	 santa/ScrollViewCorner/ScrollViewCorner.cpp	\
+	 phonelist.cpp	\
+	 callregslotview.cpp	\
+	 phonelistslotview.cpp	\
+	 bemobile.cpp	\
+	 dialabout.cpp	\
+	 dialeditpbook.cpp	\
+	 dialnewsms.cpp	\
+	 dialcalevent.cpp	\
+	 dialcalendar.cpp	\
+	 gsm.cpp	\
+	 main.cpp	\
+	 mainwindow.cpp	\
+	 workview.cpp	\
+	 calview.cpp	\
+	 pbbynameview.cpp	\
+	 pbview.cpp	\
+	 smsview.cpp	\
+	 smsboxview.cpp	\
+	 smsinboxview.cpp	\
+	 statusview.cpp	\
+	 mobileview.cpp	\
 	 initwindow.cpp
 
 #	Specify the resource definition files to use. Full or relative paths can be
@@ -92,13 +92,14 @@ LIBS =  libbe.so libroot.so libdevice.so $(STDCPPLIBS)
 #	Additional paths paths to look for local headers. These use the form
 #	#include "header". Directories that contain the files in SRCS are
 #	automatically included.
-LOCAL_INCLUDE_PATHS =  \
-                        regexp \
-                        santa/BetterScrollView \ 
-			santa/ColumnListView \ 
-			santa santa/Cursors \ 
-			santa/NewStrings \
-			santa/PrefilledBitmap \
+LOCAL_INCLUDE_PATHS = 	\
+                        regexp	\
+                        santa/BetterScrollView	\ 
+			santa/ColumnListView	\ 
+			santa	\ 
+			santa/Cursors	\ 
+			santa/NewStrings	\
+			santa/PrefilledBitmap	\
 			santa/ScrollViewCorner
 
 #	Specify the level of optimization that you want. Specify either NONE (O0),
