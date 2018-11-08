@@ -9,9 +9,9 @@ NAME = BeMobile
 
 # The type of binary, must be one of:
 #	APP:	Application
+#	DRIVER: Kernel driver
 #	SHARED:	Shared library or add-on
 #	STATIC:	Static library archive
-#	DRIVER: Kernel driver
 TYPE = APP
 
 # 	If you plan to use localization, specify the application's MIME signature.
@@ -28,11 +28,44 @@ APP_MIME_SIG =
 #	means this Makefile will not work correctly if two source files with the
 #	same name (source.c or source.cpp) are included from different directories.
 #	Also note that spaces in folder names do not work well with this Makefile.
-SRCS =  Pattern.cpp Matcher.cpp santa/BetterScrollView/BetterScrollView.cpp santa/ColumnListView/CLVColumnLabelView.cpp santa/ColumnListView/CLVEasyItem.cpp santa/ColumnListView/CLVListItem.cpp santa/ColumnListView/ColumnListView.cpp santa/Cursors/Cursors.cpp santa/NewStrings/NewStrings.cpp santa/PrefilledBitmap/PrefilledBitmap.cpp santa/ScrollViewCorner/ScrollViewCorner.cpp phonelist.cpp callregslotview.cpp phonelistslotview.cpp bemobile.cpp dialabout.cpp dialeditpbook.cpp dialnewsms.cpp dialcalevent.cpp dialcalendar.cpp gsm.cpp main.cpp mainwindow.cpp workview.cpp calview.cpp pbbynameview.cpp pbview.cpp smsview.cpp smsboxview.cpp smsinboxview.cpp statusview.cpp mobileview.cpp initwindow.cpp
+SRCS =  \
+         Pattern.cpp \
+	 Matcher.cpp \
+	 santa/BetterScrollView/BetterScrollView.cpp \
+	 santa/ColumnListView/CLVColumnLabelView.cpp \
+	 santa/ColumnListView/CLVEasyItem.cpp \
+	 santa/ColumnListView/CLVListItem.cpp \
+	 santa/ColumnListView/ColumnListView.cpp \
+	 santa/Cursors/Cursors.cpp \
+	 santa/NewStrings/NewStrings.cpp \
+	 santa/PrefilledBitmap/PrefilledBitmap.cpp \
+	 santa/ScrollViewCorner/ScrollViewCorner.cpp \
+	 phonelist.cpp \
+	 callregslotview.cpp \
+	 phonelistslotview.cpp \
+	 bemobile.cpp \
+	 dialabout.cpp \
+	 dialeditpbook.cpp \
+	 dialnewsms.cpp \
+	 dialcalevent.cpp \
+	 dialcalendar.cpp \
+	 gsm.cpp \
+	 main.cpp \
+	 mainwindow.cpp \
+	 workview.cpp \
+	 calview.cpp \
+	 pbbynameview.cpp \
+	 pbview.cpp \
+	 smsview.cpp \
+	 smsboxview.cpp \
+	 smsinboxview.cpp \
+	 statusview.cpp \
+	 mobileview.cpp \
+	 initwindow.cpp
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
-RDEFS = 
+RDEFS = Resource.rdef
 
 #	Specify the resource files to use. Full or relative paths can be used.
 #	Both RDEFS and RSRCS can be utilized in the same Makefile.
@@ -54,24 +87,19 @@ RSRCS =
 #	- 	if your library does not follow the standard library naming scheme,
 #		you need to specify the path to the library and it's name.
 #		(e.g. for mylib.a, specify "mylib.a" or "path/mylib.a")
-LIBS =  libbe.so libroot.so libdevice.so libstdc++.r4.so
-
-#	Specify additional paths to directories following the standard libXXX.so
-#	or libXXX.a naming scheme. You can specify full paths or paths relative
-#	to the Makefile. The paths included are not parsed recursively, so
-#	include all of the paths where libraries must be found. Directories where
-#	source files were specified are	automatically included.
-LIBPATHS = 
-
-#	Additional paths to look for system headers. These use the form
-#	"#include <header>". Directories that contain the files in SRCS are
-#	NOT auto-included here.
-SYSTEM_INCLUDE_PATHS =  /boot/develop/headers/be /boot/develop/headers/cpp /boot/develop/headers/posix /boot/develop/lib /boot/beos/system/lib
+LIBS =  libbe.so libroot.so libdevice.so $(STDCPPLIBS)
 
 #	Additional paths paths to look for local headers. These use the form
 #	#include "header". Directories that contain the files in SRCS are
 #	automatically included.
-LOCAL_INCLUDE_PATHS =  regexp santa/BetterScrollView santa/ColumnListView santa santa/Cursors santa/NewStrings santa/PrefilledBitmap santa/ScrollViewCorner
+LOCAL_INCLUDE_PATHS =  \
+                        regexp \
+                        santa/BetterScrollView \ 
+			santa/ColumnListView \ 
+			santa santa/Cursors \ 
+			santa/NewStrings \
+			santa/PrefilledBitmap \
+			santa/ScrollViewCorner
 
 #	Specify the level of optimization that you want. Specify either NONE (O0),
 #	SOME (O1), FULL (O2), or leave blank (for the default optimization level).
