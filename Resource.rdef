@@ -10,7 +10,7 @@ resource app_version {
 	internal = 0,
 
 	short_info = "Mobile phone manager",
-	long_info = "This program helps to manage contacts stored on a mobile phone and send/receive SMS messages."
+	long_info = "Manage contacts on a mobile phone and send/receive SMS."
 };
 
 resource(2, "Img:Inbox") #'BBMP' archive BBitmap {
