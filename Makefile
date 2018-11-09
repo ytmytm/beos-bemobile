@@ -61,19 +61,17 @@ SRCS = \
 	 smsinboxview.cpp  \
 	 smsview.cpp  \
 	 statusview.cpp  \
-	 workview.cpp  \
+	 workview.cpp
 
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
-RDEFS = \
-	 Resource.rdef  \
+RDEFS = Resource.rdef
 
 
 #	Specify the resource files to use. Full or relative paths can be used.
 #	Both RDEFS and RSRCS can be utilized in the same Makefile.
-RSRCS = \
-
+RSRCS = 
 
 # End Pe/Eddie support.
 # @<-src@ 
@@ -105,7 +103,7 @@ LOCAL_INCLUDE_PATHS = \
 	 santa/NewStrings  \
 	 santa/PrefilledBitmap \
 	 santa/ScrollViewCorner  \
-	 santa  \
+	 santa
 
 #	Specify the level of optimization that you want. Specify either NONE (O0),
 #	SOME (O1), FULL (O2), or leave blank (for the default optimization level).
@@ -135,7 +133,7 @@ SYMBOLS :=
 
 #	Includes debug information, which allows the binary to be debugged easily.
 #	If set to "TRUE", debug info will be created.
-DEBUGGER := 
+DEBUGGER :=
 
 #	Specify any additional compiler flags to be used.
 COMPILER_FLAGS = -Woverloaded-virtual -funsigned-bitfields -Wwrite-strings 
