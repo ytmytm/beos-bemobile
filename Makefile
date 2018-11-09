@@ -9,9 +9,9 @@ NAME = BeMobile
 
 # The type of binary, must be one of:
 #	APP:	Application
-#	DRIVER: Kernel driver
 #	SHARED:	Shared library or add-on
 #	STATIC:	Static library archive
+#	DRIVER: Kernel driver
 TYPE = APP
 
 # 	If you plan to use localization, specify the application's MIME signature.
@@ -28,51 +28,57 @@ APP_MIME_SIG =
 #	means this Makefile will not work correctly if two source files with the
 #	same name (source.c or source.cpp) are included from different directories.
 #	Also note that spaces in folder names do not work well with this Makefile.
-SRCS =  \
-         Pattern.cpp	\
-	 Matcher.cpp	\
-	 santa/BetterScrollView/BetterScrollView.cpp	\
-	 santa/ColumnListView/CLVColumnLabelView.cpp	\
-	 santa/ColumnListView/CLVEasyItem.cpp	\
-	 santa/ColumnListView/CLVListItem.cpp	\
-	 santa/ColumnListView/ColumnListView.cpp	\
-	 santa/Cursors/Cursors.cpp	\
-	 santa/NewStrings/NewStrings.cpp	\
-	 santa/PrefilledBitmap/PrefilledBitmap.cpp	\
-	 santa/ScrollViewCorner/ScrollViewCorner.cpp	\
-	 phonelist.cpp	\
-	 callregslotview.cpp	\
-	 phonelistslotview.cpp	\
-	 bemobile.cpp	\
-	 dialabout.cpp	\
-	 dialeditpbook.cpp	\
-	 dialnewsms.cpp	\
-	 dialcalevent.cpp	\
-	 dialcalendar.cpp	\
-	 gsm.cpp	\
-	 main.cpp	\
-	 mainwindow.cpp	\
-	 workview.cpp	\
-	 calview.cpp	\
-	 pbbynameview.cpp	\
-	 pbview.cpp	\
-	 smsview.cpp	\
-	 smsboxview.cpp	\
-	 smsinboxview.cpp	\
-	 statusview.cpp	\
-	 mobileview.cpp	\
-	 initwindow.cpp
+SRCS = \
+	 bemobile.cpp  \
+	 callregslotview.cpp  \
+	 calview.cpp  \
+	 dialabout.cpp  \
+	 dialcalendar.cpp  \
+	 dialcalevent.cpp  \
+	 dialeditpbook.cpp  \
+	 dialnewsms.cpp  \
+	 gsm.cpp  \
+	 initwindow.cpp  \
+	 main.cpp  \
+	 mainwindow.cpp  \
+	 Matcher.cpp  \
+	 mobileview.cpp  \
+	 Pattern.cpp  \
+	 pbbynameview.cpp  \
+	 pbview.cpp  \
+	 phonelist.cpp  \
+	 phonelistslotview.cpp  \
+	 santa/BetterScrollView/BetterScrollView.cpp  \
+	 santa/ColumnListView/CLVColumnLabelView.cpp  \
+	 santa/ColumnListView/CLVEasyItem.cpp  \
+	 santa/ColumnListView/CLVListItem.cpp  \
+	 santa/ColumnListView/ColumnListView.cpp  \
+	 santa/Cursors/Cursors.cpp  \
+	 santa/NewStrings/NewStrings.cpp  \
+	 santa/PrefilledBitmap/PrefilledBitmap.cpp  \
+	 santa/ScrollViewCorner/ScrollViewCorner.cpp  \
+	 smsboxview.cpp  \
+	 smsinboxview.cpp  \
+	 smsview.cpp  \
+	 statusview.cpp  \
+	 workview.cpp  \
+
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
-RDEFS = Resource.rdef
+RDEFS = \
+	 Resource.rdef  \
+
 
 #	Specify the resource files to use. Full or relative paths can be used.
 #	Both RDEFS and RSRCS can be utilized in the same Makefile.
-RSRCS = 
+RSRCS = \
+
 
 # End Pe/Eddie support.
 # @<-src@ 
+#%}
+
 #%}
 
 #	Specify libraries to link against.
@@ -92,15 +98,14 @@ LIBS =  be device $(STDCPPLIBS)
 #	Additional paths paths to look for local headers. These use the form
 #	#include "header". Directories that contain the files in SRCS are
 #	automatically included.
-LOCAL_INCLUDE_PATHS = 	\
-                        regexp	\
-                        santa/BetterScrollView	\ 
-			santa/ColumnListView	\ 
-			santa	\ 
-			santa/Cursors	\ 
-			santa/NewStrings	\
-			santa/PrefilledBitmap	\
-			santa/ScrollViewCorner
+LOCAL_INCLUDE_PATHS = \
+	 regexp  \
+	 santa/ColumnListView \
+	 santa/Cursors  \
+	 santa/NewStrings  \
+	 santa/PrefilledBitmap \
+	 santa/ScrollViewCorner  \
+	 santa  \	
 
 #	Specify the level of optimization that you want. Specify either NONE (O0),
 #	SOME (O1), FULL (O2), or leave blank (for the default optimization level).
